@@ -1,0 +1,35 @@
+{
+  "canisters": {
+    "PersonalWebSpace_backend": {
+      "main": "src/PersonalWebSpace_backend/main.mo",
+      "type": "motoko"
+    },
+    "PersonalWebSpace_frontend": {
+      "dependencies": [
+        "PersonalWebSpace_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/PersonalWebSpace_frontend/src/index.html"
+      },
+      "source": [
+        "src/PersonalWebSpace_frontend/assets",
+        "dist/PersonalWebSpace_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "dfx": "0.11.1",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
