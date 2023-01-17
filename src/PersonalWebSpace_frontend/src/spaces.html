@@ -1,31 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-      }
-
-      html,
-      body {
-        overflow: hidden;
-      }
-
-      .webgl {
-        position: fixed;
-        top: 0;
-        left: 0;
-      }
-    </style>
-</head>
-<body>
-    <canvas class="webgl"></canvas>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+      
+      <a-mixin id="floorMat" material="color:#BBB"></a-mixin>
+      
+      <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+      <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+      
+    </a-assets>
     
-    <script type="module" src="spaces.js"></script>
-</body>
+    <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
+    
+    <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+    <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  
+  </a-scene>
+  </body>
 </html>

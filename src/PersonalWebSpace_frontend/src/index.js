@@ -43,7 +43,7 @@ const initiateCollapsibles = () => {
     });
   }
 };
-
+/* 
 //function openEditView(gallery) {
 const openEditView = (evt) => {
   document.getElementById("editView").style.display = "block";
@@ -184,7 +184,7 @@ const initiateEditButtons = (actor, userGalleries) => {
  //function closeEditView() {
 const closeEditView = () => {
   document.getElementById("editView").style.display = "none";
-}
+} */
 
 /*
 const initiateCancelButtons = () => {
@@ -217,7 +217,7 @@ const formatUserGalleries = (userGalleries) => {
     const gallery = userGalleries[i];
     userGalleriesString += `<div class='responsive' width="100%" height="auto"> <div class='gallery'> `;
     const galleryURL = `https://${canisterId}.raw.ic0.app/?galleryId=${gallery.id}`;
-    userGalleriesString += `<a target='_blank' href="${galleryURL}" > <iframe src="${galleryURL}" alt='Your flaming hot Personal NFT Gallery' width="100%" height="auto"></iframe> </a> `;
+    userGalleriesString += `<a target='_blank' href="${galleryURL}" > <iframe src="${galleryURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto"></iframe> </a> `;
     userGalleriesString += `<button onclick="window.open('${galleryURL}','_blank')">View</button> <button class='editbutton' >Edit</button> `;
     userGalleriesString += `<button type='button' class='collapsible'>See Details</button>`;
     // show gallery details
@@ -258,13 +258,13 @@ const loadUserGalleries = async (actor) => {
   const userGalleries = await actor.getCallerGalleries();
   const numberOfGalleriesUserOwns = userGalleries.length;
   if (numberOfGalleriesUserOwns < 1) {
-    document.getElementById("galleriesSubtext").innerText = "You don't own any galleries yet. Get your Personal NFT Gallery now by clicking on the Create tab!";
+    document.getElementById("spacesSubtext").innerText = "You don't own any spaces yet. Get your Personal Web Space now by clicking on the Create tab!";
   } else {
-    document.getElementById("galleriesSubtext").innerText = numberOfGalleriesUserOwns === 1 
-      ? `Big success, you own ${numberOfGalleriesUserOwns} gallery! Let's take a look:`
-      : `Big success, you own ${numberOfGalleriesUserOwns} galleries! Let's take a look:`;
+    document.getElementById("spacesSubtext").innerText = numberOfGalleriesUserOwns === 1 
+      ? `Big success, you own ${numberOfGalleriesUserOwns} space! Let's take a look:`
+      : `Big success, you own ${numberOfGalleriesUserOwns} spaces! Let's take a look:`;
     const userGalleriesString = formatUserGalleries(userGalleries);
-    document.getElementById("userGalleries").innerHTML = userGalleriesString;
+    document.getElementById("userSpaces").innerHTML = userGalleriesString;
     initiateCollapsibles();
     initiateEditButtons(actor, userGalleries);
   }
@@ -273,13 +273,13 @@ const loadUserGalleries = async (actor) => {
 const notLoggedInContent = html`<div class="container">
   <h3><b>We're glad you're here! Get started right away by logging in:</b></h3>
   <button type="button" id="stoicLoginButton">Log in with Stoic Wallet</button>
-  <p>You need to be logged in to create and update galleries. If you want to see others' galleries first, click on the Explore tab</p>
+  <p>You need to be logged in to create and update spaces. If you want to see others' spaces first, click on the Explore tab</p>
 </div>`;
 
 export const renderNotLoggedIn = async () => {
   const createButton = document.getElementById("createButton");
   createButton.setAttribute("disabled", true);
-  document.getElementById("galleriesSubtext").innerText = "Let's see which galleries you own; log in to get started.";
+  document.getElementById("spacesSubtext").innerText = "Let's see which spaces you own; log in to get started.";
   render(notLoggedInContent, document.getElementById("login"));
 };
 
@@ -289,17 +289,17 @@ export const renderLoggedIn = async (actor, authClient, identity) => {
   createButton.removeAttribute("disabled");
   createButton.onclick = async () => {
     createButton.setAttribute("disabled", true);
-    document.getElementById("createSubtext").innerText = "Creating your Personal NFT Gallery, just a moment...";
+    document.getElementById("createSubtext").innerText = "Creating your Personal Web Space, just a moment...";
 
     const gallery = await actor.createGallery();
-    document.getElementById("createSubtext").innerText = "Ohh yeah, you just got yourself a new Personal NFT Gallery!";
+    document.getElementById("createSubtext").innerText = "Ohh yeah, you just got yourself a new Personal Web Space!";
     
     // reload user's galleries
     loadUserGalleries(actor);
 
     createButton.removeAttribute("disabled");
   };
-  document.getElementById("galleriesSubtext").innerText = "Let's see which galleries you own:";
+  document.getElementById("spacesSubtext").innerText = "Let's see which spaces you own:";
   // load user's galleries
   loadUserGalleries(actor);
 };

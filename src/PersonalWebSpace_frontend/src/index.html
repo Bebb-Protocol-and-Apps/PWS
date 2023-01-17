@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Personal Web Space App</title>
-<meta name='author' content='Patrick Friedrich'>
+<title>Open Internet Metaverse App</title>
+<meta name='author' content='Alex Agudelo, Patrick Friedrich'>
 <meta name='description' content='Users can create and edit their Personal Web Spaces on this web app. Each Personal Web Space is itself an NFT hosted on the Internet Computer blockchain platform, contains all data to be rendered and displayed as a 3D webpage in any browser and can be viewed at a unique URL. On this web app, Users can see which spaces they own and how they look when displayed as a webpage. They can then go ahead and edit their spaces (and thus the displayed 3D webpage).'>
 <meta name='robots' content='index, follow'>
 <meta charset='UTF-8'>
@@ -29,7 +29,7 @@ div.desc {
   text-align: center;
 }
 
-div.user-galleries {
+div.user-spaces {
   width: 100%;
   height: auto;
 }
@@ -196,30 +196,29 @@ h3 {
 <body>
 
 <div class='topnav'>
-  <a href='#'>Personal NFT Gallery</a>
+  <a href='#'>Open Internet Metaverse</a>
   <a href='#create'>Create</a>
-  <a href='#galleries'>My Galleries</a>
+  <a href='#spaces'>My Spaces</a>
   <a href='#'>Explore</a> <!-- TODO: update link to go to Explore page -->
 </div>
 
-<h3>Want to have a space for your NFTs?</h3>
-<h3>Want to show your collection to the world?</h3>
-<h3>Want to have your Personal NFT Gallery as a webpage?</h3>
-
+<h3>Want to have your own Virtual Home?</h3>
+<h3>Want to become part of the Open Metaverse Neighborhood?</h3>
+<h3>Want to have your Personal Web Space as a 3D webpage?</h3>
 
 <section id="login"></section>
 
 
-<h3 id='create'><b>Create a new Personal NFT Gallery</b></h3>
-<button type='button' id='createButton' disabled >Create Gallery</button>
-<p id='createSubtext'>The Gallery is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+<h3 id='create'><b>Create a new Personal Web Space</b></h3>
+<button type='button' id='createButton' disabled >Create Space</button>
+<p id='createSubtext'>The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
 
 
-<h3 id='galleries'><b>My Personal NFT Galleries</b></h3>
-<p id='galleriesSubtext'></p>
-<div id='userGalleries' class="user-galleries"></div>
+<h3 id='spaces'><b>My Personal Web Spaces</b></h3>
+<p id='spacesSubtext'></p>
+<div id='userSpaces' class="user-spaces"></div>
 
-<div class="form-popup" id="editView">
+<!-- <div class="form-popup" id="editView">
   <form class="form-container" width="100%">
     <h1>Edit Your Gallery</h1>
 
@@ -298,12 +297,13 @@ h3 {
 </script>
 
 <div class='clearfix'></div>
+-->
 
 <footer class='w3-light-grey w3-padding-64 w3-center' id='about'>
   <!-- <h2>About</h2> 
     <p>These are my favorite NFTs. Please enjoy!</p>   
   <br> -->
-  <p>Powered by <a href='https://kmj74-syaaa-aaaai-acnza-cai.ic0.app/' target='_blank' class='w3-hover-text-green'>Personal NFT Gallery</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' class='w3-hover-text-green'>Internet Computer</a></p>
+  <p>Powered by <a href='https://kmj74-syaaa-aaaai-acnza-cai.ic0.app/' target='_blank' class='w3-hover-text-green'>Open Internet Metaverse</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' class='w3-hover-text-green'>Internet Computer</a></p>
 </footer>
 <!--
 <script>
