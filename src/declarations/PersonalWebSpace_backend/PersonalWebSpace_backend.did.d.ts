@@ -60,11 +60,13 @@ export type OwnerResult = { 'Ok' : Principal } |
 export interface PersonalWebSpace {
   'balanceOfDip721' : ActorMethod<[Principal], bigint>,
   'check_user_has_nft' : ActorMethod<[], boolean>,
-  'createGallery' : ActorMethod<[], NftResult>,
-  'getCallerGalleries' : ActorMethod<[], Array<Nft>>,
+  'createSpace' : ActorMethod<[string], NftResult>,
+  'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
+  'getRandomSpace' : ActorMethod<[], NftResult>,
+  'getSpace' : ActorMethod<[TokenId], NftResult>,
   'getTokenIdsForUserDip721' : ActorMethod<[Principal], Array<TokenId>>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
@@ -83,7 +85,7 @@ export interface PersonalWebSpace {
     [Principal, Principal, TokenId],
     TxReceipt,
   >,
-  'updateUserGallery' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
+  'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
 }
 export interface Request {
   'url' : string,
@@ -122,10 +124,10 @@ export type TxReceipt = { 'Ok' : bigint } |
   { 'Err' : ApiError };
 export interface UpdateMetadataValuesInput {
   'id' : TokenId,
-  'ownerContactInfo' : string,
-  'galleryDescription' : string,
-  'ownerName' : string,
-  'galleryName' : string,
-  'mediaUrlsToDisplay' : Array<string>,
+  'updatedSpaceDescription' : string,
+  'updatedOwnerName' : string,
+  'updatedOwnerContactInfo' : string,
+  'updatedSpaceData' : string,
+  'updatedSpaceName' : string,
 }
 export interface _SERVICE extends PersonalWebSpace {}

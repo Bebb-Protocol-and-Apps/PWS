@@ -1,0 +1,260 @@
+# Blender 3.4.1 MTL File: 'None'
+# www.blender.org
+
+newmtl ConstructionLight_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./ConstructionLight_Albedo.tif
+
+newmtl DryWallPainted_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Drywall_AlbedoSmoothness.tif
+map_d ./Drywall_AlbedoSmoothness.tif
+map_Bump -bm 1.000000 ./DrywallPainted_Normal.tif
+
+newmtl DryWall_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Drywall_Albedo.tif
+map_d ./Drywall_Albedo.tif
+map_Bump -bm 1.000000 ./Drywall_Normal.tif
+
+newmtl Ground_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Ground_Albedo.tif
+map_Bump -bm 1.000000 ./Ground_Normal.tif
+
+newmtl Hammer_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Hammer_Albedo.tif
+map_Bump -bm 1.000000 ./Hammer_Normal.tif
+
+newmtl HardHat_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./SafetyHat_Albedo.tif
+map_Bump -bm 1.000000 ./SafetyHat_Normal.tif
+
+newmtl Jigsaw_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Jigsaw_Albedo.tif
+map_Bump -bm 1.000000 ./Jigsaw_Normal.tif
+
+newmtl LightBulb_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 11.179362 11.179362 11.179362
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Liquid_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.952830 0.924150 0.346075
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Metal_Blue_Simple_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Metal_Albedo.tif
+map_Bump -bm 1.000000 ./Metal_Normal.tif
+
+newmtl Metal_Simple_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Metal_Albedo.tif
+map_Bump -bm 1.000000 ./Metal_Normal.tif
+
+newmtl OBS_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./OBS_Albedo.tif
+map_Bump -bm 1.000000 ./OBS_Normal.tif
+
+newmtl Paint1G_WAnim_Material
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl PaintBrush_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Paintbrush_Albedo.tif
+map_Bump -bm 1.000000 ./Paintbrush_Normal.tif
+
+newmtl PaintLabel_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Paint5G_AlbedoSmoothness.tif
+map_d ./Paint5G_AlbedoSmoothness.tif
+
+newmtl Plastic_Black_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Plastic_AlbedoSmoothness.tif
+map_d ./Plastic_AlbedoSmoothness.tif
+map_Bump -bm 1.000000 ./Plastic_Normal.tif
+
+newmtl Plastic_Gray_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Plastic_AlbedoSmoothness.tif
+map_d ./Plastic_AlbedoSmoothness.tif
+map_Bump -bm 1.000000 ./Plastic_Normal.tif
+
+newmtl Plastic_Ridges_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./PlasticRidges_Albedo.tif
+map_Bump -bm 1.000000 ./PlasticRidges_Normal.tif
+
+newmtl Plastic_Rough_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./PlasticRough_Albedo.tif
+map_Bump -bm 1.000000 ./Plastic_Normal.tif
+
+newmtl Plastic_Transparent
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.415094 0.415094 0.415094
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Plastic_White_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Plastic_AlbedoSmoothness.tif
+map_d ./Plastic_AlbedoSmoothness.tif
+map_Bump -bm 1.000000 ./Plastic_Normal.tif
+
+newmtl Plastic_Yellow_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd ./Plastic_AlbedoSmoothness.tif
+map_d ./Plastic_AlbedoSmoothness.tif
+map_Bump -bm 1.000000 ./Plastic_Normal.tif
+
+newmtl Strap_Mat
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./PlasticRough_Albedo.tif
+map_Bump -bm 1.000000 ./Elastic_Normal.tif
+
+newmtl Stud_Mat.001
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.006716 0.007490 0.006476
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ./Plywood_Albedo.tif
+map_Bump -bm 1.000000 ./Plywood_Normal.tif

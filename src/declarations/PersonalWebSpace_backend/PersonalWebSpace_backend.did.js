@@ -97,17 +97,17 @@ export const idlFactory = ({ IDL }) => {
   });
   const UpdateMetadataValuesInput = IDL.Record({
     'id' : TokenId,
-    'ownerContactInfo' : IDL.Text,
-    'galleryDescription' : IDL.Text,
-    'ownerName' : IDL.Text,
-    'galleryName' : IDL.Text,
-    'mediaUrlsToDisplay' : IDL.Vec(IDL.Text),
+    'updatedSpaceDescription' : IDL.Text,
+    'updatedOwnerName' : IDL.Text,
+    'updatedOwnerContactInfo' : IDL.Text,
+    'updatedSpaceData' : IDL.Text,
+    'updatedSpaceName' : IDL.Text,
   });
   const PersonalWebSpace = IDL.Service({
     'balanceOfDip721' : IDL.Func([IDL.Principal], [IDL.Nat64], ['query']),
     'check_user_has_nft' : IDL.Func([], [IDL.Bool], ['query']),
-    'createGallery' : IDL.Func([], [NftResult], []),
-    'getCallerGalleries' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
+    'createSpace' : IDL.Func([IDL.Text], [NftResult], []),
+    'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
     'getMaxLimitDip721' : IDL.Func([], [IDL.Nat16], ['query']),
     'getMetadataDip721' : IDL.Func([TokenId], [MetadataResult], ['query']),
     'getMetadataForUserDip721' : IDL.Func(
@@ -115,6 +115,8 @@ export const idlFactory = ({ IDL }) => {
         [ExtendedMetadataResult],
         [],
       ),
+    'getRandomSpace' : IDL.Func([], [NftResult], []),
+    'getSpace' : IDL.Func([TokenId], [NftResult], ['query']),
     'getTokenIdsForUserDip721' : IDL.Func(
         [IDL.Principal],
         [IDL.Vec(TokenId)],
@@ -143,11 +145,7 @@ export const idlFactory = ({ IDL }) => {
         [TxReceipt],
         [],
       ),
-    'updateUserGallery' : IDL.Func(
-        [UpdateMetadataValuesInput],
-        [NftResult],
-        [],
-      ),
+    'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
   });
   return PersonalWebSpace;
 };

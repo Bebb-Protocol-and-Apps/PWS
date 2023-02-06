@@ -103,10 +103,10 @@ module {
 
   public type UpdateMetadataValuesInput = {
     id: TokenId;
-    ownerName: Text;
-    ownerContactInfo: Text;
-    galleryDescription: Text;
-    galleryName: Text;
-    mediaUrlsToDisplay: [Text];
+    updatedOwnerName: Text;
+    updatedOwnerContactInfo: Text;
+    updatedSpaceDescription: Text;
+    updatedSpaceName: Text;
+    updatedSpaceData: Text;
   };
 };

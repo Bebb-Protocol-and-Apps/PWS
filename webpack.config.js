@@ -41,6 +41,9 @@ const frontendDirectory = "PersonalWebSpace_frontend";
 
 const frontend_entry = path.join("src", frontendDirectory, "src", "index.html");
 const spaces_entry = path.join("src", frontendDirectory, "src", "spaces.html");
+const aframeobj_entry = path.join("src", frontendDirectory, "src", "aframeobj.html");
+const testroom_entry = path.join("src", frontendDirectory, "src", "testroom.html");
+//const landing_page_entry = path.join("src", frontendDirectory, "src", "landing_page.html");
 
 module.exports = {
   target: "web",
@@ -49,7 +52,8 @@ module.exports = {
     // The frontend.entrypoint points to the HTML file for this build, so we need
     // to replace the extension to `.js`.
     index: path.join(__dirname, frontend_entry).replace(/\.html$/, ".js"),
-    spaces: path.join(__dirname, spaces_entry).replace(/\.html$/, ".js"),
+    //spaces: path.join(__dirname, spaces_entry).replace(/\.html$/, ".js"),
+    //landing: path.join(__dirname, landing_page_entry).replace(/\.html$/, ".js"),
   },
   devtool: isDevelopment ? "source-map" : false,
   optimization: {
@@ -93,6 +97,20 @@ module.exports = {
       cache: false,
       filename: 'spaces.html',
       chunks: ["spaces"],
+      inject: true,
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, aframeobj_entry),
+      cache: false,
+      filename: 'aframeobj.html',
+      chunks: ["aframeobjs"],
+      inject: true,
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, testroom_entry),
+      cache: false,
+      filename: 'testroom.html',
+      chunks: ["testrooms"],
       inject: true,
     }),
     new webpack.EnvironmentPlugin({

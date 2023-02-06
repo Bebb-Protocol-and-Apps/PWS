@@ -58,6 +58,20 @@ dfx deploy --network ic --argument "(
     maxLimit = 65535;
   }
 )"
+
+dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --argument "(
+  principal\"$(dfx identity get-principal)\",
+  record {
+    logo = record {
+      logo_type = \"image/png\";
+      data = \"\";
+    };
+    name = \"PersonalWebSpace\";
+    symbol = \"PWS\";
+    maxLimit = 65535;
+  }
+)"
+
 ```
 
 Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
