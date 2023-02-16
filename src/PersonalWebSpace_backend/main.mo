@@ -19,11 +19,26 @@ import HTTP "./Http";
 import Stoic "./EXT/Stoic";
 
 import Protocol "./Protocol";
+import Testable "mo:matchers/Testable";
 
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
+// TODO: instead add functions to manage cycles balance and gather stats
   public func greet(name : Text) : async Text {
     return "Hello, " # name # "!";
   };
+
+//TODO: remove (just added for initial Svelte testing)
+  stable var currentValue: Nat = 0;
+
+  public func increment(): async () {
+      currentValue += 1;
+  };
+
+  public query func getValue(): async Nat {
+      currentValue;
+  };
+
+  let personalWebSpace_frontend_canister_id : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
 
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
@@ -292,7 +307,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         _name : ?Text = ?"Personal Web Space";
         _description : ?Text = ?"Flaming Hot Personal Web Space";
         _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://kfkua-eqaaa-aaaai-acnyq-cai.raw.ic0.app/?spaceId=" # Nat64.toText(newId)); //TODO: update
+        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
         _entitySpecificFields : ?Text = null;
     };
     let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject);

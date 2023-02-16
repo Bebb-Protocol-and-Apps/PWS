@@ -107,3 +107,8 @@ dist
 .tern-port
 
 .dfx
+
+.DS_Store
+dist-ssr
+*.local
+.vessel

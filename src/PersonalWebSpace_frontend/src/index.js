@@ -389,7 +389,7 @@ const saveButtonOnClick = async () => {
   <body>`;
   const lowerHTML = `</body> </html>`;
   const newHTML = upperHTML + updatedSceneHtml + lowerHTML;
-  //TODO: Write space's updated HTML to backend canister
+  // Write space's updated HTML to backend canister
   //document.body.innerHTML = updatedSceneHtml;
   // Close Inspector and hide button Inspect Scene
   await AFRAME.INSPECTOR.close();
@@ -423,7 +423,6 @@ const editButtonOnClick = async () => {
 };
 
 const loginButtonOnClick = async () => {
-  //TODO: see how Moritz Svelte template does it (popup with Plug and Stoic as options?)
   console.log('in loginButtonOnClick');
   /* await StoicIdentity.load().then(async identity => {
     console.log('in addScene identity');
@@ -518,9 +517,9 @@ const addSceneFromSpace = async (spaceId) => {
   console.log('in index string removed escapes');
   console.log(string);
   document.write(string);
-  //TODO: Add common elements 
-  //TODO: Login Button
-  //TODO: Edit Button 
+  // Add common elements 
+  // Login Button
+  // Edit Button 
 }
 
 const addSceneFromModel = async () => {
