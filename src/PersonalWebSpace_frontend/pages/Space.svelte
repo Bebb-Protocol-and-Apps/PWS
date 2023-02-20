@@ -15,7 +15,7 @@
 
   import spinner from "../assets/loading.gif";
   
-  import { getEntityClipboardRepresentation } from '../src/entity.js';
+  import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
   

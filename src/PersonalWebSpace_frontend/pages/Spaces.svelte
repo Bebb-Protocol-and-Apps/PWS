@@ -4,7 +4,7 @@
   import { store } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
-  import { getEntityClipboardRepresentation } from '../src/entity.js';
+  import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
 
