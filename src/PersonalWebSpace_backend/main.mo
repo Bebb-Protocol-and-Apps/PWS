@@ -310,8 +310,13 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
         _entitySpecificFields : ?Text = null;
     };
-    let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject);
+    //__________Local vs Mainnet Development____________
+    // for local development, comment out the following two lines...
+    let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call (live on Mainnet)
     let protocolEntityId : Text = spaceEntity.internalId;
+    // and use this instead:
+    //let protocolEntityId : Text = "";
+
     // create space for caller
     let textArrayContent : [Text] = [];
     let keyValData : [Types.MetadataKeyVal] = [

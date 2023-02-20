@@ -25,6 +25,7 @@ dfx canister --help
 If you want to test your project locally, you can use the following commands:
 
 ```bash
+
 # Install dependencies
 npm install
 
