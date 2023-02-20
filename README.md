@@ -25,11 +25,11 @@ dfx canister --help
 If you want to test your project locally, you can use the following commands:
 
 ```bash
-# Starts the replica, running in the background
-dfx start --background
-
 # Install dependencies
 npm install
+
+# Install Vessel which is a dependency
+https://github.com/dfinity/vessel:
 
 npm run dev
 
