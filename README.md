@@ -48,7 +48,17 @@ dfx deploy --argument "(
   }
 )"
 
+--> access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
+access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
+needs to be redeployed after every change
+
 npm run vite
+--> runs on port 3000
+access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+hot reloads with every UI change
+
+
+Deploy to Mainnet (live IC):
 
 dfx deploy --network ic --argument "(
   principal\"$(dfx identity get-principal)\",
@@ -75,18 +85,6 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
     maxLimit = 65535;
   }
 )"
-
-```
-
-Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
-
-Additionally, if you are making frontend changes, you can start a development server with
-
-```bash
-npm start
-```
-
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 8000.
 
 Fund wallet with cycles (from ICP): https://medium.com/dfinity/internet-computer-basics-part-3-funding-a-cycles-wallet-a724efebd111
 

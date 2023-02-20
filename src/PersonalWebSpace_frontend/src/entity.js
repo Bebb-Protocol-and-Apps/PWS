@@ -156,6 +156,7 @@ export function cloneSelectedEntity() {
  * @return {string}        Entity clipboard representation
  */
 export function getEntityClipboardRepresentation(entity) {
+  //entity.flushToDOM(true);
   var clone = prepareForSerialization(entity);
   return clone.outerHTML;
 }

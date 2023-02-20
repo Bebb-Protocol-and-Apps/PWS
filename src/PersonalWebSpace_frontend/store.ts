@@ -9,18 +9,21 @@ import {
   idlFactory as backendIdlFactory,
 } from "../declarations/PersonalWebSpace_backend";
 
-//__________Changed for Plug debugging____________
-/* export const HOST =
+//__________Local vs Mainnet Development____________
+export const HOST =
   process.env.DFX_NETWORK !== "ic"
-    ? "http://localhost:4943"
-    : "https://ic0.app"; */
+    ? "http://localhost:4943" // to be used with http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
+    : "https://ic0.app";
 
 /* export const HOST =
   process.env.DFX_NETWORK === "ic"
     ? "https://ic0.app"
-    : "http://localhost:4943"; */
+    : "http://172.30.141.44:4943"; */
 
-export const HOST = "https://ic0.app";
+//export const HOST = "https://ic0.app"; // Use in Production (on Mainnet)
+
+console.log('in store process.env.DFX_NETWORK', process.env.DFX_NETWORK);
+console.log('in store HOST', HOST);
 
 type State = {
   isAuthed: "plug" | "stoic" | null;

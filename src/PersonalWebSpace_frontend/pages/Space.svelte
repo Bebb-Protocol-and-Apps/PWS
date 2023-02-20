@@ -62,12 +62,20 @@
   };
 
 // User clicked on Edit Space
+  //TODO: Further customize Inspector
+    // Button to export entity to HTML looks like this: <a href="#" title="Copy entity HTML to clipboard" data-action="copy-entity-to-clipboard" class="button fa fa-clipboard"></a>
+      // Change href to not do anything/not change route
   const saveButtonOnClick = async () => {
     // Get updated scene and write it to backend
     console.log('in Space saveButton onclick');
     // Get edited scene HTML as String
-    const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]);
+    const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); //TODO: get final updated HTML
     console.log('updatedSceneHtml', updatedSceneHtml);
+    const updatedSceneHtmlLast = getEntityClipboardRepresentation(AFRAME.scenes[AFRAME.scenes.length-1]);
+    console.log('updatedSceneHtmlLast', updatedSceneHtmlLast);
+    console.log('document.querySelector(a-scene)', document.querySelector('a-scene'));
+    const updatedSceneHtmlAScene = getEntityClipboardRepresentation(document.querySelector('a-scene'));
+    console.log('updatedSceneHtmlAScene', updatedSceneHtmlAScene);
     // Close Inspector and hide button Inspect Scene
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
@@ -76,12 +84,9 @@
     // Assemble new scene HTML to be stored
     const respUpper = await fetch("spacesUpperHtml.html");
     const upperHTML = await respUpper.text();
-    console.log('upperHTML', upperHTML);
     const respLower = await fetch("spacesLowerHtml.html");
     const lowerHTML = await respLower.text();
-    console.log('lowerHTML', lowerHTML);
     const newHTML = upperHTML + updatedSceneHtml + lowerHTML;
-    console.log('newHTML', newHTML);
     // Write space's updated HTML to backend canister
     let updateInput = {
       id: spaceNft.id,
@@ -92,7 +97,6 @@
       updatedSpaceName: "",
     };
     extractSpaceMetadata(updateInput); // Fill additional fields needed for update
-    console.log('updateInput', updateInput);
     await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
     //document.body.innerHTML = updatedSceneHtml; // there shouldn't be any need to manually update the viewed page
   };
@@ -116,13 +120,38 @@
     };
   };
 
+  const enableExportOfAllChangesMade = () => {
+    // Background: changes made in the Inspector's scene view are only reflected in the updated HTML (exported during save event) for properties that had already been present in the entity's initial HTML element
+      // These properties have their dedicated PropertyRow (in the right panel) marked with a second class, propertyRowDefined (in addition to the class propertyRow)
+      // Thus, all property rows in the right panel need to have the second class propertyRowDefined and we add it to those which don't have it yet (because the property isn't present in the entity's initial HTML element)
+    var elements = document.body.getElementsByClassName("propertyRow");
+    console.log('in enableExportOfAllChangesMade elements', elements);
+    if(elements && elements.length > 0) {
+      //[ ...elements ].forEach( x => x.className += ' btn' )    
+      [ ...elements ].forEach( x => x.classList.add('propertyRowDefined') );
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        enableExportOfAllChangesMade();
+      }, 1000);
+    };
+  };
+
+  const customizeInspector = () => {
+    // Change A-Frame's default Inspector according to our specific requirements
+    // Ensure that all changes made will be included in updated HTML to be sent to backend
+    enableExportOfAllChangesMade();
+    // Initiate Save Button to persist changes made
+    loadSaveButton();
+  };
+
   const editButtonOnClick = async () => {
     // Open the AFrame Inspector (automatically injected by AFrame)
     await document.querySelector('a-scene').components.inspector.openInspector();
     open = false;
     // Wait until the Inspector has loaded
     setTimeout(() => {
-      loadSaveButton();      
+      customizeInspector();     
     }, 1000);
   };
 
@@ -210,7 +239,7 @@
       {/if}
 
     {/if}
-    <div style="position: absolute; height: 90%; width: 100%;">
+    <div style="position: absolute; height: 100%; width: 100%;">
       {@html spaceString}
     </div>
   {/if}
