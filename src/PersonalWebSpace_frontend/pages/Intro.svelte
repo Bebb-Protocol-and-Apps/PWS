@@ -1,23 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { store } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
-
-  const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
-
-  let count: number = 0;
-
-  const refreshCounter = async () => {
-    const res: any = await PersonalWebSpace_backend.getValue();
-    count = res.toString();
-  };
-
-  const increment = async () => {
-    await PersonalWebSpace_backend.increment();
-    refreshCounter();
-  };
 
   const createNewUserSpace = async (element) => {
     element.setAttribute("disabled", true);
@@ -159,60 +145,6 @@
   <br> -->
   <p>Powered by <a href='https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/' target='_blank' class='w3-hover-text-green'>Open Internet Metaverse</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' class='w3-hover-text-green'>Internet Computer</a></p>
 </footer>
-
-<!-- <header class="App-header">
-  <p style="font-size: 2em; margin-bottom: 0.5em">
-    Ready! 
-  </p>
-  <div
-    style="display: flex; font-size: 0.7em; text-align: left; padding: 2em; border-radius: 30px; flex-direction: column; background: rgb(220 218 224 / 25%);"
-  >
-    <div>
-      <code>npm run dev:</code>
-      <span> Runs the development server</span>
-    </div>
-    <div>
-      <code>npm run build:</code>
-      <span> Builds your frontend for production</span>
-    </div>
-    <div>
-      <code>npm run serve:</code>
-      <span> Serves your production-built frontend locally</span>
-    </div>
-    <hr />
-    <div>
-      <code>dfx deploy:</code>
-      <span> Compiles & deploys your canisters</span>
-    </div>
-    <div style="text-align: center; font-size: 0.8em; margin-top: 2em;">
-      <a
-        class="App-link"
-        href="https://vitejs.dev/guide/features.html"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Vite Docs
-      </a>
-      {" | "}
-      <a
-        class="App-link"
-        href="https://sdk.dfinity.org/docs/developers-guide/sdk-guide.html"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        IC SDK Docs
-      </a>
-    </div>
-  </div>
-  <button class="demo-button" on:click={increment}>
-    Count is: {count}
-  </button>
-  <p style="font-size: 0.6em;">This counter is running inside a canister</p>
-  <p style="font-size: 0.4em;">
-    by <a href="https://twitter.com/miamaruq">@miamaruq</a>
-    by <a href="https://twitter.com/cryptoschindler">@cryptoschindler</a>
-  </p>
-</header> -->
 
 <style global>
   .App-logo {

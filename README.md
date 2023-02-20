@@ -58,8 +58,11 @@ npm run vite
 access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
 hot reloads with every UI change
 
+For more detailed notes on running this locally, also see NotesOnLocalDev.md
+
 
 Deploy to Mainnet (live IC):
+Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
 
 dfx deploy --network ic --argument "(
   principal\"$(dfx identity get-principal)\",

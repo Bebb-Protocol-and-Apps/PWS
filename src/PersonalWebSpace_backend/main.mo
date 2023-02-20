@@ -27,18 +27,8 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     return "Hello, " # name # "!";
   };
 
-//TODO: remove (just added for initial Svelte testing)
-  stable var currentValue: Nat = 0;
-
-  public func increment(): async () {
-      currentValue += 1;
-  };
-
-  public query func getValue(): async Nat {
-      currentValue;
-  };
-
-  let personalWebSpace_frontend_canister_id : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
+  let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
+  let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
 
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
@@ -307,15 +297,16 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         _name : ?Text = ?"Personal Web Space";
         _description : ?Text = ?"Flaming Hot Personal Web Space";
         _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
+        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
         _entitySpecificFields : ?Text = null;
     };
     //__________Local vs Mainnet Development____________
-    // for local development, comment out the following two lines...
-    let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call (live on Mainnet)
-    let protocolEntityId : Text = spaceEntity.internalId;
-    // and use this instead:
-    //let protocolEntityId : Text = "";
+    var protocolEntityId : Text = ""; // enough for local development
+    if (Principal.fromActor(Self) == Principal.fromText(personalWebSpace_backend_canister_id_mainnet)) {
+      // Live on Mainnet
+      let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
+      protocolEntityId := spaceEntity.internalId;
+    };
 
     // create space for caller
     let textArrayContent : [Text] = [];

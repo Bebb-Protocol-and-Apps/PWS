@@ -6,8 +6,6 @@
   import Button from "../components/Button.svelte";
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
-  const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
-
   const saveButtonOnClick = async () => {
     console.log('in addScene saveButton onclick');
     // Get updated scene and write it to backend

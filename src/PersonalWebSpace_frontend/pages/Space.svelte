@@ -13,13 +13,11 @@
   import Button from "../components/Button.svelte";
   import NotFound from "./NotFound.svelte";
 
-  import spinner from "../assets/loading.gif";
+  import spinner from "../assets/loading.gif"; // TODO: load other assets (e.g. html pages) similarly (see https://vitejs.dev/guide/assets.html: Referenced assets are included as part of the build assets graph, will get hashed file names, and can be processed by plugins for optimization)
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-  
-  const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
 
 // this is needed for URL params
   export let params;
