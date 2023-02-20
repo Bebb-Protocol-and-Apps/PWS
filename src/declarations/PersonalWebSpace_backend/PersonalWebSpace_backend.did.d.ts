@@ -27,7 +27,7 @@ export interface LogoResult { 'data' : string, 'logo_type' : string }
 export type MetadataDesc = Array<MetadataPart>;
 export interface MetadataKeyVal { 'key' : string, 'val' : MetadataVal }
 export interface MetadataPart {
-  'data' : Array<number>,
+  'data' : Uint8Array,
   'key_val_data' : Array<MetadataKeyVal>,
   'purpose' : MetadataPurpose,
 }
@@ -41,7 +41,7 @@ export type MetadataVal = { 'Nat64Content' : bigint } |
   { 'NatContent' : bigint } |
   { 'Nat16Content' : number } |
   { 'TextArrayContent' : Array<string> } |
-  { 'BlobContent' : Array<number> } |
+  { 'BlobContent' : Uint8Array } |
   { 'PrincipalContent' : Principal } |
   { 'TextToTextAssocListContent' : AssocList } |
   { 'TextContent' : string };
@@ -67,34 +67,36 @@ export interface PersonalWebSpace {
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
   'getRandomSpace' : ActorMethod<[], NftResult>,
   'getSpace' : ActorMethod<[TokenId], NftResult>,
-  'getTokenIdsForUserDip721' : ActorMethod<[Principal], Array<TokenId>>,
+  'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
+  'getValue' : ActorMethod<[], bigint>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
+  'increment' : ActorMethod<[], undefined>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
   'ownerOfDip721' : ActorMethod<[TokenId], OwnerResult>,
   'safeTransferFromDip721' : ActorMethod<
     [Principal, Principal, TokenId],
-    TxReceipt,
+    TxReceipt
   >,
   'supportedInterfacesDip721' : ActorMethod<[], Array<InterfaceId>>,
   'symbolDip721' : ActorMethod<[], string>,
   'totalSupplyDip721' : ActorMethod<[], bigint>,
   'transferFromDip721' : ActorMethod<
     [Principal, Principal, TokenId],
-    TxReceipt,
+    TxReceipt
   >,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
 }
 export interface Request {
   'url' : string,
   'method' : string,
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
 }
 export interface Response {
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
@@ -102,11 +104,11 @@ export interface Response {
 }
 export type StreamingCallback = ActorMethod<
   [StreamingCallbackToken],
-  StreamingCallbackResponse,
+  StreamingCallbackResponse
 >;
 export interface StreamingCallbackResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Array<number>,
+  'body' : Uint8Array,
 }
 export interface StreamingCallbackToken {
   'key' : string,

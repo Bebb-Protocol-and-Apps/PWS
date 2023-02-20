@@ -1,0 +1,61 @@
+<html>
+  <head></head>
+  <body>
+    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-assets>
+        <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+        <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        <a-asset-item id="ground-glb" src="ground.glb"></a-asset-item>
+        <a-asset-item id="single_bed-glb" src="single_bed.glb"></a-asset-item>
+        <a-asset-item id="round_table-glb" src="round_table.glb"></a-asset-item>
+        <a-asset-item id="couch-glb" src="couch.glb"></a-asset-item>
+        <a-asset-item id="deskj-glb" src="deskj.glb"></a-asset-item>
+        <a-asset-item id="gaming_chair-glb" src="gaming_chair.glb"></a-asset-item>
+        <a-asset-item id="gaming_screen-glb" src="gaming_screen.glb"></a-asset-item>
+        <a-asset-item id="laptop-glb" src="laptop.glb"></a-asset-item>
+        <a-asset-item id="nightstand-glb" src="nightstand.glb"></a-asset-item>
+        <a-asset-item id="standart_bookshelf-glb" src="standart_bookshelf.glb"></a-asset-item>
+        <a-asset-item id="twin_wardrobe-glb" src="twin_wardrobe.glb"></a-asset-item>
+        <a-asset-item id="armchair-glb" src="armchair.glb"></a-asset-item>
+        <a-asset-item id="blue_flower-glb" src="blue_flower.glb"></a-asset-item>
+        <a-asset-item id="cylinder_lamp-glb" src="cylinder_lamp.glb"></a-asset-item>
+        <a-asset-item id="l_shaped_bookshelf-glb" src="l_shaped_bookshelf.glb"></a-asset-item>
+        <a-asset-item id="l_shaped_couch-glb" src="l_shaped_couch.glb"></a-asset-item>
+        <a-asset-item id="rectangle_table-glb" src="rectangle_table.glb"></a-asset-item>
+      </a-assets>
+      <!-- <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane> -->
+      <!-- <a-plane src="#ground-glb" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane> -->
+
+      <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+      <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+      <a-sky color="#ECECEC"></a-sky>
+      
+      <a-entity gltf-model="#ground-glb" position="0 -0.1 -5"></a-entity>
+      <a-entity gltf-model="#single_bed-glb" position="-0.5 0.5 -5"></a-entity>
+      <a-entity gltf-model="#nightstand-glb" position="0.9 0.4 -6"></a-entity>
+      <a-entity gltf-model="#twin_wardrobe-glb" position="-3 1 -5" rotation="0 90 0"></a-entity>
+
+      <a-entity gltf-model="#ground-glb" position="5 -0.1 -5"></a-entity>
+      <a-entity gltf-model="#couch-glb" position="5 0.5 -5.5"></a-entity>
+      <a-entity gltf-model="#round_table-glb" position="5 0.4 -4"></a-entity>
+      <a-entity gltf-model="#blue_flower-glb" position="5 1.1 -4"></a-entity>
+      <a-entity gltf-model="#standart_bookshelf-glb" position="4.5 1 -7"></a-entity>
+      <a-entity gltf-model="#standart_bookshelf-glb" position="6.25 1 -7"></a-entity>
+      
+      <a-entity gltf-model="#ground-glb" position="10 -0.1 -5"></a-entity>
+      <a-entity gltf-model="#deskj-glb" position="10 0.5 -5"></a-entity>
+      <a-entity gltf-model="#gaming_chair-glb" position="10 0.5 -4" rotation="0 180 0"></a-entity>
+      <a-entity gltf-model="#gaming_screen-glb" position="10 1.1 -5"></a-entity>
+      <a-entity gltf-model="#laptop-glb" position="10 1 -4.5"></a-entity> 
+      
+      <a-entity gltf-model="#ground-glb" position="15 -0.1 -5"></a-entity>
+      <a-entity gltf-model="#ground-glb" position="20 -0.1 -5"></a-entity>
+      <a-entity gltf-model="#l_shaped_couch-glb" position="15 0.5 -5.5" rotation="0 90 0"></a-entity>
+      <a-entity gltf-model="#rectangle_table-glb" position="15.75 0.4 -5"></a-entity>
+      <a-entity gltf-model="#cylinder_lamp-glb" position="17.5 0.8 -6.5"></a-entity>
+      <a-entity gltf-model="#l_shaped_bookshelf-glb" position="19.75 1.2 -6"></a-entity>
+      <a-entity gltf-model="#armchair-glb" position="18 0.7 -5" rotation="0 -90 0"></a-entity>
+      
+  </body>
+</html>

@@ -25,11 +25,14 @@ dfx canister --help
 If you want to test your project locally, you can use the following commands:
 
 ```bash
-# Starts the replica, running in the background
-dfx start --background
 
 # Install dependencies
 npm install
+
+# Install Vessel which is a dependency
+https://github.com/dfinity/vessel:
+
+npm run dev
 
 # Deploys your canisters to the replica and generates your candid interface
 Local:
@@ -45,6 +48,21 @@ dfx deploy --argument "(
     maxLimit = 65535;
   }
 )"
+
+--> access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
+access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
+needs to be redeployed after every change
+
+npm run vite
+--> runs on port 3000
+access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+hot reloads with every UI change
+
+For more detailed notes on running this locally, also see NotesOnLocalDev.md
+
+
+Deploy to Mainnet (live IC):
+Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
 
 dfx deploy --network ic --argument "(
   principal\"$(dfx identity get-principal)\",
@@ -72,17 +90,7 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
   }
 )"
 
-```
-
-Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
-
-Additionally, if you are making frontend changes, you can start a development server with
-
-```bash
-npm start
-```
-
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 8000.
+Fund wallet with cycles (from ICP): https://medium.com/dfinity/internet-computer-basics-part-3-funding-a-cycles-wallet-a724efebd111
 
 Top up cycles:
 dfx identity --network=ic get-wallet
@@ -91,6 +99,11 @@ dfx canister --network ic status PersonalWebSpace_backend
 dfx canister --network ic status PersonalWebSpace_frontend
 dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 3000000000000 PersonalWebSpace_backend
 dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 300000000000 PersonalWebSpace_frontend
+
+2023-02-16:
+  topped up 7T cycles each for new balances:
+  PersonalWebSpace_backend Balance: 10_896_387_427_956 Cycles
+  PersonalWebSpace_frontend Balance: 10_220_358_949_308 Cycles
 
 ### Note on frontend environment variables
 

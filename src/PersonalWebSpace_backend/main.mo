@@ -19,11 +19,16 @@ import HTTP "./Http";
 import Stoic "./EXT/Stoic";
 
 import Protocol "./Protocol";
+import Testable "mo:matchers/Testable";
 
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
+// TODO: instead add functions to manage cycles balance and gather stats
   public func greet(name : Text) : async Text {
     return "Hello, " # name # "!";
   };
+
+  let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
+  let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
 
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
@@ -292,11 +297,17 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         _name : ?Text = ?"Personal Web Space";
         _description : ?Text = ?"Flaming Hot Personal Web Space";
         _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://kfkua-eqaaa-aaaai-acnyq-cai.raw.ic0.app/?spaceId=" # Nat64.toText(newId)); //TODO: update
+        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
         _entitySpecificFields : ?Text = null;
     };
-    let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject);
-    let protocolEntityId : Text = spaceEntity.internalId;
+    //__________Local vs Mainnet Development____________
+    var protocolEntityId : Text = ""; // enough for local development
+    if (Principal.fromActor(Self) == Principal.fromText(personalWebSpace_backend_canister_id_mainnet)) {
+      // Live on Mainnet
+      let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
+      protocolEntityId := spaceEntity.internalId;
+    };
+
     // create space for caller
     let textArrayContent : [Text] = [];
     let keyValData : [Types.MetadataKeyVal] = [
