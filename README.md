@@ -33,6 +33,7 @@ npm install
 https://github.com/dfinity/vessel:
 
 npm run dev
+Note: this starts a clean local IC replica (i.e. all canister state is erased). To keep the current canister state, run dfx start --background instead
 
 # Deploys your canisters to the replica and generates your candid interface
 Local:

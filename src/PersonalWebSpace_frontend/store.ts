@@ -10,20 +10,15 @@ import {
 } from "../declarations/PersonalWebSpace_backend";
 
 //__________Local vs Mainnet Development____________
-export const HOST =
+/* export const HOST =
   process.env.DFX_NETWORK !== "ic"
     ? "http://localhost:4943" // to be used with http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
-    : "https://ic0.app";
+    : "https://ic0.app"; // Use in Production (on Mainnet) */
 
-/* export const HOST =
-  process.env.DFX_NETWORK === "ic"
+export const HOST =
+  backendCanisterId === "vee64-zyaaa-aaaai-acpta-cai"
     ? "https://ic0.app"
-    : "http://172.30.141.44:4943"; */
-
-//export const HOST = "https://ic0.app"; // Use in Production (on Mainnet)
-
-console.log('in store process.env.DFX_NETWORK', process.env.DFX_NETWORK);
-console.log('in store HOST', HOST);
+    : "http://localhost:4943"; // to be used with http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
 
 type State = {
   isAuthed: "plug" | "stoic" | null;

@@ -95,8 +95,6 @@
       initiateCollapsibles();
     }
   };
-
-  onMount(refreshCounter);
 </script>
 
 <div class='topnav'>
