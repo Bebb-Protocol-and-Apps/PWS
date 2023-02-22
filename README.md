@@ -53,7 +53,9 @@ dfx deploy --argument "(
 
 --> access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
 access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
-needs to be redeployed after every change
+or http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/space/0 (for space with spaceid 0)
+
+needs to be redeployed after every change to reflect changes
 
 # Alternative 3. Run a local vite UI (note that this had issues communicating to the backend canister for some setups in the past)
 npm run vite

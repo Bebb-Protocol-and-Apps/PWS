@@ -15,6 +15,7 @@
      */
     "sourceMap": true,
     // "skipLibCheck": true,
+    //"resolveJsonModule": true,
     "esModuleInterop": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
