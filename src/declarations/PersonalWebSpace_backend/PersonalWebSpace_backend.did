@@ -59,10 +59,8 @@ type PersonalWebSpace =
    getRandomSpace: () -> (NftResult);
    getSpace: (TokenId) -> (NftResult) query;
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
-   getValue: () -> (nat) query;
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
-   increment: () -> ();
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;

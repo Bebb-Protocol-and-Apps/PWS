@@ -26,16 +26,17 @@ If you want to test your project locally, you can use the following commands:
 
 ```bash
 
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Install Vessel which is a dependency
+# 2. Install Vessel which is a dependency
 https://github.com/dfinity/vessel:
 
 npm run dev
-Note: this starts a clean local IC replica (i.e. all canister state is erased). To keep the current canister state, run dfx start --background instead
+Note: this starts a replica which includes the canisters state stored from previous sessions.
+If you want to start a clean local IC replica (i.e. all canister state is erased) run instead: npm run erase-replica
 
-# Deploys your canisters to the replica and generates your candid interface
+# 3. Deploys your canisters to the replica and generates your candid interface
 Local:
 dfx deploy --argument "(
   principal\"$(dfx identity get-principal)\",
@@ -54,6 +55,7 @@ dfx deploy --argument "(
 access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
 needs to be redeployed after every change
 
+# Alternative 3. Run a local vite UI (note that this had issues communicating to the backend canister for some setups in the past)
 npm run vite
 --> runs on port 3000
 access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
@@ -61,6 +63,10 @@ hot reloads with every UI change
 
 For more detailed notes on running this locally, also see NotesOnLocalDev.md
 
+# Production Deployement
+npm install
+
+dfx start --background
 
 Deploy to Mainnet (live IC):
 Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
@@ -78,6 +84,8 @@ dfx deploy --network ic --argument "(
   }
 )"
 
+In case there are authentication issues, you could try this command
+Note that only authorized identities which are set up as canister controllers may deploy the production canisters
 dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
@@ -91,6 +99,7 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
   }
 )"
 
+# Cycles for Production Canisters
 Fund wallet with cycles (from ICP): https://medium.com/dfinity/internet-computer-basics-part-3-funding-a-cycles-wallet-a724efebd111
 
 Top up cycles:
