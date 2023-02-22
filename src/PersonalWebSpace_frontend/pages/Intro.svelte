@@ -9,7 +9,7 @@
     element.setAttribute("disabled", true);
     document.getElementById("createSubtext").innerText = "Creating your Personal Web Space, just a moment...";
     
-    const resp = await fetch("space.html");
+    const resp = await fetch("defaultRoom.html"); // Fetches default space each user gets initially
     const defaultSpaceHtml = await resp.text();
     const space = await $store.backendActor.createSpace(defaultSpaceHtml);
     document.getElementById("createSubtext").innerText = "Ohh yeah, you just got yourself a new Personal Web Space!";
