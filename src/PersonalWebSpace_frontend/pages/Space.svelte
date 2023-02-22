@@ -13,15 +13,14 @@
   import Button from "../components/Button.svelte";
   import NotFound from "./NotFound.svelte";
 
-  import spinner from "../assets/loading.gif";
+  import spinner from "../assets/loading.gif"; // TODO: load other assets (e.g. html pages) similarly (see https://vitejs.dev/guide/assets.html: Referenced assets are included as part of the build assets graph, will get hashed file names, and can be processed by plugins for optimization)
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-  
-  const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
+    import ObjAframe from "./ObjAframe.svelte";
 
-// this is needed for URL params
+// This is needed for URL params
   export let params;
 
 // Whether hamburger menu is open
@@ -45,7 +44,7 @@
     open = false;
   };
 
-// Extract metadata field from Space NFT
+// Extract metadata fields from Space NFT
   const extractSpaceMetadata = (targetObject) => {
     for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
       let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
@@ -120,27 +119,37 @@
     };
   };
 
-  const enableExportOfAllChangesMade = () => {
-    // Background: changes made in the Inspector's scene view are only reflected in the updated HTML (exported during save event) for properties that had already been present in the entity's initial HTML element
-      // These properties have their dedicated PropertyRow (in the right panel) marked with a second class, propertyRowDefined (in addition to the class propertyRow)
-      // Thus, all property rows in the right panel need to have the second class propertyRowDefined and we add it to those which don't have it yet (because the property isn't present in the entity's initial HTML element)
-    var elements = document.body.getElementsByClassName("propertyRow");
-    console.log('in enableExportOfAllChangesMade elements', elements);
-    if(elements && elements.length > 0) {
-      //[ ...elements ].forEach( x => x.className += ' btn' )    
-      [ ...elements ].forEach( x => x.classList.add('propertyRowDefined') );
+  const enableExportOfAllChangesMade = (entityUpdateEvent) => {
+    // Background: changes made in the Inspector's scene view are only automatically reflected in the updated HTML (exported during save event) for properties that had already been present in the entity's initial HTML element (only update event is emitted, no function call: https://github.com/aframevr/aframe-inspector/blob/master/src/lib/viewport.js)
+      // These properties are displayed in bold in the Inspector's right panel as they have their dedicated PropertyRow marked with a second class, propertyRowDefined (in addition to the class propertyRow)
+      // Changes made to properties in the Inspector's right panel are captured as expected for later export and persisting (and get the second class propertyRowDefined added so are bold as well) (update function is called: https://github.com/aframevr/aframe-inspector/blob/master/src/components/components/PropertyRow.js)
+      // We thus need to ensure that all other changes made in the scene view will be captured as expected as well such that they are exported and persisted
+      // To do so, we manually set the new attribute value on the updated entity element according to the entityupdate event (the Inspector does the same for edits made in the right panel)
+      // Note that this also sets the second class, propertyRowDefined, on that PropertyRow in the Inspector's right panel
+    if (["position", "rotation", "scale", "visible"].includes(entityUpdateEvent.component)) {
+      // Only perform updates for these types of attribute changes (as these are the ones available in the scene view and scene graph panel on the left)
+        // Note that update events in the Inspector's right panel are also captured and processed here (i.e. not only scene view update events)
+      entityUpdateEvent.entity.setAttribute(entityUpdateEvent.component, entityUpdateEvent.value); // adapted from: https://github.com/aframevr/aframe-inspector/blob/master/src/lib/entity.js
+    };
+  };
+
+  const captureUpdateEvents = () => {
+    // Changes made in the Inspector's scene view are not automatically persisted
+    // Capture events which update an entity and enable that all changes will be exported to persist them
+    if (AFRAME.INSPECTOR) {
+      AFRAME.INSPECTOR.on('entityupdate', function(event){enableExportOfAllChangesMade(event)}, true);
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
-        enableExportOfAllChangesMade();
+        captureUpdateEvents();
       }, 1000);
     };
   };
 
   const customizeInspector = () => {
-    // Change A-Frame's default Inspector according to our specific requirements
+  // Change A-Frame's default Inspector according to our specific requirements
     // Ensure that all changes made will be included in updated HTML to be sent to backend
-    enableExportOfAllChangesMade();
+    captureUpdateEvents();
     // Initiate Save Button to persist changes made
     loadSaveButton();
   };
@@ -218,7 +227,7 @@
 
       {#if open}
         <div class="spaceMenu">
-          <!-- Edit Button may only be displayed if logged-in user is owner -->
+          <!-- Edit Button may only be displayed if logged-in user is space's owner -->
           {#if isViewerSpaceOwner()}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <p class="spaceMenuItem" on:click={() => editButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 1 }}>

@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { store } from "../store";
   import Login from "../components/Login.svelte";
 
   import spinner from "../assets/loading.gif";
-
-  const PersonalWebSpace_frontend_canister_id = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
 
   const numberOfRandomSpacesToLoad = 3;
   let loading = true;
