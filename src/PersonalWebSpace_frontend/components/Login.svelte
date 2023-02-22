@@ -15,7 +15,8 @@
 </script>
 
 <svelte:window on:keyup={handleEscape} />
-<h3><b>We're glad you're here! Get started right away by logging in:</b></h3>
+
+<h3 class="font-bold">We're glad you're here! Get started right away by logging in:</h3>
 
 <button
   on:click={toggleModal}
@@ -23,7 +24,7 @@
   >login</button
 >
 
-<p>You need to be logged in to create and update spaces. If you want to see others' spaces first, click on the Explore tab</p>
+<p>You need to be logged in to create and update spaces. If you want to see others' spaces first, click on the Explore tab.</p>
 
 <div class={openModal ? "" : "hidden"}>
   <LoginModal {toggleModal} />
