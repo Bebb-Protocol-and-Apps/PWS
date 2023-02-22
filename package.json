@@ -11,13 +11,16 @@
   ],
   "scripts": {
     "dev": "npm run replica && npm run deploy",
-    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background",
+    "replica": "dfx stop && dfx start --background",
+    "erase-replica": "npm run fresh-replica && npm run deploy",
+    "fresh-replica": "dfx stop && rm -rf .dfx && dfx start --clean --background",
     "generate": "dfx generate",
     "deploy": "dfx canister create --all && npm run generate",
     "vite": "vite --port 3000",
     "build": "vite build",
     "serve": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "stop": "dfx stop"
   },
   "dependencies": {
     "@dfinity/agent": "0.15.1",
