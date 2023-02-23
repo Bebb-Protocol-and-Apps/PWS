@@ -210,10 +210,9 @@
 
 <svelte:window on:keyup={handleEscape} />
 
-<div>
+<div class="items-center text-center bg-slate-300">
   {#if loadingInProgress}
-    <h1>Loading this Space for You!</h1>
-    <img class="h-6 block" src={spinner} alt="loading animation" />
+    <h1 class="items-center text-center font-bold text-xl">Loading this Space for You!</h1>
   {:else if spaceLoadingError}
     <NotFound />
   {:else if spaceLoaded}
