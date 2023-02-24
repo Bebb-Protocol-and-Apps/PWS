@@ -210,9 +210,9 @@
 
 <svelte:window on:keyup={handleEscape} />
 
-<div class="items-center text-center bg-slate-300">
+<div>
   {#if loadingInProgress}
-    <h1 class="items-center text-center font-bold text-xl">Loading this Space for You!</h1>
+    <h1 class="items-center text-center font-bold text-xl bg-slate-300">Loading this Space for You!</h1>
   {:else if spaceLoadingError}
     <NotFound />
   {:else if spaceLoaded}

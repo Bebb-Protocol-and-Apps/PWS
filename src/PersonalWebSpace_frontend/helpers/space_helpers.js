@@ -8,10 +8,10 @@ export const formatUserSpaces = (userSpaces) => {
     userSpacesString += `<div class='responsive' width="100%" height="auto"> <div class='space'> `;
     const spaceURL = `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`;
     userSpacesString += `<a target='_blank' href="${spaceURL}" > <iframe src="${spaceURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto"></iframe> </a> `;
-    userSpacesString += `<button onclick="window.open('${spaceURL}','_blank')" class="active bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button> `;
-    userSpacesString += `<button type='button' class="collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>`;
+    userSpacesString += `<button onclick="window.open('${spaceURL}','_blank')" class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button> `;
+    userSpacesString += `<button type='button' class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>`;
     // show space details
-    var spaceDetails = `<div class='content'> `;
+    var spaceDetails = `<div class='space-details-content'> `;
     var spaceName = "";
     var spaceDescription = "";
     var ownerName = "";
@@ -45,12 +45,12 @@ export const formatUserSpaces = (userSpaces) => {
 };
 
 export const initiateCollapsibles = () => {
-  var coll = document.getElementsByClassName('collapsible');
+  var coll = document.getElementsByClassName('space-details-collapsible');
   var i;
 
   for (i = 0; i < coll.length; i++) {
     coll[i].addEventListener('click', function() {
-      this.classList.toggle('active');
+      this.classList.toggle('active-app-button');
       var content = this.nextElementSibling;
       if (content.style.display === 'block') {
         content.style.display = 'none';

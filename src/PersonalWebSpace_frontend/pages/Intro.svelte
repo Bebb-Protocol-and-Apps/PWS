@@ -65,7 +65,7 @@
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create Space</button>
     <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
   {:else}
-    <button type='button' id='createButton' on:click={(e) => createNewUserSpace(e.target)} class="active bg-slate-500 text-white font-bold py-2 px-4 rounded">Create Space</button>
+    <button type='button' id='createButton' on:click={(e) => createNewUserSpace(e.target)} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create Space</button>
     <p id='createSubtext'>Click and we'll generate a 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
   {/if}
 </section>
@@ -86,6 +86,7 @@
 <Footer />
 
 <style global>
+/* NOTE: these styles are global and thus affect any element in the app. Thus, ensure that there aren't any conflicts with the class names chosen (i.e. avoid generic names as they might conflict with an A-Frame class, e.g. content which is used in the Inspector)  */
   .App-logo {
     height: 15vmin;
     pointer-events: none;
@@ -122,7 +123,7 @@
     background: #979799;
   }
 
-  .collapsible {
+  .space-details-collapsible {
     padding: 7px;
     text-align: center;
     border: none;
@@ -130,11 +131,11 @@
     cursor: pointer;
   }
 
-  .active:hover, .collapsible:hover {
+  .active-app-button:hover, .space-details-collapsible:hover {
     background-color: #555;
   }
 
-  .content {
+  .space-details-content {
     /* padding: 0 18px; */
     display: none;
     overflow: hidden; 
