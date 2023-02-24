@@ -4,6 +4,10 @@
   import { store } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
+  import Topnav from "../components/Topnav.svelte";
+  import Footer from "../components/Footer.svelte";
+
+  import { formatUserSpaces, initiateCollapsibles } from "../helpers/space_helpers.js";
 
   const createNewUserSpace = async (element) => {
     element.setAttribute("disabled", true);
@@ -18,67 +22,6 @@
     loadUserSpaces();
 
     element.removeAttribute("disabled");
-  };
-
-  const initiateCollapsibles = () => {
-    var coll = document.getElementsByClassName('collapsible');
-    var i;
-
-    for (i = 0; i < coll.length; i++) {
-      coll[i].addEventListener('click', function() {
-        this.classList.toggle('active');
-        var content = this.nextElementSibling;
-        if (content.style.display === 'block') {
-          content.style.display = 'none';
-        } else {
-          content.style.display = 'block';
-        }
-      });
-    }
-  };
-
-  const formatUserSpaces = (userSpaces) => {
-    // transform userSpaces list to string holding HTML ready to be displayed  
-    var userSpacesString = ``;
-    for (let i = 0; i < userSpaces.length; i++) {
-      const space = userSpaces[i];
-      userSpacesString += `<div class='responsive' width="100%" height="auto"> <div class='space'> `;
-      const spaceURL = `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`;
-      userSpacesString += `<a target='_blank' href="${spaceURL}" > <iframe src="${spaceURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto"></iframe> </a> `;
-      userSpacesString += `<button onclick="window.open('${spaceURL}','_blank')">View</button> `;
-      userSpacesString += `<button type='button' class='collapsible'>See Details</button>`;
-      // show space details
-      var spaceDetails = `<div class='content'> `;
-      var spaceName = "";
-      var spaceDescription = "";
-      var ownerName = "";
-      var ownerContactInfo = "";
-      var creationTime : Date;
-      for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
-        let fieldKey = space.metadata[0].key_val_data[j].key;
-        if (fieldKey === "spaceName") {
-          spaceName = space.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "spaceDescription") {
-          spaceDescription = space.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "ownerName") {
-          ownerName = space.metadata[0].key_val_data[j].val.TextContent;      
-        } else if (fieldKey === "ownerContactInfo") {
-          ownerContactInfo = space.metadata[0].key_val_data[j].val.TextContent;      
-        } else if (fieldKey === "creationTime") {
-          creationTime = new Date(Number(space.metadata[0].key_val_data[j].val.Nat64Content) / 1000000); 
-        }
-      }
-      spaceDetails += `<p>Owner: ${space.owner}</p> `;
-      spaceDetails += `<p>Owner Name: ${ownerName}</p> `;
-      spaceDetails += `<p>Owner Contact Info: ${ownerContactInfo}</p> `;
-      spaceDetails += `<p>Space Name: ${spaceName}</p> `;
-      spaceDetails += `<p>Space Description: ${spaceDescription}</p> `;
-      spaceDetails += `<p>Creation Time: ${creationTime}</p> `;
-      spaceDetails += `</div> `;
-      userSpacesString += spaceDetails;
-      userSpacesString += `</div> </div>`;    
-    }
-    return userSpacesString;
   };
 
   const loadUserSpaces = async () => {
@@ -97,54 +40,53 @@
   };
 </script>
 
-<div class='topnav'>
-  <a href='#top'>Open Internet Metaverse</a>
-  <a href='#create'>Create</a>
-  <a href='#spaces'>My Spaces</a>
-  <a href='#/explore'>Explore</a>
+<Topnav />
+
+<div class="py-7 items-center leading-8 text-center text-xl font-semibold">
+  <h3>Want to have your own Virtual Home?</h3>
+  <h3>Want to become part of the Open Metaverse Neighborhood?</h3>
+  <h3>Want to have your Personal Web Space as a 3D webpage?</h3>
 </div>
 
-<h3>Want to have your own Virtual Home?</h3>
-<h3>Want to become part of the Open Metaverse Neighborhood?</h3>
-<h3>Want to have your Personal Web Space as a 3D webpage?</h3>
-
-<section id="login">
-{#if !$store.isAuthed}
-  <Login />
-{:else}
-  <div>Principal: {$store.principal}</div>
-  <div>AccountId: {$store.accountId}</div>
-  <Button on:click={() => store.disconnect()}>disconnect</Button>
-{/if}
+<section id="login" class="py-7 space-y-6 items-center text-center bg-slate-100">
+  {#if !$store.isAuthed}
+    <Login />
+  {:else}
+    <h3 class="font-bold">You're Logged In</h3>
+    <div>Principal: {$store.principal}</div>
+    <div>AccountId: {$store.accountId}</div>
+    <Button on:click={() => store.disconnect()}>disconnect</Button>
+  {/if}
 </section>
 
-<h3 id='create'><b>Create a new Personal Web Space</b></h3>
-{#if !$store.isAuthed}
-  <button type='button' id='createButton' disabled >Create Space</button>
-{:else}
-  <button type='button' id='createButton' on:click={(e) => createNewUserSpace(e.target)} >Create Space</button>
-{/if}
-<p id='createSubtext'>Click and we'll generate a 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+<section id="create" class="py-7 space-y-6 items-center text-center">
+  <h3 class="font-bold">Create a new Personal Web Space</h3>
+  {#if !$store.isAuthed}
+    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create Space</button>
+    <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+  {:else}
+    <button type='button' id='createButton' on:click={(e) => createNewUserSpace(e.target)} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create Space</button>
+    <p id='createSubtext'>Click and we'll generate a 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+  {/if}
+</section>
 
-<h3 id='spaces'><b>My Personal Web Spaces</b></h3>
-{#if !$store.isAuthed}
-  <p id='spacesSubtext'>Log in to see which spaces you own.</p>
-{:else}
-  <p id='spacesSubtext'>Let's see which spaces you own...</p>
-  <div id='userSpaces' class="user-spaces"></div>
-  <p hidden>{loadUserSpaces()}</p>
-{/if}
+<section id="spaces" class="py-7 space-y-6 items-center text-center bg-slate-100">
+  <h3 class="font-bold">My Personal Web Spaces</h3>
+  {#if !$store.isAuthed}
+    <p id='spacesSubtext'>Log in to see which Spaces you own.</p>
+  {:else}
+    <p id='spacesSubtext'>Let's see which Spaces you own...</p>
+    <div id='userSpaces' class="space-y-4"></div>
+    <p hidden>{loadUserSpaces()}</p>
+  {/if}
+</section>
 
 <div class='clearfix'></div>
 
-<footer class='w3-light-grey w3-padding-64 w3-center' id='about'>
-  <!-- <h2>About</h2> 
-    <p>These are my favorite NFTs. Please enjoy!</p>   
-  <br> -->
-  <p>Powered by <a href='https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/' target='_blank' class='w3-hover-text-green'>Open Internet Metaverse</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' class='w3-hover-text-green'>Internet Computer</a></p>
-</footer>
+<Footer />
 
 <style global>
+/* NOTE: these styles are global and thus affect any element in the app. Thus, ensure that there aren't any conflicts with the class names chosen (i.e. avoid generic names as they might conflict with an A-Frame class, e.g. content which is used in the Inspector)  */
   .App-logo {
     height: 15vmin;
     pointer-events: none;
@@ -179,5 +121,24 @@
   .demo-button:active {
     color: white;
     background: #979799;
+  }
+
+  .space-details-collapsible {
+    padding: 7px;
+    text-align: center;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .active-app-button:hover, .space-details-collapsible:hover {
+    background-color: #555;
+  }
+
+  .space-details-content {
+    /* padding: 0 18px; */
+    display: none;
+    overflow: hidden; 
+    /* background-color: #f1f1f1; */
   }
 </style>

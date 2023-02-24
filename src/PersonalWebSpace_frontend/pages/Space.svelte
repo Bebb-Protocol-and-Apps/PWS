@@ -212,8 +212,7 @@
 
 <div>
   {#if loadingInProgress}
-    <h1>Loading this Space for You!</h1>
-    <img class="h-6 block" src={spinner} alt="loading animation" />
+    <h1 class="items-center text-center font-bold text-xl bg-slate-300">Loading this Space for You!</h1>
   {:else if spaceLoadingError}
     <NotFound />
   {:else if spaceLoaded}
