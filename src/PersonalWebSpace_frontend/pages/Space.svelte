@@ -12,19 +12,22 @@
   import LoginModal from "../components/LoginModal.svelte";
   import Button from "../components/Button.svelte";
   import NotFound from "./NotFound.svelte";
+  import SpaceNeighbors from "./SpaceNeighbors.svelte";
 
   import spinner from "../assets/loading.gif"; // TODO: load other assets (e.g. html pages) similarly (see https://vitejs.dev/guide/assets.html: Referenced assets are included as part of the build assets graph, will get hashed file names, and can be processed by plugins for optimization)
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-    import ObjAframe from "./ObjAframe.svelte";
 
 // This is needed for URL params
   export let params;
 
 // Whether hamburger menu is open
   let open;
+
+// Whether the view with the space's neighbors should be displayed
+  let showNeighborsView = false;
 
 // Close open hamburger menu
   function handleEscape({ key }) {
@@ -66,15 +69,10 @@
       // Change href to not do anything/not change route
   const saveButtonOnClick = async () => {
     // Get updated scene and write it to backend
-    console.log('in Space saveButton onclick');
     // Get edited scene HTML as String
-    const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); //TODO: get final updated HTML
-    console.log('updatedSceneHtml', updatedSceneHtml);
+    const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
     const updatedSceneHtmlLast = getEntityClipboardRepresentation(AFRAME.scenes[AFRAME.scenes.length-1]);
-    console.log('updatedSceneHtmlLast', updatedSceneHtmlLast);
-    console.log('document.querySelector(a-scene)', document.querySelector('a-scene'));
     const updatedSceneHtmlAScene = getEntityClipboardRepresentation(document.querySelector('a-scene'));
-    console.log('updatedSceneHtmlAScene', updatedSceneHtmlAScene);
     // Close Inspector and hide button Inspect Scene
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
@@ -164,6 +162,11 @@
     }, 1000);
   };
 
+  const neighborsButtonOnClick = () => {
+    open = false;
+    showNeighborsView = true;
+  };
+
 // Load Space scene from data stored in backend canister
   let loadingInProgress = true;
   let spaceLoadingError = false;
@@ -225,6 +228,7 @@
       </div>
 
       {#if open}
+        {showNeighborsView=false}
         <div class="spaceMenu">
           <!-- Edit Button may only be displayed if logged-in user is space's owner -->
           {#if isViewerSpaceOwner()}
@@ -233,6 +237,10 @@
               Edit Space
             </p>
           {/if}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <p class="spaceMenuItem" on:click={() => neighborsButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 1 }}>
+            Discover Neighbors
+          </p>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 2 }}>
             <a href="#/" target="_blank">About OIM</a>
@@ -244,8 +252,11 @@
         </div>
 
         <hr transition:scale={{ duration: 650, easing: quadOut, opacity: 1 }} />
+      {:else if showNeighborsView}
+        <div class="spaceNeighborsView max-h-screen overflow-y-auto">
+          <SpaceNeighbors spaceNft={spaceNft} />
+        </div>
       {/if}
-
     {/if}
     <div style="position: absolute; height: 100%; width: 100%;">
       {@html spaceString}
@@ -282,5 +293,20 @@
   }
   p.spaceMenuItem:hover {
     text-decoration: underline;
+  }
+  div.spaceNeighborsView {
+    z-index: 20;
+    position: relative;
+    height: 80%; 
+    width: 80%;
+    margin: auto;
+    text-align: center;
+    font-size: 1.5em;
+    letter-spacing: 0.15em;
+    padding: 1em;
+    padding-top: 0;
+    background: #2b6163;
+    opacity: 80%;
+    color: #eef;
   }
 </style>
