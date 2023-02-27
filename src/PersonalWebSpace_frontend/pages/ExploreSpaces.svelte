@@ -1,15 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
+  
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
+  import UserSpaces from "../components/UserSpaces.svelte";
 
-  import { formatUserSpaces, initiateCollapsibles } from "../helpers/space_helpers.js";
   import spinner from "../assets/loading.gif";
 
   const numberOfRandomSpacesToLoad = 3;
   let loading = true;
+  let loadedRandomSpaces = [];
 
   const loadUserSpaces = async () => {
     let randomSpaces = [];
@@ -21,10 +22,8 @@
         randomSpacesIds.push(spaceNFTResponse.Ok.id);
       };
     };
+    loadedRandomSpaces = randomSpaces;
     loading = false;
-    const randomSpacesString = formatUserSpaces(randomSpaces);
-    document.getElementById("randomSpaces").innerHTML = randomSpacesString;
-    initiateCollapsibles();
   };
 
   onMount(loadUserSpaces);
@@ -39,8 +38,10 @@
     <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
   {:else}
     <p id='spacesSubtext'>These are a few Spaces that OIM Users own:</p>
+    <div id='randomSpaces' class="space-y-4">
+      <UserSpaces spaces={loadedRandomSpaces} />
+    </div>
   {/if}
-  <div id='randomSpaces' class="space-y-4"></div>
 </section>
 
 <div class='clearfix'></div>

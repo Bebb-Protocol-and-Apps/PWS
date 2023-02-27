@@ -146,7 +146,8 @@
         };
         loadingInProgress = false;
         
-        /* const dummyTestEntity1 = {
+        /* // TODO: for local testing, fill with dummy data
+        const dummyTestEntity1 = {
                 internalId: "internalEntityId1",
                 creationTimestamp: 11111,
                 creator: spaceNft.owner,
@@ -202,7 +203,6 @@
                 entitySpecificFields: null,
                 listOfEntitySpecificFieldKeys: null,
             };
-            // TODO: for testing, fill with dummy data
             spaceNeighborsResponse = [dummyTestEntity1, dummyTestEntity2, dummyTestEntity3, dummyTestEntity4]; */
         
         neighborEntities = spaceNeighborsResponse;

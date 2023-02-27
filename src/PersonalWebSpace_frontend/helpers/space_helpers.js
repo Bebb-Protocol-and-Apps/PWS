@@ -1,6 +1,5 @@
 import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
 
-// TODO: find better way to achieve this
 export const formatUserSpaces = (userSpaces) => {
   // transform userSpaces list to string holding HTML ready to be displayed  
   var userSpacesString = ``;

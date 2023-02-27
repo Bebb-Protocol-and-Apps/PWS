@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { store } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
+  import UserSpaces from "../components/UserSpaces.svelte";
 
-  import { formatUserSpaces, initiateCollapsibles } from "../helpers/space_helpers.js";
+  let hasLoadedSpaces = false;
+  let loadedUserSpaces = [];
 
   const createNewUserSpace = async (element) => {
     element.setAttribute("disabled", true);
@@ -33,9 +33,9 @@
       document.getElementById("spacesSubtext").innerText = numberOfSpacesUserOwns === 1 
         ? `Big success, you own ${numberOfSpacesUserOwns} space! Let's take a look:`
         : `Big success, you own ${numberOfSpacesUserOwns} spaces! Let's take a look:`;
-      const userSpacesString = formatUserSpaces(userSpaces);
-      document.getElementById("userSpaces").innerHTML = userSpacesString;
-      initiateCollapsibles();
+
+      loadedUserSpaces = userSpaces;
+      hasLoadedSpaces = true;
     }
   };
 </script>
@@ -76,8 +76,11 @@
     <p id='spacesSubtext'>Log in to see which Spaces you own.</p>
   {:else}
     <p id='spacesSubtext'>Let's see which Spaces you own...</p>
-    <div id='userSpaces' class="space-y-4"></div>
-    <p hidden>{loadUserSpaces()}</p>
+    {#if !hasLoadedSpaces}
+      <p hidden>{loadUserSpaces()}</p>
+    {:else}
+      <UserSpaces spaces={loadedUserSpaces} />
+    {/if}
   {/if}
 </section>
 
