@@ -13,13 +13,17 @@
   let loadedRandomSpaces = [];
 
   const loadUserSpaces = async () => {
+    let requestPromises = [];
+    for (var i = 0; i < numberOfRandomSpacesToLoad; i++) {
+      requestPromises.push(PersonalWebSpace_backend.getRandomSpace()); // Send requests in parallel and then await all to speed up
+    };
+    const spaceNFTResponses = await Promise.all(requestPromises);
     let randomSpaces = [];
     let randomSpacesIds = []; // Don't show the same Space multiple times
-    for (var i = 0; i < numberOfRandomSpacesToLoad; i++) {
-      const spaceNFTResponse = await PersonalWebSpace_backend.getRandomSpace(); // TODO: probably send requests in parallel and then await all to speed up
-      if (!spaceNFTResponse.Err && !randomSpacesIds.includes(spaceNFTResponse.Ok.id)) {
-        randomSpaces.push(spaceNFTResponse.Ok);
-        randomSpacesIds.push(spaceNFTResponse.Ok.id);
+    for (var j = 0; j < spaceNFTResponses.length; j++) {
+      if (!spaceNFTResponses[j].Err && !randomSpacesIds.includes(spaceNFTResponses[j].Ok.id)) {
+        randomSpaces.push(spaceNFTResponses[j].Ok);
+        randomSpacesIds.push(spaceNFTResponses[j].Ok.id);
       };
     };
     loadedRandomSpaces = randomSpaces;
