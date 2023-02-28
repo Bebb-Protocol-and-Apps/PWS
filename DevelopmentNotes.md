@@ -8,3 +8,9 @@ Example how to inject Svelte component into HTML document:
         });
         document.body.prepend(div);
       }, 1000);
+
+Removed dependencies (2023-02-28):
+    "lit-html": "^2.6.1",
+    "html-webpack-plugin": "5.5.0",
+    "stream-browserify": "3.0.0",
+    "terser-webpack-plugin": "^5.3.6",
