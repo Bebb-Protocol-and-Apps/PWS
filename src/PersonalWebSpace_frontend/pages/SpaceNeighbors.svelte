@@ -6,6 +6,8 @@
 
     import { store } from "../store";
 
+    import { initiateCollapsibles } from "../helpers/space_helpers.js";
+
     import spinner from "../assets/loading.gif";
 
     export let spaceNft;
@@ -138,68 +140,8 @@
             neighborsLoadingError = true;
         };
         loadingInProgress = false;
-        
-        /* // TODO: for local testing, fill with dummy data
-        const dummyTestEntity1 = {
-                internalId: "internalEntityId1",
-                creationTimestamp: 11111,
-                creator: spaceNft.owner,
-                owner: spaceNft.owner,
-                settings: null,
-                entityType: "Webasset",
-                name: null,
-                description: null,
-                keywords: null,
-                externalId: "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/space/0",
-                entitySpecificFields: null,
-                listOfEntitySpecificFieldKeys: null,
-            };
-            const dummyTestEntity2 = {
-                internalId: "internalEntityId2",
-                creationTimestamp: 2222,
-                creator: spaceNft.owner,
-                owner: spaceNft.owner,
-                settings: null,
-                entityType: "Webasset",
-                name: null,
-                description: null,
-                keywords: null,
-                externalId: "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/space/1",
-                entitySpecificFields: null,
-                listOfEntitySpecificFieldKeys: null,
-            };
-            const dummyTestEntity4 = {
-                internalId: "internalEntityId4",
-                creationTimestamp: 44444444444,
-                creator: spaceNft.owner,
-                owner: spaceNft.owner,
-                settings: null,
-                entityType: "Webasset",
-                name: null,
-                description: null,
-                keywords: null,
-                externalId: "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/space/3",
-                entitySpecificFields: null,
-                listOfEntitySpecificFieldKeys: null,
-            };
-            const dummyTestEntity3 = {
-                internalId: "internalEntityId3",
-                creationTimestamp: 3333333,
-                creator: spaceNft.owner,
-                owner: spaceNft.owner,
-                settings: null,
-                entityType: "Webasset",
-                name: null,
-                description: null,
-                keywords: null,
-                externalId: "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/space/2",
-                entitySpecificFields: null,
-                listOfEntitySpecificFieldKeys: null,
-            };
-            spaceNeighborsResponse = [dummyTestEntity1, dummyTestEntity2, dummyTestEntity3, dummyTestEntity4]; */
-        
         neighborEntities = spaceNeighborsResponse;
-        neighborsLoaded = true;   
+        neighborsLoaded = true;
     };
 
     onMount(loadSpaceNeighbors);
@@ -256,7 +198,7 @@
             {/if}
         </div>
     {/if}
-    <div id='spaceNeighbors' class="space-y-4">
+    <div id='spaceNeighbors' class="space-y-4" use:initiateCollapsibles>
         {#each neighborEntities as neighborEntity}
             <ProtocolEntity entity={neighborEntity} />
         {/each}

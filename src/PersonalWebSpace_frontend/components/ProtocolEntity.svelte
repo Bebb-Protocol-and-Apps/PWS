@@ -18,9 +18,14 @@
 </script>
 
 {#if entityHasValidUrl()}
-  <div class="space-neighbor-preview">
+  <div class="space-neighbor-preview space-y-1">
     <iframe src={entity.externalId} title="Entity Preview" width="100%" height="auto"></iframe>
     <button on:click={() => window.open(entity.externalId,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
+    <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
+    <div class="space-details-content">
+      <p>Address: {entity.externalId}</p>
+      <p>Owner: {entity.owner}</p>
+    </div>
   </div>
 {/if}
 
