@@ -10,9 +10,7 @@
     try {
       new URL(url);
     } catch (e) {
-      console.error('in isValidUrl');
       console.error(e);
-      console.error(url);
       return false;
     }
     return true;

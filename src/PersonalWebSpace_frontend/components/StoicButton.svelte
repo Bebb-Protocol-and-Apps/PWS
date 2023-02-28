@@ -10,7 +10,6 @@
     export let toggleModal;
 
     onMount(async () => {
-        console.log("in StoicButton onMount");
         StoicIdentity.load().then(async (identity) => {
             if (identity !== false) {
                 //ID is a already connected wallet!
@@ -20,7 +19,6 @@
     });
 
     async function connect() {
-        console.log("in StoicButton connect");
         loading = "stoic";
         await store.stoicConnect();
         loading = "";

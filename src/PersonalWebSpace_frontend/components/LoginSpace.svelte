@@ -4,7 +4,6 @@
   let openModal = false;
 
   function toggleModal() {
-    console.log("in LoginSpace toggleModal");
     openModal = !openModal;
   }
 

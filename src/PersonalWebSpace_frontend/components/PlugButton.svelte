@@ -9,7 +9,6 @@
   export let toggleModal;
 
   onMount(async () => {
-    console.log("in PlugButton onMount");
     const connected = await window.ic?.plug?.isConnected();
     if (connected) {
       console.log("plug connection detected");
@@ -18,7 +17,6 @@
   });
 
   async function connect() {
-    console.log("in PlugButton connect");
     loading = "plug";
     await store.plugConnect();
     loading = "";
