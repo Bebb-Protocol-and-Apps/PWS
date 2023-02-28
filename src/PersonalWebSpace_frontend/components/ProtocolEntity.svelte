@@ -17,13 +17,6 @@
     }
     return true;
   };
-
-  const inputHandler = function(e) {
-    if (!isValidUrl(e.target.value)) {
-      e.target.value = null;
-      e.target.placeholder = "Please only enter valid URLs";
-    }
-  };
 </script>
 
 {#if entityHasValidUrl()}

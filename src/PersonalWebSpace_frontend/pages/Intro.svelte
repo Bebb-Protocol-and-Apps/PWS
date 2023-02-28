@@ -89,7 +89,7 @@
 <Footer />
 
 <style global>
-/* NOTE: these styles are global and thus affect any element in the app. Thus, ensure that there aren't any conflicts with the class names chosen (i.e. avoid generic names as they might conflict with an A-Frame class, e.g. content which is used in the Inspector)  */
+/* NOTE: these styles are global and affect any element in the app. Thus, ensure that there aren't any conflicts with the class names chosen (i.e. avoid generic names as they might conflict with an A-Frame class, e.g. content which is used in the Inspector)  */
   .App-logo {
     height: 15vmin;
     pointer-events: none;
@@ -139,9 +139,7 @@
   }
 
   .space-details-content {
-    /* padding: 0 18px; */
     display: none;
-    overflow: hidden; 
-    /* background-color: #f1f1f1; */
+    overflow: hidden;
   }
 </style>

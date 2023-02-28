@@ -38,17 +38,5 @@
     justify-content: center;
     align-items: end;
     z-index: 10;
-    /* cursor: pointer;
-    margin-right: 1.5rem;
-    margin-left: 1.5rem;
-    margin-top: 1rem;
-    border-radius: 0.2rem;
-    background-color: #565656;
-    color: #fff;
-    font-weight: 700;
-    padding: 0.5rem 1.4rem;
-    font-size: 1.5rem;
-    z-index: 100;
-    opacity: 95%; */
   }
 </style>

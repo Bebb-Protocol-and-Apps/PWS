@@ -1,4 +1,4 @@
-// External Canister: Bebb Protocol (for integration of neighbor connections)
+// External Canister: Bebb Protocol (aka NewWave) (for integration of neighbor connections)
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // Imports and re-exports candid interface

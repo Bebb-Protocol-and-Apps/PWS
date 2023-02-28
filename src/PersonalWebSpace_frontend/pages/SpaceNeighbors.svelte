@@ -33,9 +33,7 @@
     try {
       new URL(url);
     } catch (e) {
-      console.error('in isValidUrl');
       console.error(e);
-      console.error(url);
       return false;
     }
     return true;
@@ -63,7 +61,6 @@
 
 // Owner submitted form to create a new space neighbor
     const submitAddNeighborForm = async () => {
-        console.log("in submitAddNeighborForm newNeighborUrl", newNeighborUrl);
         neighborCreationInProgress = true;
         if (inputHandler(newNeighborUrl)) {
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
@@ -100,7 +97,6 @@
             try {
                 // @ts-ignore
                 const createEntityAndBridgeResponse = await $store.protocolActor.create_entity_and_bridge(entityInitiationObject, bridgeEntityInitiationObject);
-                console.log("in submitAddNeighborForm createEntityAndBridgeResponse", createEntityAndBridgeResponse);
                 successfullyAddedNeighbor = true;
             } catch(err) {
                 console.log("Create Neighbor err", err);
@@ -133,13 +129,10 @@
     };
 
     const loadSpaceNeighbors = async () => {
-        console.log("in loadSpaceNeighbors");
         const spaceEntityId = extractSpaceEntityId();
-        console.log("in loadSpaceNeighbors spaceEntityId", spaceEntityId);
         let spaceNeighborsResponse = [];
         try {
             spaceNeighborsResponse = await $store.protocolActor.get_bridged_entities_by_entity_id(spaceEntityId, true, false, false);
-            console.log("in loadSpaceNeighbors spaceNeighborsResponse", spaceNeighborsResponse);
         } catch(err) {
             console.log("SpaceNeighbors err", err);
             neighborsLoadingError = true;
@@ -206,7 +199,6 @@
             spaceNeighborsResponse = [dummyTestEntity1, dummyTestEntity2, dummyTestEntity3, dummyTestEntity4]; */
         
         neighborEntities = spaceNeighborsResponse;
-        console.log("in loadSpaceNeighbors neighborEntities", neighborEntities);
         neighborsLoaded = true;   
     };
 

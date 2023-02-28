@@ -9,12 +9,8 @@
   import { store } from "../store";
 
   import Login from "../components/LoginSpace.svelte";
-  import LoginModal from "../components/LoginModal.svelte";
-  import Button from "../components/Button.svelte";
   import NotFound from "./NotFound.svelte";
   import SpaceNeighbors from "./SpaceNeighbors.svelte";
-
-  import spinner from "../assets/loading.gif"; // TODO: load other assets (e.g. html pages) similarly (see https://vitejs.dev/guide/assets.html: Referenced assets are included as part of the build assets graph, will get hashed file names, and can be processed by plugins for optimization)
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
@@ -64,15 +60,10 @@
   };
 
 // User clicked on Edit Space
-  //TODO: Further customize Inspector
-    // Button to export entity to HTML looks like this: <a href="#" title="Copy entity HTML to clipboard" data-action="copy-entity-to-clipboard" class="button fa fa-clipboard"></a>
-      // Change href to not do anything/not change route
   const saveButtonOnClick = async () => {
     // Get updated scene and write it to backend
     // Get edited scene HTML as String
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
-    const updatedSceneHtmlLast = getEntityClipboardRepresentation(AFRAME.scenes[AFRAME.scenes.length-1]);
-    const updatedSceneHtmlAScene = getEntityClipboardRepresentation(document.querySelector('a-scene'));
     // Close Inspector and hide button Inspect Scene
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
@@ -194,17 +185,6 @@
       spaceString = string.replace(/\\"/g, '"');
       spaceLoaded = true;
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
-
-      /* Example how to inject Svelte component into HTML document
-      setTimeout(() => {
-        console.log("Login button - Delayed for 1 second.");
-        var div = document.createElement('DIV');
-        div.setAttribute("style","position: absolute;top: 0;right: 0;width: 100%;height: 2em;display: flex;justify-content: end;align-items: end;z-index: 10;")
-        const embed = new Login({
-          target: div,
-        });
-        document.body.prepend(div);
-      }, 1000); */
     };
   };
 
