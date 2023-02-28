@@ -14,20 +14,22 @@
   let creationTime;
 
   const extractSpaceMetadata = () => {
-    for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
-      let fieldKey = space.metadata[0].key_val_data[j].key;
-      if (fieldKey === "spaceName") {
-        spaceName = space.metadata[0].key_val_data[j].val.TextContent;
-      } else if (fieldKey === "spaceDescription") {
-        spaceDescription = space.metadata[0].key_val_data[j].val.TextContent;
-      } else if (fieldKey === "ownerName") {
-        ownerName = space.metadata[0].key_val_data[j].val.TextContent;      
-      } else if (fieldKey === "ownerContactInfo") {
-        ownerContactInfo = space.metadata[0].key_val_data[j].val.TextContent;      
-      } else if (fieldKey === "creationTime") {
-        creationTime = new Date(Number(space.metadata[0].key_val_data[j].val.Nat64Content) / 1000000); 
-      }
-    };    
+    if (space.metadata) {
+      for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
+        let fieldKey = space.metadata[0].key_val_data[j].key;
+        if (fieldKey === "spaceName") {
+          spaceName = space.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "spaceDescription") {
+          spaceDescription = space.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "ownerName") {
+          ownerName = space.metadata[0].key_val_data[j].val.TextContent;      
+        } else if (fieldKey === "ownerContactInfo") {
+          ownerContactInfo = space.metadata[0].key_val_data[j].val.TextContent;      
+        } else if (fieldKey === "creationTime") {
+          creationTime = new Date(Number(space.metadata[0].key_val_data[j].val.Nat64Content) / 1000000); 
+        }
+      };
+    };
   };
 
   onMount(extractSpaceMetadata);
