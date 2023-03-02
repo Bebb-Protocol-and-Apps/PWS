@@ -45,18 +45,20 @@
 
 // Extract metadata fields from Space NFT
   const extractSpaceMetadata = (targetObject) => {
-    for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
-      let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
-      if (fieldKey === "spaceName") {
-        targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-      } else if (fieldKey === "spaceDescription") {
-        targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-      } else if (fieldKey === "ownerName") {
-        targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-      } else if (fieldKey === "ownerContactInfo") {
-        targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+    if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
+      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+        if (fieldKey === "spaceName") {
+          targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "spaceDescription") {
+          targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "ownerName") {
+          targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        } else if (fieldKey === "ownerContactInfo") {
+          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        };
       };
-    };    
+    };
   };
 
 // User clicked on Edit Space

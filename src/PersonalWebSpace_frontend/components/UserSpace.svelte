@@ -14,7 +14,7 @@
   let creationTime;
 
   const extractSpaceMetadata = () => {
-    if (space.metadata) {
+    if (space && space.metadata && space.metadata.length > 0) {
       for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
         let fieldKey = space.metadata[0].key_val_data[j].key;
         if (fieldKey === "spaceName") {

@@ -8,6 +8,8 @@
 
     import { initiateCollapsibles } from "../helpers/space_helpers.js";
 
+    import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
+
     import spinner from "../assets/loading.gif";
 
     export let spaceNft;
@@ -20,7 +22,7 @@
     let addNeighborButtonActive = true;
     let newNeighborFormActive = false;
     let newNeighborUrl : string = "";
-    let neighborUrlIsInvalid = false;
+    let neighborUrlIsValid = false;
     let neighborCreationInProgress = false;
     let successfullyAddedNeighbor = false;
     let errorAddingNeighbor = false;
@@ -41,12 +43,12 @@
     return true;
   };
 
-  const inputHandler = function(url) {
+  const neighborUrlInputHandler = function(url) {
     if (!isValidUrl(url)) {
-        neighborUrlIsInvalid = true;
+        neighborUrlIsValid = false;
         return false;
     };
-    neighborUrlIsInvalid = false;
+    neighborUrlIsValid = true;
     return true;
   };
 
@@ -64,7 +66,8 @@
 // Owner submitted form to create a new space neighbor
     const submitAddNeighborForm = async () => {
         neighborCreationInProgress = true;
-        if (inputHandler(newNeighborUrl)) {
+        const spaceEntityId = extractSpaceEntityId();
+        if (neighborUrlInputHandler(newNeighborUrl) && spaceEntityId) {
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
             const externalId : [string] = [newNeighborUrl];
             const entityInitiationObject = {
@@ -74,7 +77,7 @@
                 _settings: [],
                 _entityType: { 'Webasset' : null },
                 _name: [],
-                _description: ["Created as a Space Neighbor in the Open Internet Metaverse at https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/"] as [string],
+                _description: [`Created as a Space Neighbor in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}.ic0.app/`] as [string],
                 _keywords: [["Space Neighbor", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
                 _externalId: externalId,
                 _entitySpecificFields: [],
@@ -87,12 +90,12 @@
                 _settings: [],
                 _entityType: { 'BridgeEntity' : null },
                 _name: [],
-                _description: ["Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/"] as [string],
+                _description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}.ic0.app/`] as [string],
                 _keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
                 _externalId: [],
                 _entitySpecificFields: [],
                 _bridgeType: { 'OwnerCreated' : null },
-                _fromEntityId: extractSpaceEntityId(),
+                _fromEntityId: spaceEntityId,
                 _toEntityId: "",
                 _state: [{ 'Confirmed' : null }] as [BridgeState],
             };
@@ -107,7 +110,7 @@
 
             newNeighborFormActive = false;
             newNeighborUrl = "";
-            neighborUrlIsInvalid = false;
+            neighborUrlIsValid = false;
 
             setTimeout(() => {
                 addNeighborButtonActive = true;
@@ -122,10 +125,12 @@
 
 // Extract Space's Entity Id in Bebb Protocol from Space NFT
     const extractSpaceEntityId = () => {
-        for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
-            let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
-            if (fieldKey === "protocolEntityId") {
-                return spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
+            for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+                let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+                if (fieldKey === "protocolEntityId") {
+                    return spaceNft.metadata[0].key_val_data[j].val.TextContent;
+                };
             };
         };
     };
@@ -141,7 +146,7 @@
         };
         loadingInProgress = false;
         neighborEntities = spaceNeighborsResponse;
-        neighborsLoaded = true;
+        neighborsLoaded = !neighborsLoadingError;
     };
 
     onMount(loadSpaceNeighbors);
@@ -175,7 +180,7 @@
                         class="newNeighborUrlInput text-black font-bold"
                     />
                     {#if newNeighborUrl !== ""}
-                        {#if inputHandler(newNeighborUrl)}
+                        {#if neighborUrlInputHandler(newNeighborUrl)}
                             <iframe src={newNeighborUrl} title="Preview of the new Neighbor" width="100%" height="auto" class="py-2"></iframe>
                             {#if neighborCreationInProgress}
                                 <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
@@ -187,7 +192,7 @@
                         {/if}
                     {/if}
                 </form>
-                {#if neighborUrlIsInvalid}
+                {#if !neighborUrlIsValid}
                     <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid URL for the new Neighbor.</h3>
                 {/if}
             {/if}
