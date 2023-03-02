@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { afterUpdate } from "svelte";
 
   import UserSpace from "./UserSpace.svelte";
 
@@ -7,7 +7,7 @@
   
   export let spaces
 
-  onMount(initiateCollapsibles);
+  afterUpdate(initiateCollapsibles);
 </script>
 
 <div id='userSpaces' class="space-y-4">
