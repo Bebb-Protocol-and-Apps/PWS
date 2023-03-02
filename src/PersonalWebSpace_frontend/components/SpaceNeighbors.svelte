@@ -2,7 +2,7 @@
     import type { Principal } from "@dfinity/principal";
     import type { BridgeState } from "src/integrations/BebbProtocol/newwave.did";
     import { onMount } from "svelte";
-    import ProtocolEntity from "../components/ProtocolEntity.svelte";
+    import ProtocolEntity from "./ProtocolEntity.svelte";
 
     import { store } from "../store";
 

@@ -10,7 +10,7 @@
 
   import Login from "../components/LoginSpace.svelte";
   import NotFound from "./NotFound.svelte";
-  import SpaceNeighbors from "./SpaceNeighbors.svelte";
+  import SpaceNeighbors from "../components/SpaceNeighbors.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
