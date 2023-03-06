@@ -1,0 +1,139 @@
+type StreamingStrategy = variant {
+                           Callback:
+                            record {
+                              callback: StreamingCallback;
+                              token: StreamingCallbackToken;
+                            };};
+type StreamingCallbackToken = 
+ record {
+   content_encoding: text;
+   index: nat;
+   key: text;
+ };
+type StreamingCallbackResponse = 
+ record {
+   body: blob;
+   token: opt StreamingCallbackToken;
+ };
+type StreamingCallback = func (StreamingCallbackToken) ->
+                          (StreamingCallbackResponse) query;
+type Response = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+   streaming_strategy: opt StreamingStrategy;
+   upgrade: bool;
+ };
+type Request = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+type EntityType = 
+ variant {
+   BridgeEntity;
+   Location;
+   Person;
+   Webasset;
+ };
+type EntitySettings = record {};
+type EntityInitiationObject = 
+ record {
+   _creator: opt principal;
+   _description: opt text;
+   _entitySpecificFields: opt text;
+   _entityType: EntityType;
+   _externalId: opt text;
+   _internalId: opt text;
+   _keywords: opt vec text;
+   _name: opt text;
+   _owner: opt principal;
+   _settings: opt EntitySettings;
+ };
+type Entity = 
+ record {
+   creationTimestamp: nat64;
+   creator: principal;
+   description: opt text;
+   entitySpecificFields: opt text;
+   entityType: EntityType;
+   externalId: opt text;
+   internalId: text;
+   keywords: opt vec text;
+   listOfEntitySpecificFieldKeys: vec text;
+   name: opt text;
+   owner: principal;
+   settings: EntitySettings;
+ };
+type BridgeType = variant {OwnerCreated;};
+type BridgeState = 
+ variant {
+   Confirmed;
+   Pending;
+   Rejected;
+ };
+type BridgeEntityInitiationObject = 
+ record {
+   _bridgeType: BridgeType;
+   _creator: opt principal;
+   _description: opt text;
+   _entitySpecificFields: opt text;
+   _entityType: EntityType;
+   _externalId: opt text;
+   _fromEntityId: text;
+   _internalId: opt text;
+   _keywords: opt vec text;
+   _name: opt text;
+   _owner: opt principal;
+   _settings: opt EntitySettings;
+   _state: opt BridgeState;
+   _toEntityId: text;
+ };
+type BridgeEntity = 
+ record {
+   bridgeType: BridgeType;
+   creationTimestamp: nat64;
+   creator: principal;
+   description: opt text;
+   entitySpecificFields: opt text;
+   entityType: EntityType;
+   externalId: opt text;
+   fromEntityId: text;
+   internalId: text;
+   keywords: opt vec text;
+   listOfEntitySpecificFieldKeys: vec text;
+   name: opt text;
+   owner: principal;
+   settings: EntitySettings;
+   state: BridgeState;
+   toEntityId: text;
+ };
+service : {
+  createBridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
+  createEntity: (EntityInitiationObject) -> (Entity);
+  createEntityAndBridge: (EntityInitiationObject,
+   BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
+  create_bridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
+  create_entity: (EntityInitiationObject) -> (Entity);
+  create_entity_and_bridge: (EntityInitiationObject,
+   BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
+  get_bridge: (text) -> (opt BridgeEntity) query;
+  get_bridge_ids_by_entity_id: (text, bool, bool, bool) -> (vec text) query;
+  get_bridged_entities_by_entity_id: (text, bool, bool, bool) ->
+   (vec Entity) query;
+  get_bridges_by_entity_id: (text, bool, bool, bool) ->
+   (vec BridgeEntity) query;
+  get_entity: (text) -> (opt Entity) query;
+  get_entity_and_bridge_ids: (text, bool, bool, bool) -> (opt Entity,
+   vec text) query;
+  http_request: (Request) -> (Response) query;
+  http_request_update: (Request) -> (Response);
+}

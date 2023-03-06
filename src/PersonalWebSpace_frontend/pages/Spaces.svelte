@@ -1,9 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-  import { store } from "../store";
-  import Login from "../components/Login.svelte";
-  import Button from "../components/Button.svelte";
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   const saveButtonOnClick = async () => {
@@ -13,7 +9,6 @@
     //console.log('AFRAME.INSPECTOR.history.updates', AFRAME.INSPECTOR.history.updates);
     //console.log('AFRAME.INSPECTOR.scene.toJSON', AFRAME.INSPECTOR.scene.toJSON());
     //console.log('AFRAME.INSPECTOR.scene.object3D', AFRAME.INSPECTOR.scene.object3D);
-    //console.log('getEntityClipboardRepresentation(document.querySelector(a-scene))', getEntityClipboardRepresentation(document.querySelector('a-scene')));
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]);
     console.log('updatedSceneHtml', updatedSceneHtml);
     const respUpper = await fetch("spacesUpperHtml.html");
@@ -21,7 +16,6 @@
     const respLower = await fetch("spacesLowerHtml.html");
     const lowerHTML = await respLower.text();
     const newHTML = upperHTML + updatedSceneHtml + lowerHTML;
-    //document.body.innerHTML = updatedSceneHtml;
     // Close Inspector and hide button Inspect Scene
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
@@ -88,15 +82,11 @@
       console.log('in loginButtonOnClick stoicIdentity not false');
     } */
     const identity = await StoicIdentity.connect();
-    console.log('in loginButtonOnClick identity');
-    console.log(identity);
     const mint_actor = createActor(canisterId, {
       agentOptions: {
         identity,
       },
     });
-    console.log('in loginButtonOnClick mint_actor');
-    console.log(mint_actor);
   };
 
   const loadLoginButton = () => {

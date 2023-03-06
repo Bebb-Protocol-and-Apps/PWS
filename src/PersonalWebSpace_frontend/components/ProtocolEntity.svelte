@@ -1,0 +1,41 @@
+<script>
+  export let entity
+
+// Helper functions to check whether the Entity has got a valid URL that can be displayed
+  const entityHasValidUrl = () => {
+    return isValidUrl(entity.externalId);
+  };
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+    return true;
+  };
+</script>
+
+{#if entityHasValidUrl()}
+  <div class="space-neighbor-preview space-y-1">
+    <iframe src={entity.externalId} title="Entity Preview" width="100%" height="auto"></iframe>
+    <button on:click={() => window.open(entity.externalId,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
+    <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
+    <div class="space-details-content">
+      <p>Address: {entity.externalId}</p>
+      <p>Owner: {entity.owner}</p>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .space-neighbor-preview {
+    border: 1px solid white;
+    border-radius: 10px;
+    margin-bottom: 2vmin;
+    padding: 2vmin;
+    width: 100%;
+    height: auto;
+  }
+</style>

@@ -521,17 +521,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
 // HTTP interface
   public query func http_request(request : HTTP.Request) : async HTTP.Response {
-    //let initialHtml = "<!DOCTYPE html> <html> <head> <title>Personal NFT Gallery</title> <meta charset='UTF-8'> <meta name='viewport' content='width=device-width, initial-scale=1'> <link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'> <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'> <style> div.gallery { border: 1px solid #ccc; } div.gallery:hover { border: 1px solid #777; } div.gallery img { width: 100%; height: auto; } div.desc { padding: 7px; text-align: center; } h3 { padding: 7px; text-align: center; } * { box-sizing: border-box; } .responsive { padding: 0 6px; float: left; width: 33.333333%; } @media only screen and (max-width: 700px) { .responsive { width: 49.99999%; margin: 6px 0; } } @media only screen and (max-width: 500px) { .responsive { width: 100%; } } .clearfix:after { content: ''; display: table; clear: both; } /* Style the top navigation bar */ .topnav { overflow: hidden; background-color: #333; } /* Style the topnav links */ .topnav a { float: left; display: block; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; } /* Change color on hover */ .topnav a:hover { background-color: #ddd; color: black; } .collapsible { padding: 7px; text-align: center; width: 100%; border: none; outline: none; cursor: pointer; } .active, .collapsible:hover { background-color: #555; } .content { /* padding: 0 18px; */ display: none; overflow: hidden; /* background-color: #f1f1f1; */ } </style> </head> <body> <div class='topnav'> <a href='#'>Personal NFT Gallery</a> <a href='#gallery'>Gallery</a> <a href='#about'>About</a> </div> <h3 id='gallery'><b>Welcome to My Personal NFT Gallery</b></h3> <div class='responsive'> <div class='gallery'> <a target='_blank' href='https://www.w3schools.com/css/img_5terre.jpg'> <img src='https://www.w3schools.com/css/img_5terre.jpg' alt='Cool NFT' width='600' height='400'> </a> <button type='button' class='collapsible'>See Details</button> <div class='content'> <p>Lorem ipsum .</p> </div> </div> </div> <div class='responsive'> <div class='gallery'> <a target='_blank' href='https://www.w3schools.com/css/img_forest.jpg'> <img src='https://www.w3schools.com/css/img_forest.jpg' alt='Cool NFT' width='600' height='400'> </a> <button type='button' class='collapsible'>See Details</button> <div class='content'> <p>Lorem ipsum .</p> </div> </div> </div> <div class='responsive'> <div class='gallery'> <a target='_blank' href='https://www.w3schools.com/css/img_lights.jpg'> <img src='https://www.w3schools.com/css/img_lights.jpg' alt='Cool NFT' width='600' height='400'> </a> <button type='button' class='collapsible'>See Details</button> <div class='content'> <p>Lorem ipsum .</p> </div> </div> </div> <div class='responsive'> <div class='gallery'> <a target='_blank' href='https://www.w3schools.com/css/img_mountains.jpg'> <img src='https://www.w3schools.com/css/img_mountains.jpg' alt='Mountains' width='600' height='400'> </a> <button type='button' class='collapsible'>See Details</button> <div class='content'> <p>Lorem ipsum .</p> </div> </div> </div> <div class='clearfix'></div> <footer class='w3-light-grey w3-padding-64 w3-center' id='about'> <h2>About</h2> <p>These are my favorite NFTs. Please enjoy!</p> <br> <p>Powered by <a href='https://kmj74-syaaa-aaaai-acnza-cai.ic0.app/' target='_blank' class='w3-hover-text-green'>Personal NFT Gallery</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' class='w3-hover-text-green'>Internet Computer</a></p> </footer> <script> var coll = document.getElementsByClassName('collapsible'); var i; for (i = 0; i < coll.length; i++) { coll[i].addEventListener('click', function() { this.classList.toggle('active'); var content = this.nextElementSibling; if (content.style.display === 'block') { content.style.display = 'none'; } else { content.style.display = 'block'; } }); } </script> </body> </html> ";
-    //let body = Text.encodeUtf8("<!DOCTYPE html> <html> <body> <h1>My First Heading</h1> <p>My first paragraph.</p> </body> </html>");
-    /* let body = Text.encodeUtf8(initialHtml);
-    let response = {
-      body = body;
-      headers = [("Content-Type", "text/html"), ("Content-Length", Nat.toText(body.size()))];
-      status_code = 200 : Nat16;
-      streaming_strategy = null;
-      upgrade = false;
-    };
-    return(response); */
     //Debug.print(debug_show("http_request test"));
     //Debug.print(debug_show(request));
     if (Text.contains(request.url, #text("tokenid"))) { // endpoint for Stoic Wallet/Entrepot
@@ -587,16 +576,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           return(response);
         };
       };
-    } /* else if (Text.contains(request.url, #text("galleryplaceholderimage"))) {
-      let response = {
-        body = placeholderImageBlob;
-        headers = [("Content-Type", "image/png"), ("Content-Length", Nat.toText(placeholderImageBlob.size()))];
-        status_code = 200 : Nat16;
-        streaming_strategy = null;
-        upgrade = false;
-      };
-      return(response);
-    } */ else {
+    } else {
       return {
         upgrade = false; // ← If this is set to true, the request will be sent to http_request_update()
         status_code = 200;
@@ -606,6 +586,5 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     };
   };
-
 
 };

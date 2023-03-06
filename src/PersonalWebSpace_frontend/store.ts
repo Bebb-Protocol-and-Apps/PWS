@@ -9,6 +9,13 @@ import {
   idlFactory as backendIdlFactory,
 } from "../declarations/PersonalWebSpace_backend";
 
+import {
+  BebbProtocol,
+  createActor as createProtocolCanisterActor,
+  canisterId as protocolCanisterId,
+  idlFactory as protocolIdlFactory,
+} from "../integrations/BebbProtocol";
+
 //__________Local vs Mainnet Development____________
 /* export const HOST =
   backendCanisterId === "vee64-zyaaa-aaaai-acpta-cai"
@@ -23,6 +30,7 @@ export const HOST =
 type State = {
   isAuthed: "plug" | "stoic" | null;
   backendActor: typeof PersonalWebSpace_backend;
+  protocolActor: typeof BebbProtocol;
   principal: Principal;
   accountId: string;
   error: string;
@@ -32,6 +40,9 @@ type State = {
 const defaultState: State = {
   isAuthed: null,
   backendActor: createBackendCanisterActor(backendCanisterId, {
+    agentOptions: { host: HOST },
+  }),
+  protocolActor: createProtocolCanisterActor(protocolCanisterId, {
     agentOptions: { host: HOST },
   }),
   principal: null,
@@ -70,9 +81,19 @@ export const createStore = ({
     });
 
     if (!backendActor) {
-      console.warn("couldn't create actors");
+      console.warn("couldn't create backend actor");
       return;
-    }
+    };
+
+    const protocolActor = createProtocolCanisterActor(protocolCanisterId, {
+      agentOptions: {
+        identity,
+        host: HOST,
+      },
+    });
+    if (!protocolActor) {
+      console.warn("couldn't create protocol actor");
+    };
 
     // the stoic agent provides an `accounts()` method that returns
     // accounts associated with the principal
@@ -81,6 +102,7 @@ export const createStore = ({
     update((state) => ({
       ...state,
       backendActor,
+      protocolActor,
       principal: identity.getPrincipal(),
       accountId: accounts[0].address, // we take the default account associated with the identity
       isAuthed: "stoic",
@@ -151,15 +173,27 @@ export const createStore = ({
     })) as typeof PersonalWebSpace_backend;
 
     if (!backendActor) {
-      console.warn("couldn't create actors");
+      console.warn("couldn't create backend actor");
       return;
-    }
+    };
+
+    let protocolActor = defaultState.protocolActor;
+    try {
+      protocolActor = (await window.ic?.plug.createActor({
+        canisterId: protocolCanisterId,
+        interfaceFactory: protocolIdlFactory,
+      })) as unknown as typeof BebbProtocol;
+    } catch (err) {
+      console.warn("couldn't create protocol actor");
+      console.warn(err);
+    };
 
     const principal = await window.ic.plug.agent.getPrincipal();
 
     update((state) => ({
       ...state,
       backendActor,
+      protocolActor,
       principal,
       accountId: window.ic.plug.sessionManager.sessionData.accountId,
       isAuthed: "plug",
@@ -193,7 +227,7 @@ export const createStore = ({
 };
 
 export const store = createStore({
-  whitelist: [backendCanisterId],
+  whitelist: [backendCanisterId, protocolCanisterId],
   host: HOST,
 });
 
