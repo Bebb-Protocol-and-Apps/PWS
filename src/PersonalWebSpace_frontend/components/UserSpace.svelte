@@ -16,7 +16,10 @@
 
 // Check whether the current space viewer is its owner
   const isViewerSpaceOwner = () => {
-    return $store.principal.toText() === space.owner.toText();    
+    if ($store.principal && space.owner) {
+      return $store.principal.toText() === space.owner.toText();
+    };
+    return false;   
   };
 
 // Extract Space's Entity Id in Bebb Protocol from Space NFT
