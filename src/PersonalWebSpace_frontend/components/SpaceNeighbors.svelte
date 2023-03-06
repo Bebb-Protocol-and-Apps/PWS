@@ -3,6 +3,7 @@
     import type { BridgeState } from "src/integrations/BebbProtocol/newwave.did";
     import { onMount } from "svelte";
     import ProtocolEntity from "./ProtocolEntity.svelte";
+    import UserSpaces from "./UserSpaces.svelte";
 
     import { store } from "../store";
 
@@ -123,6 +124,25 @@
         neighborCreationInProgress = false;
     };
 
+// A visiting user (not the owner) wants to link one of their spaces to this space
+    let showVisitorSpaces = false;
+    let loadingVisitorSpaces = false;
+    let numberOfSpacesVisitorOwns = 0;
+    let loadedVisitorSpaces = [];
+
+    const loadVisitorSpaces = async () => {
+        const visitorSpaces = await $store.backendActor.getCallerSpaces();
+        numberOfSpacesVisitorOwns = visitorSpaces.length;
+        loadedVisitorSpaces = visitorSpaces;
+        loadingVisitorSpaces = false;
+    };
+
+    const makeNeighborButtonOnClick = () => {
+        showVisitorSpaces = true;
+        loadingVisitorSpaces = true;
+        loadVisitorSpaces();
+    };
+
 // Extract Space's Entity Id in Bebb Protocol from Space NFT
     const extractSpaceEntityId = () => {
         if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
@@ -202,6 +222,28 @@
                 <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Unlucky, this didn't work. Please give it another shot.</h3>
             {/if}
         </div>
+    {:else if $store.isAuthed}
+        <div id='linkToThisSpaceContainer' class="space-y-3 py-4">
+            <button class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold" on:click={() => makeNeighborButtonOnClick()}>
+                Make This Space My Neighbor
+            </button>
+            {#if showVisitorSpaces}
+                {#if loadingVisitorSpaces}
+                    <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Loading Your Spaces...</h3>
+                {:else}
+                    {#if numberOfSpacesVisitorOwns > 0}
+                        <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">These are Your Spaces. Please select which one to link to this Space:</h3>
+                        <UserSpaces spaces={loadedVisitorSpaces} entityIdToLinkTo={extractSpaceEntityId()} />
+                    {:else}
+                        <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">You currently don't own any Spaces. Please create Your first Open Internet Metaverse Space:</h3>
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <p class="linkToOim">
+                            <a href="#create" target="_blank">Create My First Space</a>
+                        </p>
+                    {/if}
+                {/if}
+            {/if}
+        </div>
     {/if}
     <div id='spaceNeighbors' class="space-y-4" use:initiateCollapsibles>
         {#each neighborEntities as neighborEntity}
@@ -214,4 +256,10 @@
     .newNeighborUrlInput {
         width: 100%;
     }
+    p.linkToOim {
+      cursor: pointer;
+      width: max-content;
+      margin: 1rem auto;
+    }
 </style>
+    
