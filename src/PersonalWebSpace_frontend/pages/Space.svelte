@@ -65,11 +65,14 @@
   const saveButtonOnClick = async () => {
     // Get updated scene and write it to backend
     // Get edited scene HTML as String
+    // @ts-ignore
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
     // Close Inspector and hide button Inspect Scene
+    // @ts-ignore
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
     var toggleElement = elements.item(0);
+    // @ts-ignore
     toggleElement.hidden = true; 
     // Assemble new scene HTML to be stored
     const respUpper = await fetch("spacesUpperHtml.html");
@@ -98,8 +101,10 @@
     if(saveButton) {
       var elements = document.body.getElementsByClassName("toggle-edit");    
       var toggleElement = elements.item(0);
+      // @ts-ignore
       toggleElement.hidden = false;
       var clone = saveButton.cloneNode(true);
+      // @ts-ignore
       clone.onclick = saveButtonOnClick;
       saveButton.replaceWith(clone);         
     } else {
@@ -127,12 +132,48 @@
   const captureUpdateEvents = () => {
     // Changes made in the Inspector's scene view are not automatically persisted
     // Capture events which update an entity and enable that all changes will be exported to persist them
+    // @ts-ignore
     if (AFRAME.INSPECTOR) {
+      // @ts-ignore
       AFRAME.INSPECTOR.on('entityupdate', function(event){enableExportOfAllChangesMade(event)}, true);
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
         captureUpdateEvents();
+      }, 1000);
+    };
+  };
+
+  const customizeCopyEntityHtmlToClipboardButton = () => {
+    // By default, the Copy entity HTML to clipboard button loads the Intro page when clicked
+    // Suppress this behavior
+    // Button to export entity to HTML looks like this: <a href="#" title="Copy entity HTML to clipboard" data-action="copy-entity-to-clipboard" class="button fa fa-clipboard"></a> 
+    // and is part of the Inspector's Right Panel
+    // it changes depending on which element is selected, thus we have to observe these changes and suppress the behavior each time the button is loaded
+    const rightPanelElement = document.getElementById("rightPanel");
+    if(rightPanelElement) {
+      const observer = new MutationObserver((mutationList) => {
+        for (const mutation of mutationList) {
+          if (mutation.type === "childList") {
+            var elements = document.body.getElementsByClassName("button fa fa-clipboard"); // There could be several Buttons matched
+            for (const copyEntityHtmlToClipboardButton of elements) {
+              // @ts-ignore
+              copyEntityHtmlToClipboardButton.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+            };
+          };
+        };        
+      });
+      const config = {
+        characterData: true,
+        attributes: false,
+        childList: true,
+        subtree: true,
+      };
+      observer.observe(rightPanelElement, config);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        customizeCopyEntityHtmlToClipboardButton();
       }, 1000);
     };
   };
@@ -143,10 +184,13 @@
     captureUpdateEvents();
     // Initiate Save Button to persist changes made
     loadSaveButton();
+    // Avoid that Copy entity HTML to clipboard button loads the Intro page when clicked
+    customizeCopyEntityHtmlToClipboardButton();
   };
 
   const editButtonOnClick = async () => {
     // Open the AFrame Inspector (automatically injected by AFrame)
+    // @ts-ignore
     await document.querySelector('a-scene').components.inspector.openInspector();
     open = false;
     // Wait until the Inspector has loaded
@@ -172,8 +216,10 @@
     // If viewer is logged in, make authenticated call
     let spaceNFTResponse;
     if ($store.isAuthed) {
+      // @ts-ignore
       spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
     } else {
+      // @ts-ignore
       spaceNFTResponse = await PersonalWebSpace_backend.getSpace(Number(params.spaceId));
     };
     

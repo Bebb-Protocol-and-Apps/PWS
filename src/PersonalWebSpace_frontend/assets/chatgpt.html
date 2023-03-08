@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Frame Lion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene background="color: #333333">
+      
+      <!-- Lion body -->
+      <a-entity id="lion-body" position="0 1 -6" scale="1.5 1.5 1.5">
+        <a-sphere radius="1" color="#e3b456"></a-sphere>
+        <a-sphere radius="0.8" color="#ffffff" position="0.5 0.5 -1.5"></a-sphere>
+        <a-sphere radius="0.3" color="#000000" position="0.3 0.4 -1.1"></a-sphere>
+        <a-sphere radius="0.3" color="#ffffff" position="-0.3 0.4 -1.1"></a-sphere>
+      </a-entity>
+      
+      <!-- Lion ears -->
+      <a-entity id="lion-ears" position="0.5 2.3 -6.5">
+        <a-cone height="0.7" radius-bottom="0.2" radius-top="0.1" color="#e3b456" rotation="45 0 0"></a-cone>
+        <a-cone height="0.7" radius-bottom="0.2" radius-top="0.1" color="#e3b456" rotation="45 180 0"></a-cone>
+      </a-entity>
+      
+      <!-- Lion nose -->
+      <a-entity id="lion-nose" position="0.5 1.2 -6.2">
+        <a-cylinder height="0.5" radius="0.2" color="#000000"></a-cylinder>
+        <a-cylinder height="0.3" radius="0.3" color="#e3b456" position="0 0.2 0"></a-cylinder>
+      </a-entity>
+      
+      <!-- Lion eyes -->
+      <a-entity id="lion-eyes" position="0.5 1.6 -6.7">
+        <a-sphere radius="0.2" color="#ffffff"></a-sphere>
+        <a-sphere radius="0.1" color="#000000" position="0 0 -0.2"></a-sphere>
+        <a-sphere radius="0.2" color="#ffffff" position="1 0 0"></a-sphere>
+        <a-sphere radius="0.1" color="#000000" position="1 0 -0.2"></a-sphere>
+      </a-entity>
+      
+      <!-- Camera -->
+      <a-entity position="0 1.6 0">
+        <a-camera></a-camera>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
