@@ -16,6 +16,8 @@
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
 
+  import spinner from "../assets/loading.gif";
+
 // This is needed for URL params
   export let params;
 
@@ -44,18 +46,31 @@
   };
 
 // Extract metadata fields from Space NFT
-  const extractSpaceMetadata = (targetObject) => {
+  const extractSpaceMetadata = (targetObject, forUpdatingSpace = false) => {
     if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
-      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
-        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
-        if (fieldKey === "spaceName") {
-          targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "spaceDescription") {
-          targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "ownerName") {
-          targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-        } else if (fieldKey === "ownerContactInfo") {
-          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+      if (forUpdatingSpace) {
+        for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+          let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+          if (fieldKey === "spaceName") {
+            targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+          } else if (fieldKey === "spaceDescription") {
+            targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+          } else if (fieldKey === "ownerName") {
+            targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+          } else if (fieldKey === "ownerContactInfo") {
+            targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+          } /* else if (fieldKey === "aboutDescription") {
+            targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+          } */;
+        };
+      } else {
+        for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+          let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+          if (fieldKey === "creationTime") {
+            targetObject[fieldKey] = new Date(Number(spaceNft.metadata[0].key_val_data[j].val.Nat64Content) / 1000000); 
+          } else {
+            targetObject[fieldKey] = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+          };
         };
       };
     };
@@ -89,7 +104,7 @@
       updatedSpaceDescription: "",
       updatedSpaceName: "",
     };
-    extractSpaceMetadata(updateInput); // Fill additional fields needed for update
+    extractSpaceMetadata(updateInput, true); // Fill additional fields needed for update
     await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
     //document.body.innerHTML = updatedSceneHtml; // there shouldn't be any need to manually update the viewed page
   };
@@ -204,6 +219,40 @@
     showNeighborsView = true;
   };
 
+// User clicked to see Space's metadata
+  const spaceMetadata = {
+    spaceName: "",
+    spaceDescription: "",
+    creationTime: "",
+    ownerName: "",
+    ownerContactInfo: "",
+    aboutDescription: "",
+  };
+  let showSpaceInfoView = false;
+
+  const spaceInfoButtonOnClick = () => {
+    extractSpaceMetadata(spaceMetadata); // Fill with Space's info from NFT metadata
+    open = false;
+    showSpaceInfoView = true;
+  };
+
+  let spaceInfoUpdateInProgress = false;
+  const submitUpdateSpaceInfoForm = async () => {
+    spaceInfoUpdateInProgress = true;
+    // Write space's updated metadata to backend canister (HTML stays the same)
+    let updateInput = {
+      id: spaceNft.id,
+      updatedSpaceData: spaceNft.metadata[0].data,
+      updatedOwnerName: spaceMetadata.ownerName,
+      updatedOwnerContactInfo: spaceMetadata.ownerContactInfo,
+      updatedSpaceDescription: spaceMetadata.spaceDescription,
+      updatedSpaceName: spaceMetadata.spaceName,
+    };
+    extractSpaceMetadata(updateInput, true); // Fill additional fields needed for update
+    await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
+    spaceInfoUpdateInProgress = false;
+  };
+
 // Load Space scene from data stored in backend canister
   let loadingInProgress = true;
   let spaceLoadingError = false;
@@ -257,6 +306,7 @@
 
       {#if open}
         {showNeighborsView=false}
+        {showSpaceInfoView = false}
         <div class="spaceMenu">
           <!-- Edit Button may only be displayed if logged-in user is space's owner -->
           {#if isViewerSpaceOwner()}
@@ -266,15 +316,19 @@
             </p>
           {/if}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" on:click={() => neighborsButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 1 }}>
+          <p class="spaceMenuItem" on:click={() => neighborsButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 2 }}>
             Discover Neighbors
           </p>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 2 }}>
+          <p class="spaceMenuItem" on:click={() => spaceInfoButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 3 }}>
+            Space Info
+          </p>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 4 }}>
             <a href="#/" target="_blank">About OIM</a>
           </p>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" on:click={() => logout()} transition:fly={{ y: -15, delay: 50 * 3 }}>
+          <p class="spaceMenuItem" on:click={() => logout()} transition:fly={{ y: -15, delay: 50 * 5 }}>
             Logout
           </p>
         </div>
@@ -283,6 +337,53 @@
       {:else if showNeighborsView}
         <div class="spaceNeighborsView max-h-screen overflow-y-auto">
           <SpaceNeighbors spaceNft={spaceNft} />
+        </div>
+      {:else if showSpaceInfoView}
+        <div class="spaceInfoView max-h-screen overflow-y-auto">
+          {#if isViewerSpaceOwner()}
+            <form on:submit={() => submitUpdateSpaceInfoForm()}>
+              <p>Space Name:</p>
+              <input
+                  bind:value={spaceMetadata.spaceName}
+                  placeholder={spaceMetadata.spaceName}
+                  class="spaceInfoInput text-black font-bold"
+              />
+              <p>Space Description:</p>
+              <input
+                  bind:value={spaceMetadata.spaceDescription}
+                  placeholder={spaceMetadata.spaceDescription}
+                  class="spaceInfoInput text-black font-bold"
+              />
+              <p>Owner Name:</p>
+              <input
+                  bind:value={spaceMetadata.ownerName}
+                  placeholder={spaceMetadata.ownerName}
+                  class="spaceInfoInput text-black font-bold"
+              />
+              <p>Owner Contact Info:</p>
+              <input
+                  bind:value={spaceMetadata.ownerContactInfo}
+                  placeholder={spaceMetadata.ownerContactInfo}
+                  class="spaceInfoInput text-black font-bold"
+              />
+              <p>Space Creation Time: {spaceMetadata.creationTime}</p>
+              <p>Owner Principal: {spaceNft.owner}</p>
+              {#if spaceInfoUpdateInProgress}
+                <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Update!</button>
+                <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
+              {:else}
+                <button type=submit class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Update!</button>
+              {/if}
+            </form>
+          {:else}
+            <p>Space Name: {spaceMetadata.spaceName}</p>
+            <p>Space Description: {spaceMetadata.spaceDescription}</p>
+            <p>Space Creation Time: {spaceMetadata.creationTime}</p>
+            <p>Owner Principal: {spaceNft.owner}</p>
+            <p>Owner Name: {spaceMetadata.ownerName}</p>
+            <p>Owner Contact Info: {spaceMetadata.ownerContactInfo}</p>
+            <!-- <p>About Owner: {spaceMetadata.aboutDescription}</p> -->
+          {/if}
         </div>
       {/if}
     {/if}
@@ -337,4 +438,22 @@
     opacity: 80%;
     color: #eef;
   }
+  div.spaceInfoView {
+    z-index: 20;
+    position: relative;
+    height: 60%; 
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    font-size: 1.5em;
+    letter-spacing: 0.15em;
+    padding: 1em;
+    padding-top: 0;
+    background: #1d1d2f;
+    opacity: 80%;
+    color: #eef;
+  }
+  .spaceInfoInput {
+        width: 100%;
+    }
 </style>
