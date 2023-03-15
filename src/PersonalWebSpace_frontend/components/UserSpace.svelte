@@ -12,7 +12,8 @@
   const spaceURL =
     process.env.NODE_ENV !== "development"
       ? `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`
-      : `http://localhost:4943/?canisterId=${PersonalWebSpace_frontend_canister_id}#/space/${space.id}`;
+      : `#/space/${space.id}`;
+      //: `http://localhost:4943/?canisterId=${PersonalWebSpace_frontend_canister_id}#/space/${space.id}`;
 
 // Check whether the current space viewer is its owner
   const isViewerSpaceOwner = () => {

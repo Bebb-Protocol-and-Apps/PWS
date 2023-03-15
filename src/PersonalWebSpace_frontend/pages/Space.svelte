@@ -198,15 +198,9 @@
   let spaceOwnerPrincipal : Principal;
   
   const addSceneFromSpace = async () => {
-    // If viewer is logged in, make authenticated call
-    let spaceNFTResponse;
-    if ($store.isAuthed) {
-      // @ts-ignore
-      spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
-    } else {
-      // @ts-ignore
-      spaceNFTResponse = await PersonalWebSpace_backend.getSpace(Number(params.spaceId));
-    };
+    // If viewer is logged in, make authenticated call (otherwise, default backendActor in store is used)
+    // @ts-ignore
+    const spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
     
     loadingInProgress = false;
     if (spaceNFTResponse.Err) {
