@@ -7,7 +7,7 @@ Network: http://172.30.141.44:3000/
 but http://localhost:3000/ doesn't work for me
 you could try uncommenting the block comment for the proxy in vite.config.ts (right under the comment with Local vs Mainnet Development) and see if that works for you
 
-Currently http://172.29.55.198:3000/ from the hot reloading npm run vite is able to access the backend cansiter. The system seems to be able to call the replica and load rooms from the canisters 
+Currently http://172.29.55.198:3000/ from the hot reloading npm run vite is able to access the backend cansiter. The system seems to be able to call the replica and load rooms from the canisters. To get it to work you need to run npm run dev which starts the backend canister, the downside is that the hot relating links will call the deployed canisters from npm run dev which means that those pages are not hot reloading. But at least the calls work
 
 
 Working with the UI spun up by npm run vite has the advantage that it supports hot reloading for changes made to the UI so one doesn't need to redeploy on every UI change.
