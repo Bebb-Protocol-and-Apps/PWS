@@ -8,8 +8,8 @@
     //https://github.com/aframevr/aframe/blob/master/docs/components/obj-model.md
     //https://www.futurelearn.com/info/courses/a-beginners-guide-to-creating-a-webvr-experience-using-aframe/0/steps/328745
     //https://jgbarah.github.io/aframe-playground/figures-04/
-    //const resp = await fetch("aframeobj.html");
-    const resp = await fetch("chatgpt.html");
+    const resp = await fetch("aframeobj.html");
+    //const resp = await fetch("chatgpt.html");
     //console.log('in index addAFrameSceneFromModel resp', resp);
     spaceString = await resp.text();
     //console.log('in index addAFrameSceneFromModel html', html);
