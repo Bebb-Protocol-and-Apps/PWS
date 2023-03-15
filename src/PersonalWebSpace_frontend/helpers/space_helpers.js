@@ -62,3 +62,44 @@ export const initiateCollapsibles = () => {
     coll[i].addEventListener('click', addCollapsibleFunctionality);
   };
 };
+
+// Extract metadata fields from Space NFT
+export const extractSpaceMetadata = (spaceNft, targetObject, forUpdatingSpace = false) => {
+  if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
+    if (forUpdatingSpace) {
+      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+        if (fieldKey === "spaceName") {
+          targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "spaceDescription") {
+          targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        } else if (fieldKey === "ownerName") {
+          targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        } else if (fieldKey === "ownerContactInfo") {
+          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        } /* else if (fieldKey === "aboutDescription") {
+          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        } */;
+      };
+    } else {
+      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+        if (fieldKey === "creationTime") {
+          targetObject[fieldKey] = new Date(Number(spaceNft.metadata[0].key_val_data[j].val.Nat64Content) / 1000000); 
+        } else {
+          targetObject[fieldKey] = spaceNft.metadata[0].key_val_data[j].val.TextContent;
+        };
+      };
+    };
+  };
+};
+
+// Format Space metadata for Space update call
+export const formatSpaceMetadataForUpdate = (spaceMetadata, targetObject) => {
+  if (spaceMetadata) {
+    targetObject.updatedSpaceName = spaceMetadata.spaceName;
+    targetObject.updatedSpaceDescription = spaceMetadata.spaceDescription;
+    targetObject.updatedOwnerName = spaceMetadata.ownerName;
+    targetObject.updatedOwnerContactInfo = spaceMetadata.ownerContactInfo;
+  };
+};

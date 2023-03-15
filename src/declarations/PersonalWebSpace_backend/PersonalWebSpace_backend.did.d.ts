@@ -127,7 +127,7 @@ export interface UpdateMetadataValuesInput {
   'updatedSpaceDescription' : string,
   'updatedOwnerName' : string,
   'updatedOwnerContactInfo' : string,
-  'updatedSpaceData' : string,
+  'updatedSpaceData' : [] | [string],
   'updatedSpaceName' : string,
 }
 export interface _SERVICE extends PersonalWebSpace {}

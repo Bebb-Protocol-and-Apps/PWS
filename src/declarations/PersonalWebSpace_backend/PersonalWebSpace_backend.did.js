@@ -100,7 +100,7 @@ export const idlFactory = ({ IDL }) => {
     'updatedSpaceDescription' : IDL.Text,
     'updatedOwnerName' : IDL.Text,
     'updatedOwnerContactInfo' : IDL.Text,
-    'updatedSpaceData' : IDL.Text,
+    'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
   });
   const PersonalWebSpace = IDL.Service({
