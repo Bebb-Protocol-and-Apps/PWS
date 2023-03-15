@@ -125,6 +125,8 @@ service : {
   create_entity: (EntityInitiationObject) -> (Entity);
   create_entity_and_bridge: (EntityInitiationObject,
    BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
+  deleteBridge: (text) -> (opt BridgeEntity);
+  delete_bridge: (text) -> (opt BridgeEntity);
   get_bridge: (text) -> (opt BridgeEntity) query;
   get_bridge_ids_by_entity_id: (text, bool, bool, bool) -> (vec text) query;
   get_bridged_entities_by_entity_id: (text, bool, bool, bool) ->

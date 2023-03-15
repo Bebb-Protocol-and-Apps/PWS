@@ -122,6 +122,8 @@ export interface _SERVICE {
     [EntityInitiationObject, BridgeEntityInitiationObject],
     [Entity, [] | [BridgeEntity]],
   >,
+  'deleteBridge' : ActorMethod<[string], [] | [BridgeEntity]>,
+  'delete_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge_ids_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
