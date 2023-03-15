@@ -7,8 +7,8 @@ Network: http://172.30.141.44:3000/
 but http://localhost:3000/ doesn't work for me
 you could try uncommenting the block comment for the proxy in vite.config.ts (right under the comment with Local vs Mainnet Development) and see if that works for you
 
-http://172.30.141.44:3000/ runs for me (i.e. shows the UI) but cannot access the backend canister. That's the error about the call to the backend canister being rejected and it saying something about the called function not being defined on the backend canister. It's not an issue with the backend canister but as far as I can see the call to the local IC replica is rejected (either because the UI isn't allowed to call the local IC replica or because it's running somewhere else). So e.g. the calls for creating a new space or loading a user's spaces on the landing page don't work.
-but accessing e.g. the testroom page works (as the backend canister isn't involved): http://172.30.141.44:3000/#/testroom
+Currently http://172.29.55.198:3000/ from the hot reloading npm run vite is able to access the backend cansiter. The system seems to be able to call the replica and load rooms from the canisters 
+
 
 Working with the UI spun up by npm run vite has the advantage that it supports hot reloading for changes made to the UI so one doesn't need to redeploy on every UI change.
 that's not the case for the UI canister spun up with 
