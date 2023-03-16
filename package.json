@@ -26,7 +26,7 @@
     "preci": "dfx stop; dfx start --background --clean; dfx deploy; dfx generate"
   },
   "dependencies": {
-    "@dfinity/agent": "0.15.1",
+    "@dfinity/agent": "^0.15.4",
     "@dfinity/auth-client": "^0.15.1",
     "@dfinity/authentication": "^0.14.2",
     "@dfinity/candid": "0.15.1",

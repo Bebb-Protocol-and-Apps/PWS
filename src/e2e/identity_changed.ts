@@ -1,4 +1,4 @@
-import { Secp256k1KeyIdentity } from "@dfinity/identity";
+/* import { Secp256k1KeyIdentity } from "@dfinity/identity";
 import hdkey from "hdkey";
 import bip39 from "bip39";
 ``;
@@ -13,6 +13,14 @@ export const identityFromSeed = async (phrase) => {
   const addrnode = root.derive("m/44'/223'/0'/0/0");
 
   return Secp256k1KeyIdentity.fromSecretKey(addrnode.privateKey);
-};
+}; 
 
-export const identity = identityFromSeed(seed);
+export const identity = identityFromSeed(seed); */
+
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
+
+// Resolves to Principal "cbydt-onhgx-x3fxj-j2xef-dsb4e-o2bqx-5oln4-koufv-wufn6-wsc54-sae"
+let seed = Buffer.from("peacock peacock peacock peacock peacock peacock peacock peacock peacock peacock peacock peacock", 'utf8');
+const totalLength = 32;
+seed = Buffer.concat([seed], totalLength);
+export const identity = Secp256k1KeyIdentity.generate(seed);
