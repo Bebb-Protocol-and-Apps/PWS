@@ -20,7 +20,10 @@
     "build": "vite build",
     "serve": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "stop": "dfx stop"
+    "stop": "dfx stop",
+    "test": "vitest",
+    "ci": "vitest run",
+    "preci": "dfx stop; dfx start --background --clean; dfx deploy; dfx generate"
   },
   "dependencies": {
     "@dfinity/agent": "0.15.1",
@@ -41,6 +44,7 @@
     "cssnano": "^5.1.14",
     "events": "3.3.0",
     "ic-stoic-identity": "^2.0.0",
+    "isomorphic-fetch": "^3.0.0",
     "postcss": "^8.4.20",
     "postcss-load-config": "^4.0.1",
     "process": "0.11.10",
@@ -52,7 +56,8 @@
     "tslib": "^2.4.1",
     "typescript": "^4.9.4",
     "util": "0.12.5",
-    "vite": "^4.0.4"
+    "vite": "^4.0.4",
+    "vitest": "^0.29.3"
   },
   "engines": {
     "node": "^12 || ^14 || ^16 || ^18"
