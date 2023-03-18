@@ -4,8 +4,6 @@
   export let modelUrl;
   modelUrl = modelUrl;
 
-  console.log("in GlbModelPreview modelUrl", modelUrl);
-
 // Note: HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
   let glbModelPreviewString = getStringForSpaceFromModel(modelUrl);
 </script>
