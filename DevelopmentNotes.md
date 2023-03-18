@@ -9,11 +9,10 @@ Example how to inject Svelte component into HTML document:
         document.body.prepend(div);
       }, 1000);
 
-Removed dependencies (2023-02-28):
-    "lit-html": "^2.6.1",
-    "html-webpack-plugin": "5.5.0",
-    "stream-browserify": "3.0.0",
-    "terser-webpack-plugin": "^5.3.6",
+HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
+
+Element to rerender everything inside when webHostedGlbModelUrl changes (https://www.webtips.dev/force-rerender-components-in-svelte), e.g.:
+{#key webHostedGlbModelUrl} <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl}/> {/key}
 
 Space Neighbors local testing with dummy entities:
     /* // for local testing, fill with dummy data

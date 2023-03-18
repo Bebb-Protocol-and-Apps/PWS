@@ -62,3 +62,29 @@ export const initiateCollapsibles = () => {
     coll[i].addEventListener('click', addCollapsibleFunctionality);
   };
 };
+
+export const getStringForSpaceFromModel = (modelUrl) => {
+  return `<html>
+    <head><script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script></head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <a-asset-item id="model-glb" src=${modelUrl}></a-asset-item>
+          <!-- <a-asset-item crossorigin="anonymous" id="model-glb" src="http://172.19.192.140:3000/full_workshop_with_props.glb"></a-asset-item> -->
+
+          <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+          <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
+        <a-sky color="#ECECEC"></a-sky>
+
+        <a-entity gltf-model="#model-glb" position="0 0 -5"></a-entity>
+
+      </a-scene>
+    </body>
+  </html>`;
+};
