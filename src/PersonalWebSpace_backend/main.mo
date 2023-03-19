@@ -483,6 +483,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           creationTimeObject,
           protocolEntityIdObject
         ];
+        // updatedSpaceData is an optional attribute; only use it to update the Space if it was provided
         let spaceData = switch(updatedUserSpaceData.updatedSpaceData) {
           case (null) {token.metadata[0].data};
           case (?"") {token.metadata[0].data};
