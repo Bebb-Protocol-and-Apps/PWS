@@ -14,6 +14,8 @@ HTML as string in Svelte needs the ending script tag to be escaped (see https://
 Element to rerender everything inside when webHostedGlbModelUrl changes (https://www.webtips.dev/force-rerender-components-in-svelte), e.g.:
 {#key webHostedGlbModelUrl} <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl}/> {/key}
 
+CORS issues in A-Frame: https://github.com/aframevr/aframe/issues/2156
+
 Space Neighbors local testing with dummy entities:
     /* // for local testing, fill with dummy data
         const dummyTestEntity1 = {

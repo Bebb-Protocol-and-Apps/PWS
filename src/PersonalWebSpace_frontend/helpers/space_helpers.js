@@ -69,7 +69,7 @@ export const getStringForSpaceFromModel = (modelUrl) => {
     <body>
       <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
         <a-assets>
-          <a-asset-item id="model-glb" src=${modelUrl}></a-asset-item>
+          <a-asset-item id="model-glb" src=${modelUrl} crossorigin="anonymous"></a-asset-item>
           <!-- <a-asset-item crossorigin="anonymous" id="model-glb" src="http://172.19.192.140:3000/full_workshop_with_props.glb"></a-asset-item> -->
 
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
