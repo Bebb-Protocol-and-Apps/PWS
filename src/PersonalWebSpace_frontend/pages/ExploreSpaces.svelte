@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+  import { store } from "../store";
   
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
@@ -15,7 +16,7 @@
   const loadUserSpaces = async () => {
     let requestPromises = [];
     for (var i = 0; i < numberOfRandomSpacesToLoad; i++) {
-      requestPromises.push(PersonalWebSpace_backend.getRandomSpace()); // Send requests in parallel and then await all to speed up
+      requestPromises.push($store.backendActor.getRandomSpace()); // Send requests in parallel and then await all to speed up
     };
     const spaceNFTResponses = await Promise.all(requestPromises);
     let randomSpaces = [];
