@@ -1,8 +1,10 @@
 {
   "PersonalWebSpace_backend": {
-    "ic": "vee64-zyaaa-aaaai-acpta-cai"
+    "ic": "vee64-zyaaa-aaaai-acpta-cai",
+    "local": "vee64-zyaaa-aaaai-acpta-cai"
   },
   "PersonalWebSpace_frontend": {
-    "ic": "vdfyi-uaaaa-aaaai-acptq-cai"
+    "ic": "vdfyi-uaaaa-aaaai-acptq-cai",
+    "local": "vdfyi-uaaaa-aaaai-acptq-cai"
   }
 }

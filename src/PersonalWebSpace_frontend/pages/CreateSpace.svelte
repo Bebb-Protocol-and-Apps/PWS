@@ -10,27 +10,45 @@
 
   let webHostedGlbModelUrl : string = "";
 
-  const createNewDefaultUserSpace = async (element, defaultSpaceNumber : Number) => {
-    element.setAttribute("disabled", true);
-    if (defaultSpaceNumber === 1) {
-      document.getElementById("createSubtextDefault1").innerText = "Creating your Personal Web Space, just a moment...";
+// Subtexts to display
+  const loginSubtext = "Please log in first.";
+  const clickDefaultSubtext = "Click and we'll generate this 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!";
+  const clickFromModelSubtext = "Click and we'll generate this Space from the provided model for you. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!";
+  const inProgressSubtext = "Creating your Personal Web Space, just a moment...";
+  const createdSubtext = "Ohh yeah, you just got yourself a new Personal Web Space! You can see it on the My Spaces tab.";
+
+// Manage status of creation to show buttons and subtexts appropriately
+  let isSpaceCreationInProgress = false;
+  let spaceToCreate = "";
+  let wasSpaceCreatedSuccessfully = false;
+
+  const setCreationInProgress = async (space) => {
+    isSpaceCreationInProgress = true;
+    spaceToCreate = space;
+  };
+
+  const setSpaceWasCreated = async () => {
+    isSpaceCreationInProgress = false;
+    wasSpaceCreatedSuccessfully = true;
+  };
+
+  const createNewDefaultUserSpace = async (defaultSpace) => {
+    await setCreationInProgress(defaultSpace);
+    if (defaultSpace === "defaultspace/1") {
       const resp = await fetch("defaultRoom.html"); // Fetches default space 1
       const defaultSpaceHtml = await resp.text();
       const space = await $store.backendActor.createSpace(defaultSpaceHtml);
-      document.getElementById("createSubtextDefault1").innerText = "Ohh yeah, you just got yourself a new Personal Web Space!";
     };
-    element.removeAttribute("disabled");
+    await setSpaceWasCreated();
   };
 
-  const createNewUserSpaceFromModel = async (element, modelType : string) => {
-    element.setAttribute("disabled", true);
+  const createNewUserSpaceFromModel = async (modelType) => {
+    await setCreationInProgress(modelType);
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
-      document.getElementById("createSubtextWebHostedGlbModel").innerText = "Creating your Personal Web Space, just a moment...";
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
       const space = await $store.backendActor.createSpace(spaceHtml);
-      document.getElementById("createSubtextWebHostedGlbModel").innerText = "Ohh yeah, you just got yourself a new Personal Web Space!";
     };
-    element.removeAttribute("disabled");
+    await setSpaceWasCreated();
   };
 
 // Helper functions to check whether a valid URL was provided in the form
@@ -72,16 +90,30 @@
   <iframe src="#/defaultspace/1" title="The Web3 Cockpit" width="100%" height="auto"></iframe>
   {#if !$store.isAuthed}
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault1'>Please log in first.</p>
+    <p id='createSubtextDefault1'>{loginSubtext}</p>
   {:else}
-    <button type='button' id='createButton' on:click={(e) => createNewDefaultUserSpace(e.target, 1)} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-    <p id='createSubtextDefault1'>Click and we'll generate this 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+    {#if isSpaceCreationInProgress}
+      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/1"}
+        <p id='createSubtextDefault1'>{inProgressSubtext}</p>
+      {/if}
+    {:else if wasSpaceCreatedSuccessfully}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/1"}
+        <p id='createSubtextDefault1'>{createdSubtext}</p>
+      {:else}
+        <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
+      {/if}
+    {:else}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
+    {/if}
   {/if}
   <!-- From Model -->
   <h3 class=" text-xl font-semibold">Create Your Space From an Existing Model:</h3>
   <!-- Web-Hosted GLB Model -->
   <h3 class="text-l font-semibold">GLB Model Hosted on the Web</h3>
-  <form on:submit|preventDefault={(e) => createNewUserSpaceFromModel(e.target, "WebHostedGlbModel")}>
+  <form on:submit|preventDefault={() => createNewUserSpaceFromModel("WebHostedGlbModel")}>
     <input
         bind:value={webHostedGlbModelUrl}
         placeholder="Input the URL of the glb model here"
@@ -94,17 +126,31 @@
         {/key}
         {#if !$store.isAuthed}
           <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <p id='createSubtextWebHostedGlbModel'>Please log in first.</p>
+          <p id='createSubtextWebHostedGlbModel'>{loginSubtext}</p>
         {:else}
-          <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-          <p id='createSubtextWebHostedGlbModel'>Click and we'll generate this Space from the provided model for you. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+          {#if isSpaceCreationInProgress}
+            <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+            {#if spaceToCreate === "WebHostedGlbModel"}
+              <p id='createSubtextWebHostedGlbModel'>{inProgressSubtext}</p>
+            {/if}
+          {:else if wasSpaceCreatedSuccessfully}
+            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+            {#if spaceToCreate === "WebHostedGlbModel"}
+              <p id='createSubtextWebHostedGlbModel'>{createdSubtext}</p>
+            {:else}
+              <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
+            {/if}
+          {:else}
+            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+            <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
+          {/if}  
         {/if}
       {:else}
         <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
         <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid URL for the GLB Model.</h3>
       {/if}
     {/if}
-</form>
+  </form>
 </section>
 
 <div class='clearfix'></div>
