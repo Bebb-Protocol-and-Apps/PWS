@@ -419,6 +419,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     };
   };
 
+  // Update a Space's metadata fields including the Space's data which is displayed (if updatedSpaceData is provided)
   public shared({ caller }) func updateUserSpace(updatedUserSpaceData: Types.UpdateMetadataValuesInput) : async Types.NftResult {
     switch (List.get(nfts, Nat64.toNat(updatedUserSpaceData.id))) {
       case (null) {
@@ -482,10 +483,16 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           creationTimeObject,
           protocolEntityIdObject
         ];
+        // updatedSpaceData is an optional attribute; only use it to update the Space if it was provided
+        let spaceData = switch(updatedUserSpaceData.updatedSpaceData) {
+          case (null) {token.metadata[0].data};
+          case (?"") {token.metadata[0].data};
+          case (?updatedSpaceData) {Text.encodeUtf8(updatedSpaceData)} //TODO: probably check provided HTML
+        };
         let updatedMetadataPart : Types.MetadataPart = {
           purpose = #Rendered;
           key_val_data = updatedKeyValData;
-          data = Text.encodeUtf8(updatedUserSpaceData.updatedSpaceData); //TODO: probably check provided HTML
+          data = spaceData;
         };
         let updatedMetadata : Types.MetadataDesc = [updatedMetadataPart];
         let updatedNft : Types.Nft = {

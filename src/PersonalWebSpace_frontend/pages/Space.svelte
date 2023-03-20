@@ -11,8 +11,10 @@
   import Login from "../components/LoginSpace.svelte";
   import NotFound from "./NotFound.svelte";
   import SpaceNeighbors from "../components/SpaceNeighbors.svelte";
+  import SpaceInfo from "../components/SpaceInfo.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
+  import { extractSpaceMetadata } from '../helpers/space_helpers.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
 
@@ -43,33 +45,18 @@
     open = false;
   };
 
-// Extract metadata fields from Space NFT
-  const extractSpaceMetadata = (targetObject) => {
-    if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
-      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
-        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
-        if (fieldKey === "spaceName") {
-          targetObject.updatedSpaceName = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "spaceDescription") {
-          targetObject.updatedSpaceDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;
-        } else if (fieldKey === "ownerName") {
-          targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-        } else if (fieldKey === "ownerContactInfo") {
-          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-        };
-      };
-    };
-  };
-
 // User clicked on Edit Space
   const saveButtonOnClick = async () => {
     // Get updated scene and write it to backend
     // Get edited scene HTML as String
+    // @ts-ignore
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
     // Close Inspector and hide button Inspect Scene
+    // @ts-ignore
     await AFRAME.INSPECTOR.close();
     var elements = document.body.getElementsByClassName("toggle-edit");    
     var toggleElement = elements.item(0);
+    // @ts-ignore
     toggleElement.hidden = true; 
     // Assemble new scene HTML to be stored
     const respUpper = await fetch("spacesUpperHtml.html");
@@ -80,13 +67,14 @@
     // Write space's updated HTML to backend canister
     let updateInput = {
       id: spaceNft.id,
-      updatedSpaceData: newHTML,
+      updatedSpaceData: [newHTML],
       updatedOwnerName: "",
       updatedOwnerContactInfo: "",
       updatedSpaceDescription: "",
       updatedSpaceName: "",
     };
-    extractSpaceMetadata(updateInput); // Fill additional fields needed for update
+    extractSpaceMetadata(spaceNft, updateInput, true); // Fill additional fields needed for update
+    // @ts-ignore
     await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
     //document.body.innerHTML = updatedSceneHtml; // there shouldn't be any need to manually update the viewed page
   };
@@ -98,8 +86,10 @@
     if(saveButton) {
       var elements = document.body.getElementsByClassName("toggle-edit");    
       var toggleElement = elements.item(0);
+      // @ts-ignore
       toggleElement.hidden = false;
       var clone = saveButton.cloneNode(true);
+      // @ts-ignore
       clone.onclick = saveButtonOnClick;
       saveButton.replaceWith(clone);         
     } else {
@@ -127,12 +117,48 @@
   const captureUpdateEvents = () => {
     // Changes made in the Inspector's scene view are not automatically persisted
     // Capture events which update an entity and enable that all changes will be exported to persist them
+    // @ts-ignore
     if (AFRAME.INSPECTOR) {
+      // @ts-ignore
       AFRAME.INSPECTOR.on('entityupdate', function(event){enableExportOfAllChangesMade(event)}, true);
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
         captureUpdateEvents();
+      }, 1000);
+    };
+  };
+
+  const customizeCopyEntityHtmlToClipboardButton = () => {
+    // By default, the Copy entity HTML to clipboard button loads the Intro page when clicked
+    // Suppress this behavior
+    // Button to export entity to HTML looks like this: <a href="#" title="Copy entity HTML to clipboard" data-action="copy-entity-to-clipboard" class="button fa fa-clipboard"></a> 
+    // and is part of the Inspector's Right Panel
+    // it changes depending on which element is selected, thus we have to observe these changes and suppress the behavior each time the button is loaded
+    const rightPanelElement = document.getElementById("rightPanel");
+    if(rightPanelElement) {
+      const observer = new MutationObserver((mutationList) => {
+        for (const mutation of mutationList) {
+          if (mutation.type === "childList") {
+            var elements = document.body.getElementsByClassName("button fa fa-clipboard"); // There could be several Buttons matched
+            for (const copyEntityHtmlToClipboardButton of elements) {
+              // @ts-ignore
+              copyEntityHtmlToClipboardButton.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+            };
+          };
+        };        
+      });
+      const config = {
+        characterData: true,
+        attributes: false,
+        childList: true,
+        subtree: true,
+      };
+      observer.observe(rightPanelElement, config);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        customizeCopyEntityHtmlToClipboardButton();
       }, 1000);
     };
   };
@@ -143,10 +169,13 @@
     captureUpdateEvents();
     // Initiate Save Button to persist changes made
     loadSaveButton();
+    // Avoid that Copy entity HTML to clipboard button loads the Intro page when clicked
+    customizeCopyEntityHtmlToClipboardButton();
   };
 
   const editButtonOnClick = async () => {
     // Open the AFrame Inspector (automatically injected by AFrame)
+    // @ts-ignore
     await document.querySelector('a-scene').components.inspector.openInspector();
     open = false;
     // Wait until the Inspector has loaded
@@ -169,13 +198,9 @@
   let spaceOwnerPrincipal : Principal;
   
   const addSceneFromSpace = async () => {
-    // If viewer is logged in, make authenticated call
-    let spaceNFTResponse;
-    if ($store.isAuthed) {
-      spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
-    } else {
-      spaceNFTResponse = await PersonalWebSpace_backend.getSpace(Number(params.spaceId));
-    };
+    // If viewer is logged in, make authenticated call (otherwise, default backendActor in store is used)
+    // @ts-ignore
+    const spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
     
     loadingInProgress = false;
     if (spaceNFTResponse.Err) {
@@ -188,6 +213,31 @@
       spaceLoaded = true;
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
     };
+  };
+
+// User clicked to see Space's metadata
+  const spaceMetadata = {
+    spaceName: "",
+    spaceDescription: "",
+    creationTime: "",
+    ownerName: "",
+    ownerContactInfo: "",
+    aboutDescription: "",
+    id: null,
+    spaceOwnerPrincipal: null,
+    spaceData: null,
+  };
+  let showSpaceInfoView = false;
+
+  const spaceInfoButtonOnClick = () => {
+    extractSpaceMetadata(spaceNft, spaceMetadata); // Fill with Space's info from NFT metadata
+    // Fill additional fields for usage in SpaceInfo
+    spaceMetadata.id = spaceNft.id;
+    spaceMetadata.spaceOwnerPrincipal = spaceOwnerPrincipal;
+    spaceMetadata.spaceData = spaceNft.metadata[0].data;
+
+    open = false;
+    showSpaceInfoView = true;
   };
 
   onMount(addSceneFromSpace);
@@ -211,6 +261,7 @@
 
       {#if open}
         {showNeighborsView=false}
+        {showSpaceInfoView = false}
         <div class="spaceMenu">
           <!-- Edit Button may only be displayed if logged-in user is space's owner -->
           {#if isViewerSpaceOwner()}
@@ -220,15 +271,19 @@
             </p>
           {/if}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" on:click={() => neighborsButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 1 }}>
+          <p class="spaceMenuItem" on:click={() => neighborsButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 2 }}>
             Discover Neighbors
           </p>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 2 }}>
+          <p class="spaceMenuItem" on:click={() => spaceInfoButtonOnClick()} transition:fly={{ y: -15, delay: 50 * 3 }}>
+            Space Info
+          </p>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 4 }}>
             <a href="#/" target="_blank">About OIM</a>
           </p>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <p class="spaceMenuItem" on:click={() => logout()} transition:fly={{ y: -15, delay: 50 * 3 }}>
+          <p class="spaceMenuItem" on:click={() => logout()} transition:fly={{ y: -15, delay: 50 * 5 }}>
             Logout
           </p>
         </div>
@@ -238,6 +293,8 @@
         <div class="spaceNeighborsView max-h-screen overflow-y-auto">
           <SpaceNeighbors spaceNft={spaceNft} />
         </div>
+      {:else if showSpaceInfoView}
+        <SpaceInfo spaceMetadata={spaceMetadata} />
       {/if}
     {/if}
     <div style="position: absolute; height: 100%; width: 100%;">
