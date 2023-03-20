@@ -74,11 +74,11 @@ export type HeaderField = [string, string];
 export interface Request {
   'url' : string,
   'method' : string,
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
 }
 export interface Response {
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
@@ -86,11 +86,11 @@ export interface Response {
 }
 export type StreamingCallback = ActorMethod<
   [StreamingCallbackToken],
-  StreamingCallbackResponse,
+  StreamingCallbackResponse
 >;
 export interface StreamingCallbackResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Array<number>,
+  'body' : Uint8Array,
 }
 export interface StreamingCallbackToken {
   'key' : string,
@@ -106,41 +106,41 @@ export type StreamingStrategy = {
 export interface _SERVICE {
   'createBridge' : ActorMethod<
     [BridgeEntityInitiationObject],
-    [] | [BridgeEntity],
+    [] | [BridgeEntity]
   >,
   'createEntity' : ActorMethod<[EntityInitiationObject], Entity>,
   'createEntityAndBridge' : ActorMethod<
     [EntityInitiationObject, BridgeEntityInitiationObject],
-    [Entity, [] | [BridgeEntity]],
+    [Entity, [] | [BridgeEntity]]
   >,
   'create_bridge' : ActorMethod<
     [BridgeEntityInitiationObject],
-    [] | [BridgeEntity],
+    [] | [BridgeEntity]
   >,
   'create_entity' : ActorMethod<[EntityInitiationObject], Entity>,
   'create_entity_and_bridge' : ActorMethod<
     [EntityInitiationObject, BridgeEntityInitiationObject],
-    [Entity, [] | [BridgeEntity]],
+    [Entity, [] | [BridgeEntity]]
   >,
   'deleteBridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'delete_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge_ids_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<string>,
+    Array<string>
   >,
   'get_bridged_entities_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<Entity>,
+    Array<Entity>
   >,
   'get_bridges_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<BridgeEntity>,
+    Array<BridgeEntity>
   >,
   'get_entity' : ActorMethod<[string], [] | [Entity]>,
   'get_entity_and_bridge_ids' : ActorMethod<
     [string, boolean, boolean, boolean],
-    [[] | [Entity], Array<string>],
+    [[] | [Entity], Array<string>]
   >,
   'http_request' : ActorMethod<[Request], Response>,
   'http_request_update' : ActorMethod<[Request], Response>,

@@ -10,7 +10,7 @@ import {
 } from "../declarations/PersonalWebSpace_backend";
 
 import {
-  BebbProtocol,
+  newwave,
   createActor as createProtocolCanisterActor,
   canisterId as protocolCanisterId,
   idlFactory as protocolIdlFactory,
@@ -30,7 +30,7 @@ export const HOST =
 type State = {
   isAuthed: "plug" | "stoic" | null;
   backendActor: typeof PersonalWebSpace_backend;
-  protocolActor: typeof BebbProtocol;
+  protocolActor: typeof newwave;
   principal: Principal;
   accountId: string;
   error: string;
@@ -182,7 +182,7 @@ export const createStore = ({
       protocolActor = (await window.ic?.plug.createActor({
         canisterId: protocolCanisterId,
         interfaceFactory: protocolIdlFactory,
-      })) as unknown as typeof BebbProtocol;
+      })) as unknown as typeof newwave;
     } catch (err) {
       console.warn("couldn't create protocol actor");
       console.warn(err);
