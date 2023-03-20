@@ -129,6 +129,8 @@ export const idlFactory = ({ IDL }) => {
         [Entity, IDL.Opt(BridgeEntity)],
         [],
       ),
+    'deleteBridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], []),
+    'delete_bridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], []),
     'get_bridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], ['query']),
     'get_bridge_ids_by_entity_id' : IDL.Func(
         [IDL.Text, IDL.Bool, IDL.Bool, IDL.Bool],
