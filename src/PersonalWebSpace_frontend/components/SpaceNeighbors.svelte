@@ -124,6 +124,59 @@
         neighborCreationInProgress = false;
     };
 
+// Helper function to find Bridge(s) between Space and a Neighbor
+    const getBridgesBetweenEntities = async (spaceEntityId, neighborProtocolEntityId, bothBridgingDirections = false, includePendingBridges = false) => {
+        if (neighborProtocolEntityId && spaceEntityId) {
+            let getBridgesResponse;
+            try {
+                const includeBridgesFromSpaceToNeighbor = true;
+                getBridgesResponse = await $store.protocolActor.get_bridges_by_entity_id(spaceEntityId, includeBridgesFromSpaceToNeighbor, bothBridgingDirections, includePendingBridges);
+            } catch (error) {
+                console.log("Error Getting Bridges", error);
+                return null;                
+            }
+            if (getBridgesResponse && getBridgesResponse.length > 0) {
+                // Filter for Bridges to Neighbor
+                const bridgesBetweenEntities = [];
+                for (var i = 0; i < getBridgesResponse.length; i++) {
+                    if (getBridgesResponse[i] && getBridgesResponse[i].toEntityId === neighborProtocolEntityId) {
+                        bridgesBetweenEntities.push(getBridgesResponse[i]);
+                    };
+                };
+                return bridgesBetweenEntities;
+            };
+        };
+        return null;
+    };
+
+// Owner clicked to delete a Neighbor
+    const deleteSpaceNeighbor = async (neighborProtocolEntityId) => {
+    // neighborProtocolEntityId: internal id in Bebb Protocol of the Neighbor to be deleted
+        const spaceEntityId = extractSpaceEntityId();
+        if (neighborProtocolEntityId && spaceEntityId && isViewerSpaceOwner()) {
+            // Find id of Bridge between Space's and Neighbor's Entities in Bebb Protocol (note: there might be multiple)
+            const findBridgesResponse = await getBridgesBetweenEntities(spaceEntityId, neighborProtocolEntityId);
+            if (findBridgesResponse && findBridgesResponse.length > 0) {
+                // Delete Bridge(s) in Bebb Protocol owned by Space owner
+                let requestPromises = [];
+                for (var i = 0; i < findBridgesResponse.length; i++) {
+                    const bridgeId = findBridgesResponse[i].internalId;
+                    if (bridgeId && findBridgesResponse[i].owner === spaceNft.owner) {
+                        requestPromises.push($store.protocolActor.delete_bridge(bridgeId)); // Send requests in parallel and then await all to speed up
+                    };
+                };
+                const deletionResponses = await Promise.all(requestPromises);
+                for (var j = 0; j < deletionResponses.length; j++) {
+                    if (deletionResponses[j].Err) {
+                        return null;
+                    };
+                };
+                return true;
+            };
+        };
+        return null;
+    };
+
 // A visiting user (not the owner) wants to link one of their spaces to this space
     let showVisitorSpaces = false;
     let loadingVisitorSpaces = false;
@@ -193,7 +246,7 @@
                 <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add Neighbor</button>
             {/if}
             {#if newNeighborFormActive}
-                <form on:submit={() => submitAddNeighborForm()}>
+                <form on:submit|preventDefault={() => submitAddNeighborForm()}>
                     <input
                         bind:value={newNeighborUrl}
                         placeholder="Input the URL of the new Neighbor here (e.g. https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/space/0)"
@@ -205,7 +258,7 @@
                             {#if neighborCreationInProgress}
                                 <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
                             {:else}
-                                <button type=submit class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Create!</button>
+                                <button type="submit" class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Create!</button>
                             {/if}
                         {:else}
                             <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create!</button>
@@ -247,7 +300,7 @@
     {/if}
     <div id='spaceNeighbors' class="space-y-4" use:initiateCollapsibles>
         {#each neighborEntities as neighborEntity}
-            <ProtocolEntity entity={neighborEntity} />
+            <ProtocolEntity entity={neighborEntity} viewerIsSpaceOwner={isViewerSpaceOwner()} deleteSpaceNeighborFunction={deleteSpaceNeighbor}/>
         {/each}
     </div>
 {/if}

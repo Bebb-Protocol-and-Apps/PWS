@@ -12,7 +12,8 @@
   const spaceURL =
     process.env.NODE_ENV !== "development"
       ? `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`
-      : `http://localhost:4943/?canisterId=${PersonalWebSpace_frontend_canister_id}#/space/${space.id}`;
+      : `#/space/${space.id}`;
+      //: `http://localhost:4943/?canisterId=${PersonalWebSpace_frontend_canister_id}#/space/${space.id}`;
 
 // Check whether the current space viewer is its owner
   const isViewerSpaceOwner = () => {
@@ -115,7 +116,7 @@
         {:else}
           <button on:click={() => linkUserSpace()} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Link</button>
           {#if errorCreatingLink}
-            <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Unlucky, the linking didn't work. Please give it another shot.</h3>
+            <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Unlucky, the linking didn't work. Please give it another try.</h3>
           {/if}
         {/if}
       {/if}

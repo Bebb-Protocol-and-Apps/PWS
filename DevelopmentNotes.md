@@ -1,3 +1,8 @@
+### Dev Notes
+need to use single quotes in HTML to store as Text (which has double quotes)
+
+remove all newlines and other space (used for exampleString): https://www.textfixer.com/tools/remove-line-breaks.php
+
 Example how to inject Svelte component into HTML document:
       setTimeout(() => {
         console.log("Login button - Delayed for 1 second.");
