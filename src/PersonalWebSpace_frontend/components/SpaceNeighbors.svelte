@@ -161,13 +161,14 @@
                 let requestPromises = [];
                 for (var i = 0; i < findBridgesResponse.length; i++) {
                     const bridgeId = findBridgesResponse[i].internalId;
-                    if (bridgeId && findBridgesResponse[i].owner === spaceNft.owner) {
+                    if (bridgeId && findBridgesResponse[i].owner?.toText() === spaceNft.owner?.toText()) {
                         requestPromises.push($store.protocolActor.delete_bridge(bridgeId)); // Send requests in parallel and then await all to speed up
                     };
                 };
                 const deletionResponses = await Promise.all(requestPromises);
                 for (var j = 0; j < deletionResponses.length; j++) {
                     if (deletionResponses[j].Err) {
+                        console.log("Error deleting Space Neighbor", deletionResponses[j].Err);
                         return null;
                     };
                 };
@@ -214,7 +215,7 @@
         try {
             spaceNeighborsResponse = await $store.protocolActor.get_bridged_entities_by_entity_id(spaceEntityId, true, false, false);
         } catch(err) {
-            console.log("SpaceNeighbors err", err);
+            console.log("Error getting SpaceNeighbors", err);
             neighborsLoadingError = true;
         };
         loadingInProgress = false;

@@ -72,6 +72,23 @@ export const idlFactory = ({ IDL }) => {
     'entityType' : EntityType,
     'entitySpecificFields' : IDL.Opt(IDL.Text),
   });
+  const NewWaveError = IDL.Variant({
+    'SelfTransfer' : IDL.Null,
+    'TokenNotFound' : IDL.Null,
+    'EntityNotFound' : IDL.Null,
+    'TxNotFound' : IDL.Null,
+    'SelfApprove' : IDL.Null,
+    'OperatorNotFound' : IDL.Null,
+    'Unauthorized' : IDL.Text,
+    'BridgeNotFound' : IDL.Null,
+    'ExistedNFT' : IDL.Null,
+    'OwnerNotFound' : IDL.Null,
+    'Other' : IDL.Text,
+  });
+  const BridgeResult = IDL.Variant({
+    'Ok' : IDL.Opt(BridgeEntity),
+    'Err' : NewWaveError,
+  });
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const Request = IDL.Record({
     'url' : IDL.Text,
@@ -107,17 +124,6 @@ export const idlFactory = ({ IDL }) => {
     'status_code' : IDL.Nat16,
   });
   return IDL.Service({
-    'createBridge' : IDL.Func(
-        [BridgeEntityInitiationObject],
-        [IDL.Opt(BridgeEntity)],
-        [],
-      ),
-    'createEntity' : IDL.Func([EntityInitiationObject], [Entity], []),
-    'createEntityAndBridge' : IDL.Func(
-        [EntityInitiationObject, BridgeEntityInitiationObject],
-        [Entity, IDL.Opt(BridgeEntity)],
-        [],
-      ),
     'create_bridge' : IDL.Func(
         [BridgeEntityInitiationObject],
         [IDL.Opt(BridgeEntity)],
@@ -129,8 +135,7 @@ export const idlFactory = ({ IDL }) => {
         [Entity, IDL.Opt(BridgeEntity)],
         [],
       ),
-    'deleteBridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], []),
-    'delete_bridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], []),
+    'delete_bridge' : IDL.Func([IDL.Text], [BridgeResult], []),
     'get_bridge' : IDL.Func([IDL.Text], [IDL.Opt(BridgeEntity)], ['query']),
     'get_bridge_ids_by_entity_id' : IDL.Func(
         [IDL.Text, IDL.Bool, IDL.Bool, IDL.Bool],
