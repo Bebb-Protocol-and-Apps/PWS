@@ -175,6 +175,13 @@
       {
         document.getElementsByClassName('gltfIcon')[i].style.display = 'none';
       }
+
+      // Now that we removed the button update the padding to make it look better
+      for (let i =0; i < document.getElementsByClassName('toolbarActions').length; i++)
+      {
+        document.getElementsByClassName('toolbarActions')[i].style.paddingTop = '10px';
+      }
+
   }
 
   /**
