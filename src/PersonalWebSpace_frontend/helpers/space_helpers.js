@@ -65,7 +65,7 @@ export const initiateCollapsibles = () => {
 
 export const getStringForSpaceFromModel = (modelUrl) => {
   return `<html>
-    <head><script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script></head>
+    <head><script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script></head>
     <body>
       <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
         <a-assets>

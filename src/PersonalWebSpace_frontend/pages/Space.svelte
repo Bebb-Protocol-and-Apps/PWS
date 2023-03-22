@@ -17,6 +17,7 @@
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+    import { log } from "console";
 
 // This is needed for URL params
   export let params;
@@ -31,7 +32,7 @@
   function handleEscape({ key }) {
     if (key === "Escape") {
       open = false;
-    };
+    }
   };
 
 // Check whether the current space viewer is its owner
@@ -51,6 +52,8 @@
     // Get edited scene HTML as String
     // @ts-ignore
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
+    console.log(AFRAME.scenes)
+    console.log(AFRAME.scenes[0])
     // Close Inspector and hide button Inspect Scene
     // @ts-ignore
     await AFRAME.INSPECTOR.close();
@@ -163,14 +166,44 @@
     };
   };
 
+  const removeUndesiredInspectorButtons = () => {
+      // Remove the resume button since it isn't useful
+      document.getElementById('playPauseScene').style.display = 'none';
+      // Remove the gltfIcon since it isn't useful
+      for (let i =0; i < document.getElementsByClassName('gltfIcon').length; i++)
+      {
+        document.getElementsByClassName('gltfIcon')[i].style.display = 'none';
+      }
+  }
+
+  const updateHelperText = () => {
+    // Update the helper text of the save button
+    var elements = document.body.getElementsByClassName("button fa fa-save");
+    for (const saveButton of elements) {
+        // @ts-ignore
+        saveButton.title = "Save changes to your canister";
+    };
+
+    // Update helper text of adding item
+    var elements = document.body.getElementsByClassName("button fa fa-plus");
+    for (const addButton of elements) {
+        // @ts-ignore
+        addButton.title = "Add a new item";
+    };
+  }
+
   const customizeInspector = () => {
-  // Change A-Frame's default Inspector according to our specific requirements
+    // Remove elements of the Inspector that we don't want
+    removeUndesiredInspectorButtons();
+    // Change A-Frame's default Inspector according to our specific requirements
     // Ensure that all changes made will be included in updated HTML to be sent to backend
     captureUpdateEvents();
     // Initiate Save Button to persist changes made
     loadSaveButton();
     // Avoid that Copy entity HTML to clipboard button loads the Intro page when clicked
     customizeCopyEntityHtmlToClipboardButton();
+    // Update the helper text to what we want
+    updateHelperText();
   };
 
   const editButtonOnClick = async () => {
@@ -181,7 +214,7 @@
     // Wait until the Inspector has loaded
     setTimeout(() => {
       customizeInspector();     
-    }, 1000);
+    }, 700);
   };
 
   const neighborsButtonOnClick = () => {
