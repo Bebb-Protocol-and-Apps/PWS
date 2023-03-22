@@ -17,7 +17,6 @@
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-    import { log } from "console";
 
 // This is needed for URL params
   export let params;
@@ -52,8 +51,6 @@
     // Get edited scene HTML as String
     // @ts-ignore
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
-    console.log(AFRAME.scenes)
-    console.log(AFRAME.scenes[0])
     // Close Inspector and hide button Inspect Scene
     // @ts-ignore
     await AFRAME.INSPECTOR.close();
@@ -166,6 +163,10 @@
     };
   };
 
+  /**
+   * This function removes any undesired buttons from the Aframe inspector
+   * This should only be called once the Aframe inspector is loaded
+   */
   const removeUndesiredInspectorButtons = () => {
       // Remove the resume button since it isn't useful
       document.getElementById('playPauseScene').style.display = 'none';
@@ -176,6 +177,9 @@
       }
   }
 
+  /**
+   * This function updates any helper text for relevant buttons on the Aframe inspector
+   */
   const updateHelperText = () => {
     // Update the helper text of the save button
     var elements = document.body.getElementsByClassName("button fa fa-save");
