@@ -32,6 +32,20 @@ type Request =
    method: text;
    url: text;
  };
+type NewWaveError = 
+ variant {
+   BridgeNotFound;
+   EntityNotFound;
+   ExistedNFT;
+   OperatorNotFound;
+   Other: text;
+   OwnerNotFound;
+   SelfApprove;
+   SelfTransfer;
+   TokenNotFound;
+   TxNotFound;
+   Unauthorized: text;
+ };
 type HeaderField = 
  record {
    text;
@@ -80,6 +94,11 @@ type BridgeState =
    Pending;
    Rejected;
  };
+type BridgeResult = 
+ variant {
+   Err: NewWaveError;
+   Ok: opt BridgeEntity;
+ };
 type BridgeEntityInitiationObject = 
  record {
    _bridgeType: BridgeType;
@@ -117,16 +136,11 @@ type BridgeEntity =
    toEntityId: text;
  };
 service : {
-  createBridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
-  createEntity: (EntityInitiationObject) -> (Entity);
-  createEntityAndBridge: (EntityInitiationObject,
-   BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
   create_bridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
   create_entity: (EntityInitiationObject) -> (Entity);
   create_entity_and_bridge: (EntityInitiationObject,
    BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
-  deleteBridge: (text) -> (opt BridgeEntity);
-  delete_bridge: (text) -> (opt BridgeEntity);
+  delete_bridge: (text) -> (BridgeResult);
   get_bridge: (text) -> (opt BridgeEntity) query;
   get_bridge_ids_by_entity_id: (text, bool, bool, bool) -> (vec text) query;
   get_bridged_entities_by_entity_id: (text, bool, bool, bool) ->
