@@ -306,7 +306,12 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       // Live on Mainnet
       let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
       protocolEntityId := spaceEntity.internalId;
-    };
+    } else {
+      // Local
+      let localProtocol  : Protocol.Interface  = actor(Protocol.LOCAL_CANISTER_ID);
+      let spaceEntity : Protocol.Entity = await localProtocol.create_entity(entityInitiationObject);
+      protocolEntityId := spaceEntity.internalId;
+    };    
 
     // create space for caller
     let textArrayContent : [Text] = [];

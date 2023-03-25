@@ -35,6 +35,8 @@ export interface BridgeEntityInitiationObject {
   '_toEntityId' : string,
   '_name' : [] | [string],
 }
+export type BridgeResult = { 'Ok' : [] | [BridgeEntity] } |
+  { 'Err' : NewWaveError };
 export type BridgeState = { 'Confirmed' : null } |
   { 'Rejected' : null } |
   { 'Pending' : null };
@@ -71,6 +73,17 @@ export type EntityType = { 'Webasset' : null } |
   { 'Person' : null } |
   { 'Location' : null };
 export type HeaderField = [string, string];
+export type NewWaveError = { 'SelfTransfer' : null } |
+  { 'TokenNotFound' : null } |
+  { 'EntityNotFound' : null } |
+  { 'TxNotFound' : null } |
+  { 'SelfApprove' : null } |
+  { 'OperatorNotFound' : null } |
+  { 'Unauthorized' : string } |
+  { 'BridgeNotFound' : null } |
+  { 'ExistedNFT' : null } |
+  { 'OwnerNotFound' : null } |
+  { 'Other' : string };
 export interface Request {
   'url' : string,
   'method' : string,
@@ -104,15 +117,6 @@ export type StreamingStrategy = {
     }
   };
 export interface _SERVICE {
-  'createBridge' : ActorMethod<
-    [BridgeEntityInitiationObject],
-    [] | [BridgeEntity]
-  >,
-  'createEntity' : ActorMethod<[EntityInitiationObject], Entity>,
-  'createEntityAndBridge' : ActorMethod<
-    [EntityInitiationObject, BridgeEntityInitiationObject],
-    [Entity, [] | [BridgeEntity]]
-  >,
   'create_bridge' : ActorMethod<
     [BridgeEntityInitiationObject],
     [] | [BridgeEntity]
@@ -122,8 +126,7 @@ export interface _SERVICE {
     [EntityInitiationObject, BridgeEntityInitiationObject],
     [Entity, [] | [BridgeEntity]]
   >,
-  'deleteBridge' : ActorMethod<[string], [] | [BridgeEntity]>,
-  'delete_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
+  'delete_bridge' : ActorMethod<[string], BridgeResult>,
   'get_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge_ids_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
