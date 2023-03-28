@@ -21,6 +21,12 @@ Element to rerender everything inside when webHostedGlbModelUrl changes (https:/
 
 CORS issues in A-Frame: https://github.com/aframevr/aframe/issues/2156
 
+Secure Iframes:
+https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
+https://www.w3schools.com/tags/att_iframe_sandbox.asp
+https://developer.mozilla.org/en-US/docs/Web/Security/IFrame_credentialless
+https://www.w3schools.com/tags/att_iframe_referrerpolicy.asp
+
 Space Neighbors local testing with dummy entities:
     /* // for local testing, fill with dummy data
         const dummyTestEntity1 = {
