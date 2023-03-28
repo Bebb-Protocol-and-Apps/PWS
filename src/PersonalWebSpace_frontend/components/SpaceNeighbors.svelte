@@ -259,7 +259,7 @@
                             {#if neighborCreationInProgress}
                                 <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
                             {:else}
-                                <button type="submit" class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Create!</button>
+                                <button type=submit class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Create!</button>
                             {/if}
                         {:else}
                             <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create!</button>
