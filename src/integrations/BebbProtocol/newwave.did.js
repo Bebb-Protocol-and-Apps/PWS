@@ -123,6 +123,26 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const BridgeEntityUpdateObject = IDL.Record({
+    'internalId' : IDL.Text,
+    'name' : IDL.Opt(IDL.Text),
+    'description' : IDL.Opt(IDL.Text),
+    'keywords' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'state' : IDL.Opt(BridgeState),
+    'settings' : IDL.Opt(EntitySettings),
+    'bridgeType' : IDL.Opt(BridgeType),
+  });
+  const EntityUpdateObject = IDL.Record({
+    'internalId' : IDL.Text,
+    'name' : IDL.Opt(IDL.Text),
+    'description' : IDL.Opt(IDL.Text),
+    'keywords' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'settings' : IDL.Opt(EntitySettings),
+  });
+  const EntityResult = IDL.Variant({
+    'Ok' : IDL.Opt(Entity),
+    'Err' : NewWaveError,
+  });
   return IDL.Service({
     'create_bridge' : IDL.Func(
         [BridgeEntityInitiationObject],
@@ -160,6 +180,8 @@ export const idlFactory = ({ IDL }) => {
       ),
     'http_request' : IDL.Func([Request], [Response], ['query']),
     'http_request_update' : IDL.Func([Request], [Response], []),
+    'update_bridge' : IDL.Func([BridgeEntityUpdateObject], [BridgeResult], []),
+    'update_entity' : IDL.Func([EntityUpdateObject], [EntityResult], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

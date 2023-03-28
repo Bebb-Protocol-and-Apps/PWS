@@ -51,6 +51,14 @@ type HeaderField =
    text;
    text;
  };
+type EntityUpdateObject = 
+ record {
+   description: opt text;
+   internalId: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt EntitySettings;
+ };
 type EntityType = 
  variant {
    BridgeEntity;
@@ -59,6 +67,11 @@ type EntityType =
    Webasset;
  };
 type EntitySettings = record {};
+type EntityResult = 
+ variant {
+   Err: NewWaveError;
+   Ok: opt Entity;
+ };
 type EntityInitiationObject = 
  record {
    _creator: opt principal;
@@ -98,6 +111,16 @@ type BridgeResult =
  variant {
    Err: NewWaveError;
    Ok: opt BridgeEntity;
+ };
+type BridgeEntityUpdateObject = 
+ record {
+   bridgeType: opt BridgeType;
+   description: opt text;
+   internalId: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt EntitySettings;
+   state: opt BridgeState;
  };
 type BridgeEntityInitiationObject = 
  record {
@@ -152,4 +175,6 @@ service : {
    vec text) query;
   http_request: (Request) -> (Response) query;
   http_request_update: (Request) -> (Response);
+  update_bridge: (BridgeEntityUpdateObject) -> (BridgeResult);
+  update_entity: (EntityUpdateObject) -> (EntityResult);
 }
