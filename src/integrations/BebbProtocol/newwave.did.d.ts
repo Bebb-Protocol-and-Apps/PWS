@@ -35,6 +35,15 @@ export interface BridgeEntityInitiationObject {
   '_toEntityId' : string,
   '_name' : [] | [string],
 }
+export interface BridgeEntityUpdateObject {
+  'internalId' : string,
+  'name' : [] | [string],
+  'description' : [] | [string],
+  'keywords' : [] | [Array<string>],
+  'state' : [] | [BridgeState],
+  'settings' : [] | [EntitySettings],
+  'bridgeType' : [] | [BridgeType],
+}
 export type BridgeResult = { 'Ok' : [] | [BridgeEntity] } |
   { 'Err' : NewWaveError };
 export type BridgeState = { 'Confirmed' : null } |
@@ -67,11 +76,20 @@ export interface EntityInitiationObject {
   '_internalId' : [] | [string],
   '_name' : [] | [string],
 }
+export type EntityResult = { 'Ok' : [] | [Entity] } |
+  { 'Err' : NewWaveError };
 export type EntitySettings = {};
 export type EntityType = { 'Webasset' : null } |
   { 'BridgeEntity' : null } |
   { 'Person' : null } |
   { 'Location' : null };
+export interface EntityUpdateObject {
+  'internalId' : string,
+  'name' : [] | [string],
+  'description' : [] | [string],
+  'keywords' : [] | [Array<string>],
+  'settings' : [] | [EntitySettings],
+}
 export type HeaderField = [string, string];
 export type NewWaveError = { 'SelfTransfer' : null } |
   { 'TokenNotFound' : null } |
@@ -147,4 +165,6 @@ export interface _SERVICE {
   >,
   'http_request' : ActorMethod<[Request], Response>,
   'http_request_update' : ActorMethod<[Request], Response>,
+  'update_bridge' : ActorMethod<[BridgeEntityUpdateObject], BridgeResult>,
+  'update_entity' : ActorMethod<[EntityUpdateObject], EntityResult>,
 }
