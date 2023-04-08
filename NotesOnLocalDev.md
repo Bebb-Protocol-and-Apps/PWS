@@ -55,8 +55,9 @@ Running Bebb Protocol locally:
 This project's dfx.json specifies Bebb Protocol as a remote canister (i.e. can be used by project's canisters locally but isn't built as it relies on the remote canister being deployed to the local replica from another project). It's newwave. The files for the integration (wasm, did, js, ts) need to be copied over to the integrations/BebbProtocol folder manually if changed.
 Clone Bebb Protocol's repo: https://github.com/patnorris/NewWavePre/tree/firstMotokoVersion
 And use the latest version (e.g. 0.0.3 as of 2023-03)
-Start a local replica in this project
-Deploy this project's canisters (after these steps the following canister ids should be assigned: PersonalWebSpace_backend canister id: rrkah-fqaaa-aaaaa-aaaaq-cai; PersonalWebSpace_frontend canister id: ryjl3-tyaaa-aaaaa-aaaba-cai)
+Go to OIM's codebase (where the file you're reading is in)
+Start a local replica in this project (OIM)
+Deploy this project's canisters, PersonalWebSpace_backend and PersonalWebSpace_frontend, see deploy command in README (after these steps the following canister ids should be assigned: PersonalWebSpace_backend canister id: rrkah-fqaaa-aaaaa-aaaaq-cai; PersonalWebSpace_frontend canister id: ryjl3-tyaaa-aaaaa-aaaba-cai)
 Go to the folder with Bebb Protocol's latest version and run dfx deploy there (this creates the local Bebb Protocol canister on the local replica started earlier which is thus the same replica this project's canisters are running on)
 Make sure the local canister id for the deployed Bebb Protocol canister is rkp4c-7iaaa-aaaaa-aaaca-cai (required by this project to make the calls on the local replica)
 This project's canisters should now successfully call the locally deployed Bebb Protocol canister (i.e. all functionality works, same as on mainnet)
