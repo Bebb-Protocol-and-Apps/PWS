@@ -61,6 +61,7 @@ type PersonalWebSpace =
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
+   listFiles: () -> (vec text);
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -71,7 +72,7 @@ type PersonalWebSpace =
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
-   upload: (text, vec nat8) -> (text);
+   upload: (text, File) -> (text);
  };
 type OwnerResult = 
  variant {
@@ -160,6 +161,7 @@ type HeaderField =
    text;
    text;
  };
+type File = blob;
 type ExtendedMetadataResult = 
  variant {
    Err: ApiError;

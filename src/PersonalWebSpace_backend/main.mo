@@ -15,6 +15,8 @@ import Random "mo:base/Random";
 import RBTree "mo:base/RBTree";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
+import UUID "mo:uuid/UUID";
+import Source "mo:uuid/async/SourceV4";
 
 
 import Types "./Types";
@@ -612,7 +614,12 @@ private let maxFiles : Nat = 10; // limit to 10 files per user, adjust as needed
 
 type UserId = Principal;
 type File = Blob;
-type FileInfo = (Text, File);
+
+public type FileInfo = {
+  file_name : Text;
+  file_content : Blob;
+  file_id : Text;
+};
 
 public type UserRecord = {
   totalSize : Nat;
@@ -621,6 +628,7 @@ public type UserRecord = {
 
 // private var storage : {UserId; var files : [FileInfo]; var totalSize : Nat} = {};
 private var storage : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+private var file_search : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
 
 
 private func getUserTotalSize(user: UserId) : Nat {
@@ -663,9 +671,42 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
     return "Error: File limit reached.";
   };
 
+
+  var found_unique_file_id : Bool = true;
+  var counter : Nat = 0;
+  var file_id = "";
+
+  // Keep searching for a unique name until one is found, the chances of collisions are really low
+  //  but in case it happens keep looping until a file id is not found
+  while(found_unique_file_id)
+  {
+    // 100 is chosen arbitarily to ensure that in case of something weird happening
+    //  there is a timeout
+    if (counter > 100)
+    {
+      return "Error: Failed to upload file due to not finding a unique identifier, please contact support";
+    };
+
+    // Technically there could be a race condition here... lets see if we can make this an atomic 
+    //  operation
+    let g = Source.Source();
+    file_id := UUID.toText(await g.new());
+
+    if (file_search.get(file_id) == null)
+    {
+      // Claim the id by putting an empty record into it
+      file_search.put(file_id, { file_name = "blank"; file_content = ""; file_id = "blank"});
+      found_unique_file_id := false;
+    };
+
+    counter := counter + 1;
+  };
+
   // Add the new file to the user record and save it back to the
-  let newFiles = Array.append(userFiles, [(fileName, content)]);
+  let file_info = [{ file_name = fileName; file_content = content; file_id = file_id}];
+  let newFiles = Array.append(userFiles, file_info);
   let newUserRecord = {files = newFiles; totalSize = userTotalSize + fileSize };
+
   storage.put(Principal.toText(user), newUserRecord);
 
   return "File successfully uploaded";
@@ -674,8 +715,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
 public shared(msg) func listFiles() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
-  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.0 );
+  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_id );
 };
-
 
 };

@@ -103,6 +103,7 @@ export const idlFactory = ({ IDL }) => {
     'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
   });
+  const File = IDL.Vec(IDL.Nat8);
   const PersonalWebSpace = IDL.Service({
     'balanceOfDip721' : IDL.Func([IDL.Principal], [IDL.Nat64], ['query']),
     'check_user_has_nft' : IDL.Func([], [IDL.Bool], ['query']),
@@ -124,6 +125,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'greet' : IDL.Func([IDL.Text], [IDL.Text], []),
     'http_request' : IDL.Func([Request], [Response], ['query']),
+    'listFiles' : IDL.Func([], [IDL.Vec(IDL.Text)], []),
     'logoDip721' : IDL.Func([], [LogoResult], ['query']),
     'mintDip721' : IDL.Func([IDL.Principal, MetadataDesc], [MintReceipt], []),
     'nameDip721' : IDL.Func([], [IDL.Text], ['query']),
@@ -146,7 +148,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
-    'upload' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat8)], [IDL.Text], []),
+    'upload' : IDL.Func([IDL.Text, File], [IDL.Text], []),
   });
   return PersonalWebSpace;
 };

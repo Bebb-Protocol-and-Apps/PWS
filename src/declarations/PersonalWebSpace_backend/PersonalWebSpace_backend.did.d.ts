@@ -16,6 +16,7 @@ export type ExtendedMetadataResult = {
     'Ok' : { 'token_id' : TokenId, 'metadata_desc' : MetadataDesc }
   } |
   { 'Err' : ApiError };
+export type File = Uint8Array;
 export type HeaderField = [string, string];
 export type InterfaceId = { 'Burn' : null } |
   { 'Mint' : null } |
@@ -70,6 +71,7 @@ export interface PersonalWebSpace {
   'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
+  'listFiles' : ActorMethod<[], Array<string>>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
@@ -86,7 +88,7 @@ export interface PersonalWebSpace {
     TxReceipt
   >,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
-  'upload' : ActorMethod<[string, Uint8Array], string>,
+  'upload' : ActorMethod<[string, File], string>,
 }
 export interface Request {
   'url' : string,
