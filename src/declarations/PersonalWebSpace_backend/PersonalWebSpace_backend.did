@@ -71,6 +71,7 @@ type PersonalWebSpace =
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
+   upload: (text, vec nat8) -> (text);
  };
 type OwnerResult = 
  variant {

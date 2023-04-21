@@ -12,6 +12,10 @@ import Char "mo:base/Char";
 import AssocList "mo:base/AssocList";
 import Buffer "mo:base/Buffer";
 import Random "mo:base/Random";
+import RBTree "mo:base/RBTree";
+import HashMap "mo:base/HashMap";
+import Array "mo:base/Array";
+
 
 import Types "./Types";
 import HTTP "./Http";
@@ -20,6 +24,7 @@ import Stoic "./EXT/Stoic";
 
 import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
+import Blob "mo:base/Blob";
 
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
 // TODO: instead add functions to manage cycles balance and gather stats
@@ -598,5 +603,201 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     };
   };
+
+
+// Code for uploading files
+private let maxFileSize : Nat = 1024; // 1 KB as an example, adjust as needed
+private let maxTotalSize : Nat = 10240; // 10 KB as an example, adjust as needed
+private let maxFiles : Nat = 10; // limit to 10 files per user, adjust as needed
+
+type UserId = Principal;
+type File = Blob;
+type FileInfo = (Text, File);
+
+public type UserRecord = {
+  totalSize : Nat;
+  files : [FileInfo];
+};
+
+// private var storage : {UserId; var files : [FileInfo]; var totalSize : Nat} = {};
+private var storage : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+
+
+private func getUserTotalSize(user: UserId) : Nat {
+  switch (storage.get(Principal.toText(user))) {
+    case (null) { return 0; };
+    case (?userRecord) { return userRecord.totalSize; };
+  };
+};
+
+private func getUserFiles(user: UserId) : [FileInfo] {
+  switch (storage.get(Principal.toText(user))) {
+    case (null) { return []; };
+    case (?userRecord) { return userRecord.files; };
+  };
+};
+
+public shared(msg) func upload(fileName : Text, content : File) : async Text {
+  let user = msg.caller;
+  // if (Principal.isAnonymous(user))
+  // {
+  //       return "Error: user not logged in";
+  // };
+
+  let fileSize = content.size();
+  if (fileSize > maxFileSize) {
+    return "Error: File size exceeds the limit.";
+  };
+
+  if (fileSize <= 0) {
+    return "Error: File empty";
+  };
+
+  let userTotalSize = getUserTotalSize(user);
+  if (userTotalSize + fileSize > maxTotalSize) {
+    return "Error: Total size limit reached.";
+  };
+
+  let userFiles = getUserFiles(user);
+  if (userFiles.size() >= maxFiles) {
+    return "Error: File limit reached.";
+  };
+
+  // Add the new file to the user record and save it back to the
+  let newFiles = Array.append(userFiles, [(fileName, content)]);
+  let newUserRecord = {files = newFiles; totalSize = userTotalSize + fileSize };
+  storage.put(Principal.toText(user), newUserRecord);
+
+  return Nat.toText(newUserRecord.totalSize);
+  return "File successfully uploaded";
+};
+
+public shared(msg) func listFiles() : async [Text] {
+  let user = msg.caller;
+  let userFiles = getUserFiles(user);
+  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.0 );
+};
+
+
+//   ////// Functionality for uploading files
+//   Dictionary in Python
+//   HashMap
+
+
+//   List
+//   HashTable
+//   Buffer
+
+//   Reference
+//   For loop
+
+//   stable
+//   - 
+//   Sharred
+
+//   inefficient to apped to array, much easier to append to a List
+
+
+
+
+
+
+
+
+
+// Principal.equal and principal.hash 
+// but can do Principal to text
+
+
+
+//   // Define a struct to represent the file
+//   public type File = {
+//     file_name : Text;
+//     owner : Principal;
+//     data : [Nat8];
+//   };
+
+  
+
+//   // Define a struct to represent the logged-in user
+//   public type User = {
+//     principal : Principal;
+//     upload_quota : Nat64;
+//     files : [File];
+//   };
+
+//   // Define a map to store the logged-in users and their upload quotas
+//   stable var file_users = List.nil<User>();
+
+//   // Define a method to upload a file
+//   public shared(msg) func upload(file_name : Text, data : [Nat8]) : async Text {
+//     if (Principal.isAnonymous(msg.caller))
+//     {
+//           return "Error: user not logged in";
+//     };
+
+
+//     var counter = 0;
+//     var found_user = false;
+//     for (user in file_users.toIter<User>)
+//     {
+//       if (user.princial == msg.caller)
+//       {
+//           found_user = true;
+//           break;
+//       };
+//       counter = counter + 1;
+//     };
+
+//     if (!found_user)
+//     {
+//       let new_user : User = {
+//         principal = msg.caller;
+//         upload_quoate = 1000000;
+//         files = List.nil<File>();
+//       }
+//       counter = counter + 1;
+//     }
+
+//     let user = users.get(msg.caller);
+    
+//     if (user.upload_quota < data.length()) {
+//       return "Error: upload size limit exceeded";
+//     }
+//     let file_extension = Text.split(file_name, ".")[1];
+//     if (!is_valid_file_extension(file_extension)) {
+//       return "Error: invalid file type";
+//     }
+//     let file = File{file_name = file_name, owner = msg.caller, data = data};
+//     files := RBTree.insert<Text, File>(files, file_name, file);
+//     users := RBTree.set<Principal, User>(users, msg.caller, User{principal = msg.caller, upload_quota = user.upload_quota - data.length()});
+//     return "Success: file uploaded";
+//   };
+
+//   https://github.com/Significant-Gravitas/Auto-GPT/tree/master/autogpt
+ 
+// Pat says:
+// https://github.com/antimatter15/alpaca.cpp
+ 
+// Pat says:
+// https://github.com/patnorris/NewWavePre/blob/firstMotokoVersion/NewWaveV0/0.0.3/src/newwave/main.mo#L126
+ 
+// Pat says:
+// https://github.com/dfinity/motoko-base/blob/master/src/HashMap.mo
+ 
+// Pat says:
+// https://github.com/ZhenyaUsenko/motoko-hash-map
+ 
+// Pat says:
+// https://forum.dfinity.org/t/stable-hashmap-without-need-for-an-upgrade-func/10040
+ 
+// Pat says:var entitiesStorage : HashMap.HashMap<Text, Entity.Entity> = HashMap.HashMap(0, Text.equal, Text.hash); 
+// Pat says:
+// https://github.com/dfinity/motoko-base/tree/master/src
+
+// for ((k, entity) in entitiesStorage.entries()) { 
+// Pat says:for (bridgeId in bridgeIdsToRetrieve.vals()) { over [Text] 
+// Pat says:filter<T>(l : List<T>, f : T -> Bool) : List<T> { 
+// Pat says:List.filter(nfts, func(token: Types.Nft) : Bool { token.owner == user }) 
 
 };

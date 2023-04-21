@@ -146,6 +146,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
+    'upload' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat8)], [IDL.Text], []),
   });
   return PersonalWebSpace;
 };

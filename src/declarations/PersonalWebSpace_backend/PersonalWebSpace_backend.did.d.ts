@@ -86,6 +86,7 @@ export interface PersonalWebSpace {
     TxReceipt
   >,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
+  'upload' : ActorMethod<[string, Uint8Array], string>,
 }
 export interface Request {
   'url' : string,
