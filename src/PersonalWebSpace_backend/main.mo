@@ -626,8 +626,10 @@ public type UserRecord = {
   files : [FileInfo];
 };
 
-// private var storage : {UserId; var files : [FileInfo]; var totalSize : Nat} = {};
+// Variable stores reference of a user to all their files
 private var storage : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+// This is a quick file lookup by an anonomous file_id file. Allows public access of files without
+//  needing to reveal who owns the file
 private var file_search : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
 
 
