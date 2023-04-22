@@ -626,22 +626,38 @@ public type UserRecord = {
   file_ids : [Text];
 };
 
-// Variable stores reference of a user to all their files
-private var storage : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
-// This is a quick file lookup by an anonomous file_id file. Allows public access of files without
-//  needing to reveal who owns the file
-private var file_search : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
 
 
+// A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
+//  defined by RFC 4122
+// Files should be synced with the UserRecord assicated with it to keep the user/data scheme in sync
+private var fileDatabase : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
+
+// Variable stores reference of a user with all the files they have uploaded to their account.
+//  The user record stores reference to all the UUIDs for the files they have stored
+private var userFileRecords : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+
+/*
+ * Function retrieves the total size of the files uploaded to their account
+ * 
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return The total size of files uploaded to their account 
+*/
 private func getUserTotalSize(user: UserId) : Nat {
-  switch (storage.get(Principal.toText(user))) {
+  switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return 0; };
     case (?userRecord) { return userRecord.totalSize; };
   };
 };
 
+/*
+ * Function all the file ids associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the File Ids associated with the user account. The file Ids can be used to retrieve the files
+ *  stored within the fileDatabase
+*/
 private func getUserFileIds(user: UserId) : [Text] {
-  switch (storage.get(Principal.toText(user))) {
+  switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) {
        return userRecord.file_ids; 
@@ -649,15 +665,19 @@ private func getUserFileIds(user: UserId) : [Text] {
   };
 };
 
-// Retrieves all the files of the specified user
+/*
+ * Function retrives all the FileInfo (i.e files) associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the FileInfo structs for the user account which contain the file and other relevant information
+*/
 private func getUserFiles(user: UserId) : [FileInfo] {
-  switch (storage.get(Principal.toText(user))) {
+  switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) { 
       var userFileInfo : [FileInfo] = [];
       for (file_id in userRecord.file_ids.vals())
       {
-        let retrievedFileInfo : ?FileInfo = file_search.get(file_id);
+        let retrievedFileInfo : ?FileInfo = fileDatabase.get(file_id);
         switch (retrievedFileInfo) {
             case(?checkedFileInfo) {
                 userFileInfo := Array.append<FileInfo>(userFileInfo, [checkedFileInfo]);
@@ -670,6 +690,12 @@ private func getUserFiles(user: UserId) : [FileInfo] {
   };
 };
 
+/*
+ * Public Function which enables a logged in user to upload a file to their account if they have enough space available
+ * @params fileName: The file name that the uplaoded file should be called 
+ * @params content: The file to be uploaded 
+ * @return A text of the results of the uploading status
+*/
 public shared(msg) func upload(fileName : Text, content : File) : async Text {
   let user = msg.caller;
   // if (Principal.isAnonymous(user))
@@ -720,24 +746,24 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
     let g = Source.Source();
     file_id := UUID.toText(await g.new());
 
-    if (file_search.get(file_id) == null)
+    if (fileDatabase.get(file_id) == null)
     {
       // Claim the id by putting an empty record into it
-      file_search.put(file_id, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
+      fileDatabase.put(file_id, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
       found_unique_file_id := false;
     };
 
     counter := counter + 1;
   };
 
-  // Add the new file to the storage 
+  // Add the new file to the file database
   let file_info = { file_name = fileName; file_content = content; owner_principal = Principal.toText(user) };
-  file_search.put(file_id, file_info);
+  fileDatabase.put(file_id, file_info);
 
   // Add the new file id to the user record
   let newFilesId = Array.append(userFilesIds,[file_id]);
   let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
-  storage.put(Principal.toText(user), newUserRecord);
+  userFileRecords.put(Principal.toText(user), newUserRecord);
 
   return "File successfully uploaded";
 };
