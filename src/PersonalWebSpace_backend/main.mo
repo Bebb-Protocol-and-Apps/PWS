@@ -829,10 +829,30 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func listFiles() : async [Text] {
+public shared(msg) func listFileNames() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
   return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
+};
+
+/*
+ * Public Function which displays all the file ids that the user has uploaded to their account
+ * @return An array of text that contain all the file ids uploaded to the current users account
+*/
+public shared(msg) func listFileIds() : async [Text] {
+  let user = msg.caller;
+  let userFileIds = getUserFileIds(user);
+  return userFileIds;
+};
+
+/*
+ * Public Function which retrieves a file by file id
+ * Currently there are no visability constraints on files, but once visability is built it can be added here
+ *
+ * @return The file associated with the file id
+*/
+public shared(msg) func getFile(fileId: Text) : async ?FileInfo {
+  return fileDatabase.get(fileId);
 };
 
 };
