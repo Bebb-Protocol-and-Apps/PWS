@@ -607,12 +607,16 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
   };
 
 
-// Code for uploading files
-private let maxFileSize : Nat = 1024; // 1 KB as an example, adjust as needed
-private let maxTotalSize : Nat = 10240; // 10 KB as an example, adjust as needed
-private let maxFiles : Nat = 10; // limit to 10 files per user, adjust as needed
+/* 
+ * Code for uploading files
+*/
+// 1 MB is the max size for a single file
+let oneMB : Nat = 1048576; // 1 MB
+private let maxFileSize : Nat = oneMB; 
+private let maxTotalSize : Nat = 10 * oneMB;
+private let maxFiles : Nat = 10;
 
-type UserId = Principal;
+type FileUserId = Principal;
 type File = Blob;
 
 public type FileInfo = {
@@ -625,7 +629,6 @@ public type UserRecord = {
   totalSize : Nat;
   file_ids : [Text];
 };
-
 
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
@@ -643,7 +646,7 @@ private var userFileRecords : HashMap.HashMap<Text, UserRecord> = HashMap.HashMa
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return The total size of files uploaded to their account 
 */
-private func getUserTotalSize(user: UserId) : Nat {
+private func getUserTotalSize(user: FileUserId) : Nat {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return 0; };
     case (?userRecord) { return userRecord.totalSize; };
@@ -656,7 +659,7 @@ private func getUserTotalSize(user: UserId) : Nat {
  * @return All the File Ids associated with the user account. The file Ids can be used to retrieve the files
  *  stored within the fileDatabase
 */
-private func getUserFileIds(user: UserId) : [Text] {
+private func getUserFileIds(user: FileUserId) : [Text] {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) {
@@ -670,7 +673,7 @@ private func getUserFileIds(user: UserId) : [Text] {
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
-private func getUserFiles(user: UserId) : [FileInfo] {
+private func getUserFiles(user: FileUserId) : [FileInfo] {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) { 
@@ -691,17 +694,44 @@ private func getUserFiles(user: UserId) : [FileInfo] {
 };
 
 /*
+ * Function which checks the file extension and ensures that it is within the supported formats
+ * 
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return The total size of files uploaded to their account 
+*/
+private func isValidFileExtension(fileName : Text) : Bool {
+  let validExtensions : [Text] = ["glb", "gltf" ];
+  var extensionMatched : Bool = false;
+  for (extension in validExtensions.vals())
+  {
+    if (Text.endsWith(fileName, #text extension))
+    {
+      extensionMatched := true;
+    };
+  };
+
+  return extensionMatched;
+};
+
+/*
  * Public Function which enables a logged in user to upload a file to their account if they have enough space available
  * @params fileName: The file name that the uplaoded file should be called 
  * @params content: The file to be uploaded 
  * @return A text of the results of the uploading status
 */
 public shared(msg) func upload(fileName : Text, content : File) : async Text {
+
   let user = msg.caller;
   // if (Principal.isAnonymous(user))
   // {
   //       return "Error: user not logged in";
   // };
+
+  // Ensure that the file extension is supported
+  let validExtension : Bool = isValidFileExtension(fileName);
+  if (validExtension == false) {
+    return "File Extension not valid";
+  };
 
   // Make sure the new file isn't above the limit
   let fileSize = content.size();
@@ -768,6 +798,10 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
   return "File successfully uploaded";
 };
 
+/*
+ * Public Function which displays all the file names that the user has uploaded to their account
+ * @return An array of text that contain all the file names uploaded to the current users account
+*/
 public shared(msg) func listFiles() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
