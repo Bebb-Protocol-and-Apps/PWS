@@ -745,10 +745,11 @@ private func isValidFileExtension(fileName : Text) : Bool {
 public shared(msg) func upload(fileName : Text, content : File) : async Text {
 
   let user = msg.caller;
-  // if (Principal.isAnonymous(user))
-  // {
-  //       return "Error: user not logged in";
-  // };
+  
+  if (Principal.isAnonymous(user))
+  {
+        return "Error: user not logged in";
+  };
 
   // Ensure that the file extension is supported
   let validExtension : Bool = isValidFileExtension(fileName);
@@ -846,10 +847,10 @@ public shared(msg) func listFileIds() : async [Text] {
 };
 
 /*
- * Public Function which retrieves a file by file id
+ * Public Function which retrieves a file info by file id
  * Currently there are no visability constraints on files, but once visability is built it can be added here
  *
- * @return The file associated with the file id
+ * @return The file info associated with the file id
 */
 public shared(msg) func getFile(fileId: Text) : async ?FileInfo {
   return fileDatabase.get(fileId);
