@@ -608,7 +608,14 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
 
 /* 
- * Code for uploading files
+ * 
+ *
+ *
+ *
+ *  Code for uploading files
+ *
+ *
+ *
 */
 // 1 MB is the max size for a single file
 let oneMB : Nat = 1048576; // 1 MB
@@ -619,17 +626,29 @@ private let maxFiles : Nat = 10;
 type FileUserId = Principal;
 type File = Blob;
 
+/*
+ * Structure is used to store a file with the associated metadata.
+ * In the future we can add file visability permissions here
+ */
 public type FileInfo = {
+  // Stores who the owner of the file is
   owner_principal : Text;
+  // Stores the file name, useful for human readableness
   file_name : Text;
+  // Stores the actual contents of the file
   file_content : Blob;
 };
 
+/*
+ * Structure is used to store a file user record which keeps track of how much data a single user has saved
+ *  and which files that specific user owns
+ */
 public type UserRecord = {
+  // The total size of files the user has uploaded
   totalSize : Nat;
+  // The file ids of the files the user owns. The file ids can be used to search in the file database
   file_ids : [Text];
 };
-
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
@@ -698,6 +717,10 @@ private func getUserFiles(user: FileUserId) : [FileInfo] {
  * 
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return The total size of files uploaded to their account 
+ *
+ * @note: Checking if a file is valid via the file extension is generally  dumb since it is easy to change.
+ *          In the future we want to add the ability to inspect the file and ensure it is actually the file
+ *          it claims to be.
 */
 private func isValidFileExtension(fileName : Text) : Bool {
   let validExtensions : [Text] = ["glb", "gltf" ];
@@ -765,17 +788,21 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
   while(found_unique_file_id)
   {
     // 100 is chosen arbitarily to ensure that in case of something weird happening
-    //  there is a timeout
+    //  there is a timeout and it errors rather then looking forever
     if (counter > 100)
     {
       return "Error: Failed to upload file due to not finding a unique identifier, please contact support";
     };
 
     // Technically there could be a race condition here... lets see if we can make this an atomic 
-    //  operation
+    //  operation. For now since the chance of a collision is realllly low, the chance that two names within
+    //  the time the UUID is checked and then aquired 1 line later happens to be the same is small
+    //  we can leave this for now. When we have higher usage we probably should integrate to a more robust
+    //  database system with atomic operations anyways.
+    // The only risk is if the randomness in the names isn't that random? Though it should be but it is hard to 
+    //  check now. Checking for race conditions in the uploading will need to be checked in the future
     let g = Source.Source();
     file_id := UUID.toText(await g.new());
-
     if (fileDatabase.get(file_id) == null)
     {
       // Claim the id by putting an empty record into it
