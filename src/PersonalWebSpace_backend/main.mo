@@ -781,7 +781,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
 
   var found_unique_file_id : Bool = true;
   var counter : Nat = 0;
-  var file_id : Text = "";
+  var newFileId : Text = "";
 
   // Keep searching for a unique name until one is found, the chances of collisions are really low
   //  but in case it happens keep looping until a file id is not found
@@ -794,19 +794,19 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
       return "Error: Failed to upload file due to not finding a unique identifier, please contact support";
     };
 
-    // Technically there could be a race condition here... lets see if we can make this an atomic 
+    // Technically there is a race condition here... lets see if we can make this an atomic 
     //  operation. For now since the chance of a collision is realllly low, the chance that two names within
     //  the time the UUID is checked and then aquired 1 line later happens to be the same is small
     //  we can leave this for now. When we have higher usage we probably should integrate to a more robust
     //  database system with atomic operations anyways.
-    // The only risk is if the randomness in the names isn't that random? Though it should be but it is hard to 
-    //  check now. Checking for race conditions in the uploading will need to be checked in the future
+    // The only risk is if the randomness in the names isn't that random? We will have to see how robust the Random module is.
+    //  Checking for race conditions in the uploading will need to be checked in the future
     let g = Source.Source();
-    file_id := UUID.toText(await g.new());
-    if (fileDatabase.get(file_id) == null)
+    newFileId := UUID.toText(await g.new());
+    if (fileDatabase.get(newFileId) == null)
     {
       // Claim the id by putting an empty record into it
-      fileDatabase.put(file_id, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
+      fileDatabase.put(newFileId, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
       found_unique_file_id := false;
     };
 
@@ -815,10 +815,10 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
 
   // Add the new file to the file database
   let file_info = { file_name = fileName; file_content = content; owner_principal = Principal.toText(user) };
-  fileDatabase.put(file_id, file_info);
+  fileDatabase.put(newFileId, file_info);
 
   // Add the new file id to the user record
-  let newFilesId = Array.append(userFilesIds,[file_id]);
+  let newFilesId = Array.append(userFilesIds,[newFileId]);
   let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
   userFileRecords.put(Principal.toText(user), newUserRecord);
 
