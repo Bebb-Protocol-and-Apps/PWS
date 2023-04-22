@@ -616,14 +616,14 @@ type UserId = Principal;
 type File = Blob;
 
 public type FileInfo = {
+  owner_principal : Text;
   file_name : Text;
   file_content : Blob;
-  file_id : Text;
 };
 
 public type UserRecord = {
   totalSize : Nat;
-  files : [FileInfo];
+  file_ids : [Text];
 };
 
 // Variable stores reference of a user to all their files
@@ -640,10 +640,33 @@ private func getUserTotalSize(user: UserId) : Nat {
   };
 };
 
+private func getUserFileIds(user: UserId) : [Text] {
+  switch (storage.get(Principal.toText(user))) {
+    case (null) { return []; };
+    case (?userRecord) {
+       return userRecord.file_ids; 
+       };
+  };
+};
+
+// Retrieves all the files of the specified user
 private func getUserFiles(user: UserId) : [FileInfo] {
   switch (storage.get(Principal.toText(user))) {
     case (null) { return []; };
-    case (?userRecord) { return userRecord.files; };
+    case (?userRecord) { 
+      var userFileInfo : [FileInfo] = [];
+      for (file_id in userRecord.file_ids.vals())
+      {
+        let retrievedFileInfo : ?FileInfo = file_search.get(file_id);
+        switch (retrievedFileInfo) {
+            case(?checkedFileInfo) {
+                userFileInfo := Array.append<FileInfo>(userFileInfo, [checkedFileInfo]);
+            }
+        };
+
+      };      
+      return userFileInfo;      
+      };
   };
 };
 
@@ -654,29 +677,32 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
   //       return "Error: user not logged in";
   // };
 
+  // Make sure the new file isn't above the limit
   let fileSize = content.size();
   if (fileSize > maxFileSize) {
     return "Error: File size exceeds the limit.";
   };
 
+  // Ensure that the user isn't uploading an empty file
   if (fileSize <= 0) {
     return "Error: File empty";
   };
 
+  // Retrieve the total amount of data stored by the user
   let userTotalSize = getUserTotalSize(user);
   if (userTotalSize + fileSize > maxTotalSize) {
     return "Error: Total size limit reached.";
   };
 
-  let userFiles = getUserFiles(user);
-  if (userFiles.size() >= maxFiles) {
+  // Retrieve all the file ids used by the current user
+  let userFilesIds = getUserFileIds(user);
+  if (userFilesIds.size() >= maxFiles) {
     return "Error: File limit reached.";
   };
 
-
   var found_unique_file_id : Bool = true;
   var counter : Nat = 0;
-  var file_id = "";
+  var file_id : Text = "";
 
   // Keep searching for a unique name until one is found, the chances of collisions are really low
   //  but in case it happens keep looping until a file id is not found
@@ -697,18 +723,20 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
     if (file_search.get(file_id) == null)
     {
       // Claim the id by putting an empty record into it
-      file_search.put(file_id, { file_name = "blank"; file_content = ""; file_id = "blank"});
+      file_search.put(file_id, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
       found_unique_file_id := false;
     };
 
     counter := counter + 1;
   };
 
-  // Add the new file to the user record and save it back to the
-  let file_info = [{ file_name = fileName; file_content = content; file_id = file_id}];
-  let newFiles = Array.append(userFiles, file_info);
-  let newUserRecord = {files = newFiles; totalSize = userTotalSize + fileSize };
+  // Add the new file to the storage 
+  let file_info = { file_name = fileName; file_content = content; owner_principal = Principal.toText(user) };
+  file_search.put(file_id, file_info);
 
+  // Add the new file id to the user record
+  let newFilesId = Array.append(userFilesIds,[file_id]);
+  let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
   storage.put(Principal.toText(user), newUserRecord);
 
   return "File successfully uploaded";
@@ -717,7 +745,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
 public shared(msg) func listFiles() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
-  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_id );
+  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
 };
 
 };
