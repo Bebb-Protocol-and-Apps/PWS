@@ -745,11 +745,11 @@ private func isValidFileExtension(fileName : Text) : Bool {
 public shared(msg) func upload(fileName : Text, content : File) : async Text {
 
   let user = msg.caller;
-  
-  if (Principal.isAnonymous(user))
-  {
-        return "Error: user not logged in";
-  };
+
+  // if (Principal.isAnonymous(user))
+  // {
+  //       return "Error: user not logged in";
+  // };
 
   // Ensure that the file extension is supported
   let validExtension : Bool = isValidFileExtension(fileName);
@@ -855,5 +855,67 @@ public shared(msg) func listFileIds() : async [Text] {
 public shared(msg) func getFile(fileId: Text) : async ?FileInfo {
   return fileDatabase.get(fileId);
 };
+
+/*
+ * Public Function which retrieves the logged in users userRecord
+ *
+ * @return The user record associated with the logged in users
+*/
+public shared(msg) func getUserRecord() : async ?UserRecord {
+  let user = msg.caller;
+  return userFileRecords.get(Principal.toText(user));
+};
+
+/*
+ * Public Function which retrieves a file info by file id
+ * Currently there are no visability constraints on files, but once visability is built it can be added here
+ *
+ * @return The file info associated with the file id
+*/
+public shared(msg) func deleteFile(fileId: Text) : async Text {
+  let user = msg.caller;
+
+  if (Principal.isAnonymous(user))
+  {
+        return "Error: user not logged in";
+  };
+
+  // Check to make sure that the user owns the file attempting to be deleted
+  let userFileIds = getUserFileIds(user);
+  let fileIdOwnedByUser : Bool = Array.find<Text>(userFileIds, func x = fileId == x) != null;
+  if (fileIdOwnedByUser == false)
+  {
+    return "Error deleting file";
+  };
+
+  // Figure out the size of the file attempting to be deleted
+  let fileInfo : ?FileInfo = fileDatabase.get(fileId);
+  var fileSize = 0;
+  switch (fileInfo) {
+    case (null) { fileSize := 0;};
+    case (?value) { fileSize := value.file_content.size(); };
+  };
+
+  // // Attempt to retrieve the user record and then delete the file and then update
+  //  the user record to reflect the file being deleted
+  let optionalUserRecord : ?UserRecord = userFileRecords.get(Principal.toText(user));
+  switch (optionalUserRecord) {
+    case (null) {
+      return "Error deleting file";
+    };
+    case (?userRecord) {
+
+      // Delete the file
+      let deleteFileResult = fileDatabase.remove(fileId);
+
+      // Delete the file from the user record and reduce the file size
+      let updatedFileIds : [Text] = Array.filter<Text>(userFileIds, func x = x != fileId);
+      let newUserRecord : UserRecord = {file_ids = updatedFileIds; totalSize = userRecord.totalSize - fileSize; };
+      userFileRecords.put(Principal.toText(user), newUserRecord);
+    };
+  };
+
+    return "Success";
+  };
 
 };
