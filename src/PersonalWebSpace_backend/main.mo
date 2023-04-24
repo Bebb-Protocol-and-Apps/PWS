@@ -746,10 +746,10 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
 
   let user = msg.caller;
 
-  // if (Principal.isAnonymous(user))
-  // {
-  //       return "Error: user not logged in";
-  // };
+  if (Principal.isAnonymous(user))
+  {
+        return "Error: user not logged in";
+  };
 
   // Ensure that the file extension is supported
   let validExtension : Bool = isValidFileExtension(fileName);
