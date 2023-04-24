@@ -17,6 +17,11 @@ export type ExtendedMetadataResult = {
   } |
   { 'Err' : ApiError };
 export type File = Uint8Array;
+export interface FileInfo {
+  'file_name' : string,
+  'file_content' : Uint8Array,
+  'owner_principal' : string,
+}
 export type HeaderField = [string, string];
 export type InterfaceId = { 'Burn' : null } |
   { 'Mint' : null } |
@@ -62,16 +67,20 @@ export interface PersonalWebSpace {
   'balanceOfDip721' : ActorMethod<[Principal], bigint>,
   'check_user_has_nft' : ActorMethod<[], boolean>,
   'createSpace' : ActorMethod<[string], NftResult>,
+  'deleteFile' : ActorMethod<[string], string>,
   'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
+  'getFile' : ActorMethod<[string], [] | [FileInfo]>,
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
   'getRandomSpace' : ActorMethod<[], NftResult>,
   'getSpace' : ActorMethod<[TokenId], NftResult>,
   'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
+  'getUserRecord' : ActorMethod<[], [] | [UserRecord]>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
-  'listFiles' : ActorMethod<[], Array<string>>,
+  'listFileIds' : ActorMethod<[], Array<string>>,
+  'listFileNames' : ActorMethod<[], Array<string>>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
@@ -133,4 +142,5 @@ export interface UpdateMetadataValuesInput {
   'updatedSpaceData' : [] | [string],
   'updatedSpaceName' : string,
 }
+export interface UserRecord { 'totalSize' : bigint, 'file_ids' : Array<string> }
 export interface _SERVICE extends PersonalWebSpace {}

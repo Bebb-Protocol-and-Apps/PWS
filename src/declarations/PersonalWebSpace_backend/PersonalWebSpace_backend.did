@@ -1,3 +1,8 @@
+type UserRecord = 
+ record {
+   file_ids: vec text;
+   totalSize: nat;
+ };
 type UpdateMetadataValuesInput = 
  record {
    id: TokenId;
@@ -52,16 +57,20 @@ type PersonalWebSpace =
    balanceOfDip721: (principal) -> (nat64) query;
    check_user_has_nft: () -> (bool) query;
    createSpace: (text) -> (NftResult);
+   deleteFile: (text) -> (text);
    getCallerSpaces: () -> (vec Nft) query;
+   getFile: (text) -> (opt FileInfo);
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
    getMetadataForUserDip721: (principal) -> (ExtendedMetadataResult);
    getRandomSpace: () -> (NftResult);
    getSpace: (TokenId) -> (NftResult) query;
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
+   getUserRecord: () -> (opt UserRecord);
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
-   listFiles: () -> (vec text);
+   listFileIds: () -> (vec text);
+   listFileNames: () -> (vec text);
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -160,6 +169,12 @@ type HeaderField =
  record {
    text;
    text;
+ };
+type FileInfo = 
+ record {
+   file_content: blob;
+   file_name: text;
+   owner_principal: text;
  };
 type File = blob;
 type ExtendedMetadataResult = 
