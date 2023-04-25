@@ -742,7 +742,7 @@ private func isValidFileExtension(fileName : Text) : Bool {
  * @params content: The file to be uploaded 
  * @return A text of the results of the uploading status
 */
-public shared(msg) func upload(fileName : Text, content : File) : async Text {
+public shared(msg) func uploadUserFile(fileName : Text, content : File) : async Text {
 
   let user = msg.caller;
 
@@ -830,7 +830,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func listFileNames() : async [Text] {
+public shared(msg) func liseUserFileNames() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
   return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
@@ -840,7 +840,7 @@ public shared(msg) func listFileNames() : async [Text] {
  * Public Function which displays all the file ids that the user has uploaded to their account
  * @return An array of text that contain all the file ids uploaded to the current users account
 */
-public shared(msg) func listFileIds() : async [Text] {
+public shared(msg) func listUserFileIds() : async [Text] {
   let user = msg.caller;
   let userFileIds = getUserFileIds(user);
   return userFileIds;
@@ -867,8 +867,8 @@ public shared(msg) func getUserRecord() : async ?UserRecord {
 };
 
 /*
- * Public Function which retrieves a file info by file id
- * Currently there are no visability constraints on files, but once visability is built it can be added here
+ * Public Function which deletes the file_id that is passed in
+ * The file must be owned by the current logged in user to allow deleting the file
  *
  * @return The file info associated with the file id
 */
