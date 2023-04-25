@@ -644,7 +644,7 @@ public type FileInfo = {
  *  and which files that specific user owns
  */
 public type UserRecord = {
-  // The total size of files the user has uploaded
+  // The total size of files the user has uploaded in Bytes
   totalSize : Nat;
   // The file ids of the files the user owns. The file ids can be used to search in the file database
   file_ids : [Text];
@@ -652,7 +652,7 @@ public type UserRecord = {
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
-// Files should be synced with the UserRecord assicated with it to keep the user/data scheme in sync
+// Files should be synced with the UserRecord associated with it to keep the user/data scheme in sync
 private var fileDatabase : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
 
 // Variable stores reference of a user with all the files they have uploaded to their account.
@@ -665,7 +665,7 @@ private var userFileRecords : HashMap.HashMap<Text, UserRecord> = HashMap.HashMa
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return The total size of files uploaded to their account 
 */
-private func getUserTotalSize(user: FileUserId) : Nat {
+private func getUserFilesTotalSize(user: FileUserId) : Nat {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return 0; };
     case (?userRecord) { return userRecord.totalSize; };
@@ -715,8 +715,8 @@ private func getUserFiles(user: FileUserId) : [FileInfo] {
 /*
  * Function which checks the file extension and ensures that it is within the supported formats
  * 
- * @params user: The user id associated with the account, i.e a text representation of the principal
- * @return The total size of files uploaded to their account 
+ * @params fileName: The file name to check to see if it is valid
+ * @return Whether the file name is a valid type
  *
  * @note: Checking if a file is valid via the file extension is generally  dumb since it is easy to change.
  *          In the future we want to add the ability to inspect the file and ensure it is actually the file
@@ -738,7 +738,7 @@ private func isValidFileExtension(fileName : Text) : Bool {
 
 /*
  * Public Function which enables a logged in user to upload a file to their account if they have enough space available
- * @params fileName: The file name that the uplaoded file should be called 
+ * @params fileName: The file name that the uploaded file should be called 
  * @params content: The file to be uploaded 
  * @return A text of the results of the uploading status
 */
@@ -769,7 +769,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
   };
 
   // Retrieve the total amount of data stored by the user
-  let userTotalSize = getUserTotalSize(user);
+  let userTotalSize = getUserFilesTotalSize(user);
   if (userTotalSize + fileSize > maxTotalSize) {
     return "Error: Total size limit reached.";
   };
@@ -780,13 +780,13 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
     return "Error: File limit reached.";
   };
 
-  var found_unique_file_id : Bool = true;
+  var found_unique_file_id : Bool = false;
   var counter : Nat = 0;
   var newFileId : Text = "";
 
   // Keep searching for a unique name until one is found, the chances of collisions are really low
   //  but in case it happens keep looping until a file id is not found
-  while(found_unique_file_id)
+  while(not found_unique_file_id)
   {
     // 100 is chosen arbitarily to ensure that in case of something weird happening
     //  there is a timeout and it errors rather then looking forever
@@ -808,7 +808,7 @@ public shared(msg) func upload(fileName : Text, content : File) : async Text {
     {
       // Claim the id by putting an empty record into it
       fileDatabase.put(newFileId, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
-      found_unique_file_id := false;
+      found_unique_file_id := true;
     };
 
     counter := counter + 1;
