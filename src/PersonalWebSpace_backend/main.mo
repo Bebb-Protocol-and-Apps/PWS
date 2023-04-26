@@ -28,6 +28,12 @@ import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
 import Blob "mo:base/Blob";
 
+// Import types for file storage
+import FileUserId "./types/FileStorageTypes";
+import File "./types/FileStorageTypes";
+import FileInfo "./types/FileStorageTypes";
+import UserRecord "./types/FileStorageTypes";
+
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
 // TODO: instead add functions to manage cycles balance and gather stats
   public func greet(name : Text) : async Text {
@@ -622,33 +628,6 @@ let oneMB : Nat = 1048576; // 1 MB
 private let maxFileSize : Nat = oneMB; 
 private let maxTotalSize : Nat = 10 * oneMB;
 private let maxFiles : Nat = 10;
-
-type FileUserId = Principal;
-type File = Blob;
-
-/*
- * Structure is used to store a file with the associated metadata.
- * In the future we can add file visability permissions here
- */
-public type FileInfo = {
-  // Stores who the owner of the file is
-  owner_principal : Text;
-  // Stores the file name, useful for human readableness
-  file_name : Text;
-  // Stores the actual contents of the file
-  file_content : Blob;
-};
-
-/*
- * Structure is used to store a file user record which keeps track of how much data a single user has saved
- *  and which files that specific user owns
- */
-public type UserRecord = {
-  // The total size of files the user has uploaded in Bytes
-  totalSize : Nat;
-  // The file ids of the files the user owns. The file ids can be used to search in the file database
-  file_ids : [Text];
-};
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
