@@ -668,17 +668,18 @@ private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
-private func getUserFiles(user: FileTypes.FileUserId) : [FileTypes.FileInfo] {
+private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.FileInfo> {
   switch (userFileRecords.get(Principal.toText(user))) {
-    case (null) { return []; };
+    case (null) { return Buffer.Buffer<FileTypes.FileInfo>(0); };
     case (?userRecord) { 
-      var userFileInfo : [FileTypes.FileInfo] = [];
+      var userFileInfo = Buffer.Buffer<FileTypes.FileInfo>(userRecord.file_ids.size());
       for (file_id in userRecord.file_ids.vals())
       {
         let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
-        switch (retrievedFileInfo) {
+          switch (retrievedFileInfo) {
+            case(null) {};
             case(?checkedFileInfo) {
-                userFileInfo := Array.append<FileTypes.FileInfo>(userFileInfo, [checkedFileInfo]);
+                userFileInfo.add(checkedFileInfo);
             }
         };
 
@@ -809,7 +810,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
 public shared(msg) func liseUserFileNames() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
-  return Array.map<FileTypes.FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
+  return Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name);
 };
 
 /*
