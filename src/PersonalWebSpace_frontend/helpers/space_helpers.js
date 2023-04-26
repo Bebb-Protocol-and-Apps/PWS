@@ -7,7 +7,7 @@ export const formatUserSpaces = (userSpaces) => {
     const space = userSpaces[i];
     userSpacesString += `<div class='responsive' width="100%" height="auto"> <div class='space'> `;
     const spaceURL = `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`;
-    userSpacesString += `<a target='_blank' href="${spaceURL}" > <iframe src="${spaceURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe> </a> `;
+    userSpacesString += `<a target='_blank' href="${spaceURL}" > <iframe src="${spaceURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe> </a> `;
     userSpacesString += `<button onclick="window.open('${spaceURL}','_blank')" class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button> `;
     userSpacesString += `<button type='button' class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>`;
     // show space details
