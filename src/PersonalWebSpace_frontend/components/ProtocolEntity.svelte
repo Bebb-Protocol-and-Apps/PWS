@@ -46,7 +46,7 @@
 
 {#if entityHasValidUrl()}
   <div class="space-neighbor-preview space-y-1">
-    <iframe src={entity.externalId} title="Entity Preview" width="100%" height="auto" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
+    <iframe src={entity.externalId} title="Entity Preview" width="100%" height="auto" sandbox="allow-scripts allow-same-origin"></iframe>
     <button on:click={() => window.open(entity.externalId,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
     {#if viewerIsSpaceOwner}
       {#if linkDeletionInProgress}
