@@ -255,7 +255,7 @@
                     />
                     {#if newNeighborUrl !== ""}
                         {#if neighborUrlInputHandler(newNeighborUrl)}
-                            <iframe src={newNeighborUrl} title="Preview of the new Neighbor" width="100%" height="auto" class="py-2" sandbox="allow-scripts" credentialless referrerpolicy="no-referrer"></iframe>
+                            <iframe src={newNeighborUrl} title="Preview of the new Neighbor" width="100%" height="auto" class="py-2" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
                             {#if neighborCreationInProgress}
                                 <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
                             {:else}
