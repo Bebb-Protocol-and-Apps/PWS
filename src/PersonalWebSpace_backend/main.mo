@@ -17,6 +17,7 @@ import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import UUID "mo:uuid/UUID";
 import Source "mo:uuid/async/SourceV4";
+import FileTypes "./types/FileStorageTypes";
 
 
 import Types "./Types";
@@ -28,11 +29,7 @@ import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
 import Blob "mo:base/Blob";
 
-// Import types for file storage
-import FileUserId "./types/FileStorageTypes";
-import File "./types/FileStorageTypes";
-import FileInfo "./types/FileStorageTypes";
-import UserRecord "./types/FileStorageTypes";
+
 
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
 // TODO: instead add functions to manage cycles balance and gather stats
@@ -632,11 +629,11 @@ private let maxFiles : Nat = 10;
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
 // Files should be synced with the UserRecord associated with it to keep the user/data scheme in sync
-private var fileDatabase : HashMap.HashMap<Text, FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
+private var fileDatabase : HashMap.HashMap<Text, FileTypes.FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
 
 // Variable stores reference of a user with all the files they have uploaded to their account.
 //  The user record stores reference to all the UUIDs for the files they have stored
-private var userFileRecords : HashMap.HashMap<Text, UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+private var userFileRecords : HashMap.HashMap<Text, FileTypes.UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
 
 /*
  * Function retrieves the total size of the files uploaded to their account
@@ -644,7 +641,7 @@ private var userFileRecords : HashMap.HashMap<Text, UserRecord> = HashMap.HashMa
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return The total size of files uploaded to their account 
 */
-private func getUserFilesTotalSize(user: FileUserId) : Nat {
+private func getUserFilesTotalSize(user: FileTypes.FileUserId) : Nat {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return 0; };
     case (?userRecord) { return userRecord.totalSize; };
@@ -657,7 +654,7 @@ private func getUserFilesTotalSize(user: FileUserId) : Nat {
  * @return All the File Ids associated with the user account. The file Ids can be used to retrieve the files
  *  stored within the fileDatabase
 */
-private func getUserFileIds(user: FileUserId) : [Text] {
+private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) {
@@ -671,17 +668,17 @@ private func getUserFileIds(user: FileUserId) : [Text] {
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
-private func getUserFiles(user: FileUserId) : [FileInfo] {
+private func getUserFiles(user: FileTypes.FileUserId) : [FileTypes.FileInfo] {
   switch (userFileRecords.get(Principal.toText(user))) {
     case (null) { return []; };
     case (?userRecord) { 
-      var userFileInfo : [FileInfo] = [];
+      var userFileInfo : [FileTypes.FileInfo] = [];
       for (file_id in userRecord.file_ids.vals())
       {
-        let retrievedFileInfo : ?FileInfo = fileDatabase.get(file_id);
+        let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
         switch (retrievedFileInfo) {
             case(?checkedFileInfo) {
-                userFileInfo := Array.append<FileInfo>(userFileInfo, [checkedFileInfo]);
+                userFileInfo := Array.append<FileTypes.FileInfo>(userFileInfo, [checkedFileInfo]);
             }
         };
 
@@ -721,7 +718,7 @@ private func isValidFileExtension(fileName : Text) : Bool {
  * @params content: The file to be uploaded 
  * @return A text of the results of the uploading status
 */
-public shared(msg) func uploadUserFile(fileName : Text, content : File) : async Text {
+public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File) : async Text {
 
   let user = msg.caller;
 
@@ -812,7 +809,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : File) : async 
 public shared(msg) func liseUserFileNames() : async [Text] {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
-  return Array.map<FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
+  return Array.map<FileTypes.FileInfo, Text>(userFiles, func fileInfo = fileInfo.file_name );
 };
 
 /*
@@ -831,7 +828,7 @@ public shared(msg) func listUserFileIds() : async [Text] {
  *
  * @return The file info associated with the file id
 */
-public shared(msg) func getFile(fileId: Text) : async ?FileInfo {
+public shared(msg) func getFile(fileId: Text) : async ?FileTypes.FileInfo {
   return fileDatabase.get(fileId);
 };
 
@@ -840,7 +837,7 @@ public shared(msg) func getFile(fileId: Text) : async ?FileInfo {
  *
  * @return The user record associated with the logged in users
 */
-public shared(msg) func getUserRecord() : async ?UserRecord {
+public shared(msg) func getUserRecord() : async ?FileTypes.UserRecord {
   let user = msg.caller;
   return userFileRecords.get(Principal.toText(user));
 };
@@ -856,7 +853,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
 
   if (Principal.isAnonymous(user))
   {
-        return "Error: user not logged in";
+    return "Error: user not logged in";
   };
 
   // Check to make sure that the user owns the file attempting to be deleted
@@ -868,7 +865,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
   };
 
   // Figure out the size of the file attempting to be deleted
-  let fileInfo : ?FileInfo = fileDatabase.get(fileId);
+  let fileInfo : ?FileTypes.FileInfo = fileDatabase.get(fileId);
   var fileSize = 0;
   switch (fileInfo) {
     case (null) { fileSize := 0;};
@@ -877,7 +874,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
 
   // // Attempt to retrieve the user record and then delete the file and then update
   //  the user record to reflect the file being deleted
-  let optionalUserRecord : ?UserRecord = userFileRecords.get(Principal.toText(user));
+  let optionalUserRecord : ?FileTypes.UserRecord = userFileRecords.get(Principal.toText(user));
   switch (optionalUserRecord) {
     case (null) {
       return "Error deleting file";
@@ -889,7 +886,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
 
       // Delete the file from the user record and reduce the file size
       let updatedFileIds : [Text] = Array.filter<Text>(userFileIds, func x = x != fileId);
-      let newUserRecord : UserRecord = {file_ids = updatedFileIds; totalSize = userRecord.totalSize - fileSize; };
+      let newUserRecord : FileTypes.UserRecord = {file_ids = updatedFileIds; totalSize = userRecord.totalSize - fileSize; };
       userFileRecords.put(Principal.toText(user), newUserRecord);
     };
   };

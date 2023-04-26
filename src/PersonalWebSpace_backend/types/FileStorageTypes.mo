@@ -1,10 +1,17 @@
+import Types "../Types";
+import Blob "mo:base/Blob";
+import Principal "mo:base/Principal";
+
 module {
 
     // The user id used for hasing the user record
-    type FileUserId = Principal;
+    public type FileUserId = Principal;
     
     // The type of the file storage
-    type File = Blob;
+    public type File = Blob;
+
+    // Defines a common return type for all File requests
+    public type FileResult = Types.Result<Text, Types.ApiError>;
 
     /*
      * Structure is used to store a file with the associated metadata.
