@@ -87,7 +87,7 @@
   <h3 class="text-xl font-semibold">Spaces Ready For You:</h3>
   <!-- Default Space 1 -->
   <h3 class="text-l font-semibold">The Web3 Cockpit</h3>
-  <iframe src="#/defaultspace/1" title="The Web3 Cockpit" width="100%" height="auto" sandbox="allow-scripts allow-same-origin"></iframe>
+  <iframe src="#/defaultspace/1" title="The Web3 Cockpit" width="100%" height="auto"></iframe>
   {#if !$store.isAuthed}
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
     <p id='createSubtextDefault1'>{loginSubtext}</p>
