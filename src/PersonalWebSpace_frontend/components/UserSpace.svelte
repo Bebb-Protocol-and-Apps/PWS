@@ -105,7 +105,7 @@
 <div class="responsive">
   <div class="space space-y-1"> 
     <a target="_blank" rel="noreferrer" href={spaceURL} >
-      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" credentialless></iframe>
+      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" credentialless referrerpolicy="no-referrer"></iframe>
     </a>
     {#if isViewerSpaceOwner() && entityIdToLinkTo !== ""}
       {#if linkCreationInProgress}
