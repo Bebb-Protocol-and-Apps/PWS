@@ -15,10 +15,9 @@ import Random "mo:base/Random";
 import RBTree "mo:base/RBTree";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
-import UUID "mo:uuid/UUID";
-import Source "mo:uuid/async/SourceV4";
-import FileTypes "./types/FileStorageTypes";
 
+import FileTypes "./types/FileStorageTypes";
+import Utils "./Utils";
 
 import Types "./Types";
 import HTTP "./Http";
@@ -779,8 +778,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
     //  database system with atomic operations anyways.
     // The only risk is if the randomness in the names isn't that random? We will have to see how robust the Random module is.
     //  Checking for race conditions in the uploading will need to be checked in the future
-    let g = Source.Source();
-    newFileId := UUID.toText(await g.new());
+    newFileId := await Utils.newRandomUniqueId();
     if (fileDatabase.get(newFileId) == null)
     {
       // Claim the id by putting an empty record into it
