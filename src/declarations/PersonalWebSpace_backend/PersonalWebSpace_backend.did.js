@@ -137,8 +137,8 @@ export const idlFactory = ({ IDL }) => {
     'getUserRecord' : IDL.Func([], [IDL.Opt(UserRecord)], []),
     'greet' : IDL.Func([IDL.Text], [IDL.Text], []),
     'http_request' : IDL.Func([Request], [Response], ['query']),
-    'listFileIds' : IDL.Func([], [IDL.Vec(IDL.Text)], []),
-    'listFileNames' : IDL.Func([], [IDL.Vec(IDL.Text)], []),
+    'liseUserFileNames' : IDL.Func([], [IDL.Vec(IDL.Text)], []),
+    'listUserFileIds' : IDL.Func([], [IDL.Vec(IDL.Text)], []),
     'logoDip721' : IDL.Func([], [LogoResult], ['query']),
     'mintDip721' : IDL.Func([IDL.Principal, MetadataDesc], [MintReceipt], []),
     'nameDip721' : IDL.Func([], [IDL.Text], ['query']),
@@ -161,7 +161,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
-    'upload' : IDL.Func([IDL.Text, File], [IDL.Text], []),
+    'uploadUserFile' : IDL.Func([IDL.Text, File], [IDL.Text], []),
   });
   return PersonalWebSpace;
 };

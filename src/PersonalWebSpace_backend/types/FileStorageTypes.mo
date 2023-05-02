@@ -4,14 +4,25 @@ import Principal "mo:base/Principal";
 
 module {
 
+    // Result used when the file api returns a value
+    public type FileResult = Types.Result<FileResultSuccessOptions, Types.ApiError>;
+
+    // Success options for the file api
+    public type FileResultSuccessOptions = {
+        #Success;
+        #File: FileInfo;
+        #UserRecord: UserRecord;
+        #FileId: Text;
+        #FileNames: [Text];
+        #FileIds: [Text];
+        #Other : Text;
+    };
+
     // The user id used for hasing the user record
     public type FileUserId = Principal;
     
     // The type of the file storage
     public type File = Blob;
-
-    // Defines a common return type for all File requests
-    public type FileResult = Types.Result<Text, Types.ApiError>;
 
     /*
      * Structure is used to store a file with the associated metadata.

@@ -69,8 +69,8 @@ type PersonalWebSpace =
    getUserRecord: () -> (opt UserRecord);
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
-   listFileIds: () -> (vec text);
-   listFileNames: () -> (vec text);
+   liseUserFileNames: () -> (vec text);
+   listUserFileIds: () -> (vec text);
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -81,7 +81,7 @@ type PersonalWebSpace =
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
-   upload: (text, File) -> (text);
+   uploadUserFile: (text, File) -> (text);
  };
 type OwnerResult = 
  variant {

@@ -21,7 +21,7 @@ module {
     #Unauthorized;
     #InvalidTokenId;
     #ZeroAddress;
-    #Other;
+    #Other: Text;
   };
 
   public type Result<S, E> = {

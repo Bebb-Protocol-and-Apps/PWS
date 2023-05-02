@@ -97,7 +97,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         ) {
           return #Err(#Unauthorized);
         } else if (Principal.notEqual(from, token.owner)) {
-          return #Err(#Other);
+          return #Err(#Other(""));
         } else {
           nfts := List.map(nfts, func (item : Types.Nft) : Types.Nft {
             if (item.id == token.id) {
@@ -160,7 +160,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     let item = List.find(nfts, func(token: Types.Nft) : Bool { token.owner == user });
     switch (item) {
       case null {
-        return #Err(#Other);
+        return #Err(#Other(""));
       };
       case (?token) {
         return #Ok({
@@ -414,7 +414,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
       switch (random.range(p)) {
         case (null) {
-          return #Err(#Other);
+          return #Err(#Other(""));
         };
         case (?randomNumber) {
           let spaceId = randomNumber % numberOfSpaces;
@@ -430,7 +430,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
       };
     } else {
-      return #Err(#Other);
+      return #Err(#Other(""));
     };
   };
 
@@ -719,42 +719,42 @@ private func isValidFileExtension(fileName : Text) : Bool {
  * @params content: The file to be uploaded 
  * @return A text of the results of the uploading status
 */
-public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File) : async Text {
+public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File) : async FileTypes.FileResult {
 
   let user = msg.caller;
 
   if (Principal.isAnonymous(user))
   {
-        return "Error: user not logged in";
+    return #Err(#Unauthorized);
   };
 
   // Ensure that the file extension is supported
   let validExtension : Bool = isValidFileExtension(fileName);
   if (validExtension == false) {
-    return "File Extension not valid";
+    return #Err(#Other("File Extension not valid"));
   };
 
   // Make sure the new file isn't above the limit
   let fileSize = content.size();
   if (fileSize > maxFileSize) {
-    return "Error: File size exceeds the limit.";
+    return #Err(#Other("Error: File size exceeds the limit."));
   };
 
   // Ensure that the user isn't uploading an empty file
   if (fileSize <= 0) {
-    return "Error: File empty";
+    return #Err(#Other("Error: File Empty"));
   };
 
   // Retrieve the total amount of data stored by the user
   let userTotalSize = getUserFilesTotalSize(user);
   if (userTotalSize + fileSize > maxTotalSize) {
-    return "Error: Total size limit reached.";
+    return #Err(#Other("Error: Total size limit reached."));
   };
 
   // Retrieve all the file ids used by the current user
   let userFilesIds = getUserFileIds(user);
   if (userFilesIds.size() >= maxFiles) {
-    return "Error: File limit reached.";
+    return #Err(#Other("Error: File limit reached."));
   };
 
   var found_unique_file_id : Bool = false;
@@ -769,7 +769,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
     //  there is a timeout and it errors rather then looking forever
     if (counter > 100)
     {
-      return "Error: Failed to upload file due to not finding a unique identifier, please contact support";
+      return #Err(#Other("Error: Failed to upload file due to not finding a unique identifier, please contact support"));
     };
 
     // Technically there is a race condition here... lets see if we can make this an atomic 
@@ -800,27 +800,27 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
   let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
   userFileRecords.put(Principal.toText(user), newUserRecord);
 
-  return "File successfully uploaded";
+  return #Ok(#Success);
 };
 
 /*
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func liseUserFileNames() : async [Text] {
+public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
-  return Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name);
+  return #Ok(#FileNames(Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name)));
 };
 
 /*
  * Public Function which displays all the file ids that the user has uploaded to their account
  * @return An array of text that contain all the file ids uploaded to the current users account
 */
-public shared(msg) func listUserFileIds() : async [Text] {
+public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFileIds = getUserFileIds(user);
-  return userFileIds;
+  return #Ok(#FileIds(userFileIds));
 };
 
 /*
@@ -829,8 +829,15 @@ public shared(msg) func listUserFileIds() : async [Text] {
  *
  * @return The file info associated with the file id
 */
-public shared(msg) func getFile(fileId: Text) : async ?FileTypes.FileInfo {
-  return fileDatabase.get(fileId);
+public shared(msg) func getFile(fileId: Text) : async FileTypes.FileResult {
+  let retrievedFile = fileDatabase.get(fileId);
+  switch (retrievedFile)
+  {
+    case(null) {return #Err(#Other("Error getting file"));};
+    case(?file) {
+      return #Ok(#File(file));
+    };
+  };
 };
 
 /*
@@ -838,9 +845,13 @@ public shared(msg) func getFile(fileId: Text) : async ?FileTypes.FileInfo {
  *
  * @return The user record associated with the logged in users
 */
-public shared(msg) func getUserRecord() : async ?FileTypes.UserRecord {
+public shared(msg) func getUserRecord() : async FileTypes.FileResult {
   let user = msg.caller;
-  return userFileRecords.get(Principal.toText(user));
+  let retrievedUserRecord = userFileRecords.get(Principal.toText(user));
+  switch(retrievedUserRecord) {
+    case(null) {#Err(#Other("Error getting user record"));};
+    case(?userRecord) {#Ok(#UserRecord(userRecord));};
+  };
 };
 
 /*
@@ -849,12 +860,12 @@ public shared(msg) func getUserRecord() : async ?FileTypes.UserRecord {
  *
  * @return The file info associated with the file id
 */
-public shared(msg) func deleteFile(fileId: Text) : async Text {
+public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
   let user = msg.caller;
 
   if (Principal.isAnonymous(user))
   {
-    return "Error: user not logged in";
+    return #Err(#Unauthorized);
   };
 
   // Check to make sure that the user owns the file attempting to be deleted
@@ -862,7 +873,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
   let fileIdOwnedByUser : Bool = Array.find<Text>(userFileIds, func x = fileId == x) != null;
   if (fileIdOwnedByUser == false)
   {
-    return "Error deleting file";
+    return #Err(#Other("Error deleting file"));
   };
 
   // Figure out the size of the file attempting to be deleted
@@ -878,7 +889,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
   let optionalUserRecord : ?FileTypes.UserRecord = userFileRecords.get(Principal.toText(user));
   switch (optionalUserRecord) {
     case (null) {
-      return "Error deleting file";
+      return  #Err(#Other("Error deleting file"));
     };
     case (?userRecord) {
 
@@ -892,7 +903,7 @@ public shared(msg) func deleteFile(fileId: Text) : async Text {
     };
   };
 
-    return "Success";
+    return #Ok(#Success);
   };
 
 };

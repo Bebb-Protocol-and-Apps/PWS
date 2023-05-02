@@ -79,8 +79,8 @@ export interface PersonalWebSpace {
   'getUserRecord' : ActorMethod<[], [] | [UserRecord]>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
-  'listFileIds' : ActorMethod<[], Array<string>>,
-  'listFileNames' : ActorMethod<[], Array<string>>,
+  'liseUserFileNames' : ActorMethod<[], Array<string>>,
+  'listUserFileIds' : ActorMethod<[], Array<string>>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
@@ -97,7 +97,7 @@ export interface PersonalWebSpace {
     TxReceipt
   >,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
-  'upload' : ActorMethod<[string, File], string>,
+  'uploadUserFile' : ActorMethod<[string, File], string>,
 }
 export interface Request {
   'url' : string,
