@@ -748,6 +748,21 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
     return #Err(#Other("Error: File Empty"));
   };
 
+  // Check to make sure a file with that name isn't already uploaded
+  let userFiles = getUserFiles(user);
+  var fileNameAlreadyExists : Bool = false;
+  for (fileInfo in userFiles.vals())
+  {
+    if (fileInfo.file_name == fileName)
+    {
+      fileNameAlreadyExists := true;
+    };
+  };
+  if (fileNameAlreadyExists)
+  {
+    return #Err(#Other("Error: File Name Already Exists"));
+  };
+
   // Retrieve the total amount of data stored by the user
   let userTotalSize = getUserFilesTotalSize(user);
   if (userTotalSize + fileSize > maxTotalSize) {
