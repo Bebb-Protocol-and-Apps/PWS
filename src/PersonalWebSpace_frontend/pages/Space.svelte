@@ -129,48 +129,91 @@
     };
   };
 
-  const customizeCopyEntityHtmlToClipboardButton = () => {
+  const customizeCopyEntityHtmlToClipboardButton = (rightPanelElement) => {
     // By default, the Copy entity HTML to clipboard button loads the Intro page when clicked
     // Suppress this behavior
     // Button to export entity to HTML looks like this: <a href="#" title="Copy entity HTML to clipboard" data-action="copy-entity-to-clipboard" class="button fa fa-clipboard"></a> 
     // and is part of the Inspector's Right Panel
     // it changes depending on which element is selected, thus we have to observe these changes and suppress the behavior each time the button is loaded
-    const rightPanelElement = document.getElementById("rightPanel");
-    if(rightPanelElement) {
+    const observer = new MutationObserver((mutationList) => {
+      for (const mutation of mutationList) {
+        if (mutation.type === "childList") {
+          var elements = document.body.getElementsByClassName("button fa fa-clipboard"); // There could be several Buttons matched
+          for (const copyEntityHtmlToClipboardButton of elements) {
+            // @ts-ignore
+            copyEntityHtmlToClipboardButton.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+          };
+        };
+      };        
+    });
+    const config = {
+      characterData: true,
+      attributes: false,
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(rightPanelElement, config);
+  };
+
+  const customizePropertyRows = (rightPanelElement) => {
+    // Background: changes made in the Inspector's scene view are only automatically reflected in the updated HTML (exported during save event) for properties that had already been present in the entity's initial HTML element (only update event is emitted, no function call: https://github.com/aframevr/aframe-inspector/blob/master/src/lib/viewport.js)
+      // These properties are displayed in bold in the Inspector's right panel as they have their dedicated PropertyRow marked with a second class, propertyRowDefined (in addition to the class propertyRow)
+      // Changes made to properties in the Inspector's right panel are captured as expected for later export and persisting (and get the second class propertyRowDefined added so are bold as well) (update function is called: https://github.com/aframevr/aframe-inspector/blob/master/src/components/components/PropertyRow.js)
+      // We thus need to ensure that all other changes made in the scene view will be captured as expected as well such that they are exported and persisted
+      // To do so, we manually set the second class, propertyRowDefined, on the PropertyRows in the Inspector's right panel
       const observer = new MutationObserver((mutationList) => {
         for (const mutation of mutationList) {
-          if (mutation.type === "childList") {
-            var elements = document.body.getElementsByClassName("button fa fa-clipboard"); // There could be several Buttons matched
-            for (const copyEntityHtmlToClipboardButton of elements) {
-              // @ts-ignore
-              copyEntityHtmlToClipboardButton.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
-            };
+          if (mutation.type === "characterData" || mutation.type === "childList") {
+            // Select all the elements
+            const propertyRowElements = document.querySelectorAll('.propertyRow');
+            // Loop through each propertyRow element
+            propertyRowElements.forEach((propertyRowElement) => {
+              if (!propertyRowElement.classList.contains('propertyRowDefined')) {
+                // Find the label and input elements within the current propertyRowElement
+                const labelElement = propertyRowElement.querySelector('.text');
+                // Extract the property name
+                const property = labelElement.textContent.trim();
+                if (["position", "rotation", "scale"].includes(property)) {
+                  // Only perform updates for these types of attribute changes (as these are the ones available in the scene view and scene graph panel on the left)
+                  const currentAttribute = AFRAME.INSPECTOR.selectedEntity.getAttribute(property);
+                  // Set the value explicitly on the entity element (which will also add the class propertyRowDefined to the PropertyRow such that it appears bold in the Inspector's right panel)
+                  AFRAME.INSPECTOR.selectedEntity.setAttribute(property, currentAttribute);
+                };
+              };
+            });
           };
-        };        
-      });
-      const config = {
-        characterData: true,
-        attributes: false,
-        childList: true,
-        subtree: true,
-      };
-      observer.observe(rightPanelElement, config);
+        };       
+    });
+    const config = {
+      characterData: true,
+      attributes: false,
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(rightPanelElement, config);
+  };
+
+  const customizeRightPanel = () => {
+    const rightPanelElement = document.getElementById("rightPanel");
+    if(rightPanelElement) {
+      // Avoid that Copy entity HTML to clipboard button loads the Intro page when clicked
+      customizeCopyEntityHtmlToClipboardButton(rightPanelElement);
+      // Ensure that changes made in the Inspector's scene view are persisted
+      customizePropertyRows(rightPanelElement);
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
-        customizeCopyEntityHtmlToClipboardButton();
+        customizeRightPanel();
       }, 1000);
     };
   };
 
   const customizeInspector = () => {
   // Change A-Frame's default Inspector according to our specific requirements
-    // Ensure that all changes made will be included in updated HTML to be sent to backend
-    captureUpdateEvents();
     // Initiate Save Button to persist changes made
     loadSaveButton();
-    // Avoid that Copy entity HTML to clipboard button loads the Intro page when clicked
-    customizeCopyEntityHtmlToClipboardButton();
+    // Customize features on the Right Panel
+    customizeRightPanel();
   };
 
   const editButtonOnClick = async () => {

@@ -8,7 +8,7 @@
   let glbModelPreviewString = getStringForSpaceFromModel(modelUrl);
 </script>
 <div class="glb-model-space-preview space-y-1">
-    <iframe srcdoc={glbModelPreviewString} title="Preview of the Glb Model" width="100%" height="auto" class="py-2" sandbox="allow-scripts" credentialless referrerpolicy="no-referrer"></iframe>
+    <iframe srcdoc={glbModelPreviewString} title="Preview of the Glb Model" width="100%" height="auto" class="py-2" credentialless referrerpolicy="no-referrer"></iframe>
 </div>
 
 <style>
