@@ -629,10 +629,14 @@ private let maxFiles : Nat = 10;
 //  defined by RFC 4122
 // Files should be synced with the UserRecord associated with it to keep the user/data scheme in sync
 private var fileDatabase : HashMap.HashMap<Text, FileTypes.FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
+// Stable version of the file database for cansiter upgrades
+stable var fileDatabaseStable : [(Text, FileTypes.FileInfo)] = [];
 
 // Variable stores reference of a user with all the files they have uploaded to their account.
 //  The user record stores reference to all the UUIDs for the files they have stored
 private var userFileRecords : HashMap.HashMap<Text, FileTypes.UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+// Stable version of the userFileRecords for canister upgrades
+stable var userFileRecordsStable : [(Text, FileTypes.UserRecord)] = [];
 
 /*
  * Function retrieves the total size of the files uploaded to their account
@@ -904,4 +908,18 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     return #Ok(#Success);
   };
 
+
+
+  // Upgrade Hooks
+  system func preupgrade() {
+    fileDatabaseStable := Iter.toArray(fileDatabase.entries());
+    userFileRecordsStable := Iter.toArray(userFileRecords.entries());
+  };
+
+  system func postupgrade() {
+    fileDatabase := HashMap.fromIter(Iter.fromArray(fileDatabaseStable), fileDatabaseStable.size(), Text.equal, Text.hash);
+    fileDatabaseStable := [];
+    userFileRecords := HashMap.fromIter(Iter.fromArray(userFileRecordsStable), userFileRecordsStable.size(), Text.equal, Text.hash);
+    userFileRecordsStable := [];
+  };
 };
