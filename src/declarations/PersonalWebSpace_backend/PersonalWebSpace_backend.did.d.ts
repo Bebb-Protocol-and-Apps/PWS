@@ -4,7 +4,7 @@ import type { ActorMethod } from '@dfinity/agent';
 export type ApiError = { 'ZeroAddress' : null } |
   { 'InvalidTokenId' : null } |
   { 'Unauthorized' : null } |
-  { 'Other' : null };
+  { 'Other' : string };
 export type AssocList = [] | [[[string, string], List]];
 export interface Dip721NonFungibleToken {
   'maxLimit' : number,
@@ -22,6 +22,15 @@ export interface FileInfo {
   'file_content' : Uint8Array,
   'owner_principal' : string,
 }
+export type FileResult = { 'Ok' : FileResultSuccessOptions } |
+  { 'Err' : ApiError };
+export type FileResultSuccessOptions = { 'File' : FileInfo } |
+  { 'FileNames' : Array<string> } |
+  { 'Success' : null } |
+  { 'FileId' : string } |
+  { 'Other' : string } |
+  { 'FileIds' : Array<string> } |
+  { 'UserRecord' : UserRecord };
 export type HeaderField = [string, string];
 export type InterfaceId = { 'Burn' : null } |
   { 'Mint' : null } |
@@ -67,20 +76,20 @@ export interface PersonalWebSpace {
   'balanceOfDip721' : ActorMethod<[Principal], bigint>,
   'check_user_has_nft' : ActorMethod<[], boolean>,
   'createSpace' : ActorMethod<[string], NftResult>,
-  'deleteFile' : ActorMethod<[string], string>,
+  'deleteFile' : ActorMethod<[string], FileResult>,
   'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
-  'getFile' : ActorMethod<[string], [] | [FileInfo]>,
+  'getFile' : ActorMethod<[string], FileResult>,
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
   'getRandomSpace' : ActorMethod<[], NftResult>,
   'getSpace' : ActorMethod<[TokenId], NftResult>,
   'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
-  'getUserRecord' : ActorMethod<[], [] | [UserRecord]>,
+  'getUserRecord' : ActorMethod<[], FileResult>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
-  'liseUserFileNames' : ActorMethod<[], Array<string>>,
-  'listUserFileIds' : ActorMethod<[], Array<string>>,
+  'listUserFileIds' : ActorMethod<[], FileResult>,
+  'listUserFileNames' : ActorMethod<[], FileResult>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
@@ -97,7 +106,7 @@ export interface PersonalWebSpace {
     TxReceipt
   >,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
-  'uploadUserFile' : ActorMethod<[string, File], string>,
+  'uploadUserFile' : ActorMethod<[string, File], FileResult>,
 }
 export interface Request {
   'url' : string,

@@ -57,20 +57,20 @@ type PersonalWebSpace =
    balanceOfDip721: (principal) -> (nat64) query;
    check_user_has_nft: () -> (bool) query;
    createSpace: (text) -> (NftResult);
-   deleteFile: (text) -> (text);
+   deleteFile: (text) -> (FileResult);
    getCallerSpaces: () -> (vec Nft) query;
-   getFile: (text) -> (opt FileInfo);
+   getFile: (text) -> (FileResult);
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
    getMetadataForUserDip721: (principal) -> (ExtendedMetadataResult);
    getRandomSpace: () -> (NftResult);
    getSpace: (TokenId) -> (NftResult) query;
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
-   getUserRecord: () -> (opt UserRecord);
+   getUserRecord: () -> (FileResult);
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
-   liseUserFileNames: () -> (vec text);
-   listUserFileIds: () -> (vec text);
+   listUserFileIds: () -> (FileResult);
+   listUserFileNames: () -> (FileResult);
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -81,7 +81,7 @@ type PersonalWebSpace =
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
-   uploadUserFile: (text, File) -> (text);
+   uploadUserFile: (text, File) -> (FileResult);
  };
 type OwnerResult = 
  variant {
@@ -170,6 +170,21 @@ type HeaderField =
    text;
    text;
  };
+type FileResultSuccessOptions = 
+ variant {
+   File: FileInfo;
+   FileId: text;
+   FileIds: vec text;
+   FileNames: vec text;
+   Other: text;
+   Success;
+   UserRecord: UserRecord;
+ };
+type FileResult = 
+ variant {
+   Err: ApiError;
+   Ok: FileResultSuccessOptions;
+ };
 type FileInfo = 
  record {
    file_content: blob;
@@ -203,7 +218,7 @@ type AssocList =
 type ApiError = 
  variant {
    InvalidTokenId;
-   Other;
+   Other: text;
    Unauthorized;
    ZeroAddress;
  };
