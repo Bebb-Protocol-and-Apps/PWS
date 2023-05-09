@@ -117,6 +117,7 @@ export const idlFactory = ({ IDL }) => {
     'TransactionHistory' : IDL.Null,
     'TransferNotification' : IDL.Null,
   });
+  const File = IDL.Vec(IDL.Nat8);
   const UpdateMetadataValuesInput = IDL.Record({
     'id' : TokenId,
     'updatedSpaceDescription' : IDL.Text,
@@ -125,7 +126,6 @@ export const idlFactory = ({ IDL }) => {
     'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
   });
-  const File = IDL.Vec(IDL.Nat8);
   const PersonalWebSpace = IDL.Service({
     'balanceOfDip721' : IDL.Func([IDL.Principal], [IDL.Nat64], ['query']),
     'check_user_has_nft' : IDL.Func([], [IDL.Bool], ['query']),
@@ -167,6 +167,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'symbolDip721' : IDL.Func([], [IDL.Text], ['query']),
+    'testUploadFile' : IDL.Func([IDL.Text, File], [IDL.Text], []),
     'totalSupplyDip721' : IDL.Func([], [IDL.Nat64], ['query']),
     'transferFromDip721' : IDL.Func(
         [IDL.Principal, IDL.Principal, TokenId],

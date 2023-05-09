@@ -100,6 +100,7 @@ export interface PersonalWebSpace {
   >,
   'supportedInterfacesDip721' : ActorMethod<[], Array<InterfaceId>>,
   'symbolDip721' : ActorMethod<[], string>,
+  'testUploadFile' : ActorMethod<[string, File], string>,
   'totalSupplyDip721' : ActorMethod<[], bigint>,
   'transferFromDip721' : ActorMethod<
     [Principal, Principal, TokenId],

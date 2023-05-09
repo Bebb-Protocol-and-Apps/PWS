@@ -923,6 +923,9 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     return #Ok(#Success);
   };
 
+  public shared(msg) func testUploadFile(fileName : Text, content : FileTypes.File) : async Text {
+    return Nat.toText(content.size());
+  };
 
 
   // Upgrade Hooks

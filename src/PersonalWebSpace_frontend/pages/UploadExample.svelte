@@ -7,6 +7,7 @@
     handleFiles(files);
   }
 
+   // Function will try to upload the passed in files to the canisters
   async function handleFiles(files) {
     console.log(files);
 
@@ -40,4 +41,5 @@
 	id="many"
 	multiple
 	type="file"
+  accept=".gltf,.glb"
 />

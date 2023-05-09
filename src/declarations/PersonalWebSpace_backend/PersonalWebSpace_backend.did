@@ -78,6 +78,7 @@ type PersonalWebSpace =
    safeTransferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    supportedInterfacesDip721: () -> (vec InterfaceId) query;
    symbolDip721: () -> (text) query;
+   testUploadFile: (text, File) -> (text);
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
