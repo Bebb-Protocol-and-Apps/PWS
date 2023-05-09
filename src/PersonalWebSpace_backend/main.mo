@@ -96,7 +96,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         ) {
           return #Err(#Unauthorized);
         } else if (Principal.notEqual(from, token.owner)) {
-          return #Err(#Other(""));
+          return #Err(#Unauthorized);
         } else {
           nfts := List.map(nfts, func (item : Types.Nft) : Types.Nft {
             if (item.id == token.id) {
@@ -159,7 +159,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     let item = List.find(nfts, func(token: Types.Nft) : Bool { token.owner == user });
     switch (item) {
       case null {
-        return #Err(#Other(""));
+        return #Err(#Other("No token found for this user"));
       };
       case (?token) {
         return #Ok({
@@ -413,7 +413,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
       switch (random.range(p)) {
         case (null) {
-          return #Err(#Other(""));
+          return #Err(#Other("Error retrieving a random space"));
         };
         case (?randomNumber) {
           let spaceId = randomNumber % numberOfSpaces;
@@ -429,7 +429,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
       };
     } else {
-      return #Err(#Other(""));
+      return #Err(#Other("No space available"));
     };
   };
 
