@@ -65,7 +65,7 @@ hot reloads with every UI change
 
 For more detailed notes on running this locally, also see NotesOnLocalDev.md
 
-# Production Deployement
+# Production Deployment
 npm install
 
 dfx start --background
