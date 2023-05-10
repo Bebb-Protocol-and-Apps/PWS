@@ -13,6 +13,7 @@
   import ObjAframe from "./pages/ObjAframe.svelte";
   import Testroom from "./pages/Testroom.svelte";
   import UploadExample from "./pages/UploadExample.svelte";
+  import DownloadFileExample from "./pages/DownloadFileExample.svelte";
 
   const routes = {
     // Exact path (with /# in front of route)
@@ -26,6 +27,7 @@
     "/objaframe": ObjAframe,
     "/testroom": Testroom,
     "/uploadExample": UploadExample,
+    "/downloadFileExample" : DownloadFileExample,
     // Catch-all (this is optional, but if present it must be the last)
     "*": NotFound,
   };

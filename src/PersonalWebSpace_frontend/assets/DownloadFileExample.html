@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.3/dist/aframe-extras.min.js"></script>
+    <script src="https://mannymeadows.github.io/Noosa/aframe-sun-sky.min.js"></script>
+  </head>
+  <body>
+
+
+    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="" device-orientation-permission-ui="" raycaster="direction: 0.9544506796854287 -0.10164039183312146 -0.2805229594810959; origin: -4.846717797159805 5.074580504821491 2.3289351396596443; useWorldCoordinates: true">
+      <a-assets>
+        <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+        <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        <!-- <a-asset-item id="room-glb" src="roomModel.glb"></a-asset-item> -->
+        <a-asset-item id="ground-glb" src="ground.glb"></a-asset-item>
+        <a-asset-item id="single_bed-glb" src="single_bed.glb"></a-asset-item>
+        <a-asset-item id="round_table-glb" src="round_table.glb"></a-asset-item>
+        <a-asset-item id="couch-glb" src="couch.glb"></a-asset-item>
+        <a-asset-item id="deskj-glb" src="deskj.glb"></a-asset-item>
+        <a-asset-item id="gaming_chair-glb" src="gaming_chair.glb"></a-asset-item>
+        <a-asset-item id="gaming_screen-glb" src="gaming_screen.glb"></a-asset-item>
+        <a-asset-item id="laptop-glb" src="laptop.glb"></a-asset-item>
+        <a-asset-item id="nightstand-glb" src="nightstand.glb"></a-asset-item>
+        <a-asset-item id="standart_bookshelf-glb" src="standart_bookshelf.glb"></a-asset-item>
+        <a-asset-item id="twin_wardrobe-glb" src="twin_wardrobe.glb"></a-asset-item>
+        <a-asset-item id="armchair-glb" src="armchair.glb"></a-asset-item>
+        <a-asset-item id="blue_flower-glb" src="blue_flower.glb"></a-asset-item>
+        <a-asset-item id="cylinder_lamp-glb" src="cylinder_lamp.glb"></a-asset-item>
+        <a-asset-item id="l_shaped_bookshelf-glb" src="l_shaped_bookshelf.glb"></a-asset-item>
+        <a-asset-item id="l_shaped_couch-glb" src="l_shaped_couch.glb"></a-asset-item>
+        <a-asset-item id="rectangle_table-glb" src="rectangle_table.glb"></a-asset-item>
+      </a-assets>
+
+      <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>
+      <a-light type="directional" intensity="1.0" position="2 1 -1" light=""></a-light>
+
+      <a-sky color="#ECECEC" material="" geometry=""></a-sky>
+      
+      <a-entity gltf-model="ground.glb" position="0 -0.1 -5" rotation="0 -90 0" id="Ground Panel 1"></a-entity>
+      <a-entity gltf-model="single_bed.glb" position="1.73955 0.63895 -7.02074" rotation="" id="Bed"></a-entity>
+      <a-entity gltf-model="nightstand.glb" position="0.376 0.326 -7.93" rotation="" id="Left Night Stand"></a-entity>
+      <a-entity gltf-model="twin_wardrobe.glb" position="-1.27162 1.20305 -5.3544" rotation="0 90 0" id="Wardrobe"></a-entity>
+
+      <a-entity gltf-model="ground.glb" position="5 -0.1 -5" rotation="0 -90 0" id="Ground Panel 3"></a-entity>
+      <a-entity gltf-model="couch.glb" position="6.13644 0.57318 -7.86671" rotation="" id="Couch"></a-entity>
+      <a-entity gltf-model="round_table.glb" position="6.31712 0.33773 -5.80587" rotation="0 -90 0" id="Table"></a-entity>
+      <a-entity gltf-model="blue_flower.glb" position="6.30849 0.9772 -5.81435" rotation="0 -90 0" id="Flower"></a-entity>
+      <a-entity gltf-model="standart_bookshelf.glb" position="4.46484 1.20559 0.9413" rotation="0 180 0" id="Bookshelf"></a-entity>
+      
+      
+      <a-entity gltf-model="ground.glb" position="4.99758 -0.1 -0.00467" rotation="0 -90 0" id="Ground Panel 4"></a-entity>
+      <a-entity gltf-model="deskj.glb" position="0.33438 0.60296 0.80843" rotation="0 180 0" id="Desk"></a-entity>
+      <a-entity gltf-model="gaming_chair.glb" position="0.34427 0.5 -0.26818" rotation="" id="Desk Chair"></a-entity>
+      <a-entity gltf-model="gaming_screen.glb" position="0.32405 1.15329 0.81179" rotation="0 180 0" id="Monitor"></a-entity>
+       
+      
+      
+      
+      
+      
+      <a-entity gltf-model="cylinder_lamp.glb" position="1.61721 0.6526 0.97845" rotation="0 -90 0" id="Lamp"></a-entity>
+      <a-entity gltf-model="l_shaped_bookshelf.glb" position="6.78742 1.21443 -0.10481" rotation="0 -90 0" id="L Shape Bookshelf"></a-entity>
+      <a-entity gltf-model="armchair.glb" position="6.4535 0.69193 -3.78853" rotation="0 -180 0" id="Armchair"></a-entity>
+      <a-entity gltf-model="ground.glb" id="Ground Panel 2" position="0.02808 -0.1 -0.01568" rotation="0 -90 0"></a-entity>
+      <a-entity id="Right Night Stand" position="3.07288 0.326 -7.93" rotation="" gltf-model="nightstand.glb"></a-entity>
+      
+
+  
+<div class="a-loader-title" style="display: none;"></div>
+<div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div></a-scene>
+
+  </body>
+</html>
