@@ -16,44 +16,32 @@
     //console.log('in index addAFrameSceneFromModel html', html);
     //document.write(html);
     console.log("################################");
-    let response;
-    response = await fetch("https://aframe.io/");
-    console.log("response");
-    console.log(response);
-    console.log(response.body);
-    console.log(response.bodyUsed);
-    const responseText = await response.text();
-    console.log(responseText);
-    let iframeElement = document.getElementById("html-fetch-iframe");
+    const iframeElement = document.createElement('iframe');
+    iframeElement.src = 'https://aframe.io/';
     console.log("iframeElement");
     console.log(iframeElement);
-    //iframeElement.innerHTML = responseText;
-    iframeElement.srcdoc = responseText;
-    let entityElement = document.getElementById("aentityhtml");
-    console.log("entityElement");
-    console.log(entityElement);
-    //entityElement.setAttribute("html", "cursor:#cursor;html:#my-interface");
-    /* await setTimeout(() => {
-      let iframeElement = document.getElementById("html-fetch-iframe");
-      console.log("iframeElement");
-      console.log(iframeElement);
-      document.getElementById("html-fetch-iframe").innerHTML = responseText;
-    }, 5000); */
-    const imgIframe = await html2canvas(iframeElement);
-    console.log("imgIframe");
-    console.log(imgIframe);
-    const imgEntity = await html2canvas(document.getElementById("my-interface"));
-    console.log("imgEntity");
-    console.log(imgEntity);
-    let divIframe = document.getElementById("divIframe");
-    console.log("divIframe");
-    console.log(divIframe);
-    let divEntity = document.getElementById("divEntity");
-    console.log("divEntity");
-    console.log(divEntity);
-    divIframe.appendChild(imgIframe);
-    divEntity.appendChild(imgEntity);
-    entityElement.setAttribute("html", "cursor:#cursor;html:#my-interface");
+    
+    setTimeout(() => {
+      let entityElement = document.getElementById("aentityhtml");
+      console.log("entityElement");
+      console.log(entityElement);
+      let divIframe = document.getElementById("canvasContainer");
+      console.log("divIframe");
+      console.log(divIframe);
+      const imgIframe = html2canvas(iframeElement);
+      console.log("imgIframe");
+      console.log(imgIframe);
+      divIframe.innerHTML = "";
+      divIframe.appendChild(iframeElement);
+      /* const imgEntity = html2canvas(document.getElementById("my-interface"));
+      console.log("imgEntity");
+      console.log(imgEntity); */
+      /* let divEntity = document.getElementById("divEntity");
+      console.log("divEntity");
+      console.log(divEntity);
+      divEntity.appendChild(imgEntity); */
+      entityElement.setAttribute("html", "cursor:#cursor;html:#my-interface");
+    }, 5000);
   };
 
   onMount(addAFrameSceneFromModel);
