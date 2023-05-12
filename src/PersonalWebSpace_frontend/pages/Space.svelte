@@ -255,6 +255,24 @@
       spaceString = string.replace(/\\"/g, '"');
       spaceLoaded = true;
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
+      const getSceneElement = () => {
+        const sceneElement = document.querySelector('a-scene');
+        if (sceneElement) {
+          return sceneElement;
+        } else {
+          // Scene hasn't loaded yet
+          setTimeout(() => {
+            getSceneElement();
+          }, 1000);
+        };
+      };
+      setTimeout(() => {
+        let sceneEl = getSceneElement();
+        console.log("Space loaded", sceneEl);
+        console.log("renderer", sceneEl.renderer);
+        sceneEl.renderer.preserveDrawingBuffer = true;
+        sceneEl.tick();
+      }, 2000);
     };
   };
 

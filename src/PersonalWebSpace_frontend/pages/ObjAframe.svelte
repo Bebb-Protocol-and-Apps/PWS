@@ -15,27 +15,38 @@
     //console.log('in index addAFrameSceneFromModel html', html);
     //document.write(html);
     console.log("################################");
-    /* const iframeElement = document.createElement('iframe');
-    iframeElement.src = 'https://aframe.io/';
+    const iframeElement = document.createElement('iframe');
+    //iframeElement.src = 'https://aframe.io/';
     iframeElement.style.height = "200px";
-    iframeElement.style.width = "200px"; */
+    iframeElement.style.width = "200px";
+    let response = await fetch("https://aframe.io/");
+    console.log("response");
+    console.log(response);
+    const responseText = await response.text();
+    console.log(responseText);
+    //let iframeElement = document.getElementById("html-fetch-iframe");
+    //iframeElement.innerHTML = responseText;
+    iframeElement.srcdoc = responseText;
+    console.log("iframeElement");
+    console.log(iframeElement);
     
     setTimeout(async () => {
-      const iframeElement = document.getElementById("my-interface");
+      /* const iframeElement = document.getElementById("my-interface");
       console.log("iframeElement");
-      console.log(iframeElement);
+      console.log(iframeElement); */
       let entityElement = document.getElementById("aentityhtml");
       console.log("entityElement");
       console.log(entityElement);
       let divIframe = document.getElementById("canvasContainer");
       console.log("divIframe");
       console.log(divIframe);
-      /* const newDiv = document.createElement('div');
+      const newDiv = document.createElement('div');
       newDiv.style.height = "200px";
       newDiv.style.width = "200px";
-      newDiv.appendChild(iframeElement);
-      divIframe.appendChild(iframeElement); */
-      const imgIframe = await html2canvas(iframeElement);
+      //newDiv.appendChild(iframeElement);
+      newDiv.innerHTML = responseText;
+      divIframe.appendChild(newDiv);
+      const imgIframe = await html2canvas(divIframe);
       console.log("imgIframe");
       console.log(imgIframe);
       divIframe.innerHTML = "";
@@ -47,6 +58,7 @@
       console.log("divEntity");
       console.log(divEntity);
       divEntity.appendChild(imgEntity); */
+      //document.getElementById("my-interface").appendChild(imgIframe)
       entityElement.setAttribute("html", "cursor:#cursor;html:#my-interface");
     }, 5000);
   };
