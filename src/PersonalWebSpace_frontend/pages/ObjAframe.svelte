@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import html2canvas from "html2canvas";
 
   let spaceString;
   
@@ -16,19 +17,19 @@
     //document.write(html);
     console.log("################################");
     const iframeElement = document.createElement('iframe');
-    //iframeElement.src = 'https://aframe.io/';
+    iframeElement.src = 'http://172.25.153.17:3000/#/space/8';
     iframeElement.style.height = "200px";
     iframeElement.style.width = "200px";
-    let response = await fetch("https://aframe.io/");
+    let response = await fetch("http://172.25.153.17:3000/#/space/8");
     console.log("response");
     console.log(response);
     const responseText = await response.text();
     console.log(responseText);
     //let iframeElement = document.getElementById("html-fetch-iframe");
     //iframeElement.innerHTML = responseText;
-    iframeElement.srcdoc = responseText;
-    console.log("iframeElement");
-    console.log(iframeElement);
+    //iframeElement.srcdoc = responseText;
+    //console.log("iframeElement");
+    //console.log(iframeElement);
     
     setTimeout(async () => {
       /* const iframeElement = document.getElementById("my-interface");
@@ -43,8 +44,8 @@
       const newDiv = document.createElement('div');
       newDiv.style.height = "200px";
       newDiv.style.width = "200px";
-      //newDiv.appendChild(iframeElement);
-      newDiv.innerHTML = responseText;
+      newDiv.appendChild(iframeElement);
+      //newDiv.innerHTML = responseText;
       divIframe.appendChild(newDiv);
       const imgIframe = await html2canvas(divIframe);
       console.log("imgIframe");
