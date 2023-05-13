@@ -16,11 +16,12 @@
     //console.log('in index addAFrameSceneFromModel html', html);
     //document.write(html);
     console.log("################################");
-    const iframeElement = document.createElement('iframe');
+    /* const iframeElement = document.createElement('iframe');
     iframeElement.src = 'http://172.25.153.17:3000/#/space/8';
     iframeElement.style.height = "200px";
-    iframeElement.style.width = "200px";
-    let response = await fetch("http://172.25.153.17:3000/#/space/8");
+    iframeElement.style.width = "200px"; */
+    const url = "https://aframe.io/";
+    let response = await fetch(url);
     console.log("response");
     console.log(response);
     const responseText = await response.text();
@@ -44,8 +45,8 @@
       const newDiv = document.createElement('div');
       newDiv.style.height = "200px";
       newDiv.style.width = "200px";
-      newDiv.appendChild(iframeElement);
-      //newDiv.innerHTML = responseText;
+      //newDiv.appendChild(iframeElement);
+      newDiv.innerHTML = responseText;
       divIframe.appendChild(newDiv);
       const imgIframe = await html2canvas(divIframe);
       console.log("imgIframe");
