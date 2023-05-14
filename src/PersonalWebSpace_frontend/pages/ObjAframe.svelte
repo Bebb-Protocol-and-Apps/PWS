@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import html2canvas from "html2canvas";
+  import axios from 'axios';
 
   let spaceString;
   
@@ -16,16 +17,25 @@
     //console.log('in index addAFrameSceneFromModel html', html);
     //document.write(html);
     console.log("################################");
+    // Define the user agent string for a popular browser.
+    const config = { 
+      headers: { 
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 
+      }, 
+    };
+    const response = await axios.get('https://aframe.io/');
+    console.log("response");
+    console.log(response);
     /* const iframeElement = document.createElement('iframe');
     iframeElement.src = 'http://172.25.153.17:3000/#/space/8';
     iframeElement.style.height = "200px";
     iframeElement.style.width = "200px"; */
-    const url = "https://aframe.io/";
+    /* const url = "https://aframe.io/";
     let response = await fetch(url);
     console.log("response");
     console.log(response);
     const responseText = await response.text();
-    console.log(responseText);
+    console.log(responseText); */
     //let iframeElement = document.getElementById("html-fetch-iframe");
     //iframeElement.innerHTML = responseText;
     //iframeElement.srcdoc = responseText;
@@ -46,7 +56,8 @@
       newDiv.style.height = "200px";
       newDiv.style.width = "200px";
       //newDiv.appendChild(iframeElement);
-      newDiv.innerHTML = responseText;
+      //newDiv.innerHTML = responseText;
+      newDiv.innerHTML = response.data;
       divIframe.appendChild(newDiv);
       const imgIframe = await html2canvas(divIframe);
       console.log("imgIframe");
@@ -55,8 +66,8 @@
       divIframe.appendChild(imgIframe);
       /* const imgEntity = html2canvas(document.getElementById("my-interface"));
       console.log("imgEntity");
-      console.log(imgEntity); */
-      /* let divEntity = document.getElementById("divEntity");
+      console.log(imgEntity);
+      let divEntity = document.getElementById("divEntity");
       console.log("divEntity");
       console.log(divEntity);
       divEntity.appendChild(imgEntity); */

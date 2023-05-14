@@ -101,6 +101,19 @@
 		<a-torus-knot position="0 1.5 -1" radius="0.1" radius-tubular="0.02" material="shader:phong;reflectivity:0.3;" id="knot"></a-torus-knot>
 		<!-- <a-entity html="cursor:#cursor;html:#my-interface" shadow position="0.25 1.5 -0.5"></a-entity> -->
 		<a-entity id="aentityhtml" shadow position="0.25 1.5 -0.5"></a-entity>
+		<!-- Define the browser entity -->
+		<a-entity
+			browser="width: 16; height: 9;"
+			position="0 1.6 -2"
+			scale="1.5 1.5 1.5"
+		>
+			<a-plane
+			position="0 0 0.01"
+			scale="1.6 0.9 1"
+			color="#FFF"
+			browser__display
+			></a-plane>
+		</a-entity>
 	</a-scene>
 
 	<div id="dom-overlay">
