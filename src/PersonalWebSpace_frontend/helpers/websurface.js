@@ -86,44 +86,18 @@ export const component = AFRAME.registerComponent('websurface', {
 
     // Iframes don't work in VR/fullscreen mode, so we remove the texture based on them
     el.sceneEl.addEventListener('enter-vr', function () {
-      console.log('enter-vr', el);
       el.object3D.remove(data.element);
-      //el.setAttribute('src', './OIM_NeighborVisualization_Webportal.png');
-      //el.setAttribute('material', { color: 'black' });
-      //el.setAttribute('color', 'green');
-      /* console.log('enter-vr el children', el.children);
-      let children = el.children;
-      for (let i = 0; i < children.length; i++) {
-        if (children[i].tagName.toLowerCase() === 'a-box') {
-          console.log('enter-vr el children[i]', children[i]);
-          children[i].setAttribute('material', { src: '#OIM__NeighborVisualization__Webportal_' });
-        };
-      }; */
     });
   
     el.sceneEl.addEventListener('exit-vr', function () {
-      console.log('exit-vr', el);
       el.object3D.add(data.element);
     });
 
     el.sceneEl.addEventListener('enter-fullscreen', function () {
-      console.log('enter-fullscreen', el);
       el.object3D.remove(data.element);
-      //el.setAttribute('src', './OIM_NeighborVisualization_Webportal.png');
-      //el.setAttribute('material', { color: 'black' });
-      //el.setAttribute('color', 'green');
-      /* console.log('enter-fullscreen el children', el.children);
-      let children = el.children;
-      for (let i = 0; i < children.length; i++) {
-        if (children[i].tagName.toLowerCase() === 'a-box') {
-          console.log('enter-fullscreen el children[i]', children[i]);
-          children[i].setAttribute('material', { src: '#OIM__NeighborVisualization__Webportal_' });
-        };
-      }; */
     });
   
     el.sceneEl.addEventListener('exit-fullscreen', function () {
-      console.log('exit-fullscreen', el);
       el.object3D.add(data.element);
     });
 

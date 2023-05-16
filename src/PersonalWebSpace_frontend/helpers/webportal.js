@@ -1,4 +1,4 @@
-//import './lib/aframe-aabb-collider-component.min';
+//import './lib/aframe-aabb-collider-component.min'; // Not enabled currently
 import './websurface';
 
 AFRAME.registerComponent('web-portal', {
@@ -57,6 +57,43 @@ AFRAME.registerComponent('web-portal', {
     // Transition to the portal's URL on click
     if (data.enableOnClickTransition == true) {
       el.setAttribute('link', { href: data.url });
+    };
+
+    const title = document.createElement('a-text');
+    title.setAttribute('value', data.text);
+    title.setAttribute('position', `0 ${data.height * 0.5 + 0.25 + data.frameWidth} 0`);
+    title.setAttribute('align', 'center');
+    title.setAttribute('side', 'double');
+    el.appendChild(title);
+    data.titleEl = title;
+
+    if (data.enableFrame == true) {
+      const frameWidth = data.frameWidth;
+      const width = data.width;
+      const height = data.height;
+
+      const box1 = document.createElement('a-box');
+      box1.setAttribute('position', `${(width + frameWidth) / 2} 0 0`);
+      box1.setAttribute('scale', `${frameWidth} ${height} ${frameWidth}`);
+      el.appendChild(box1);
+
+      const box2 = document.createElement('a-box');
+      box2.setAttribute('position', `${-(width + frameWidth) / 2} 0 0`);
+      box2.setAttribute('scale', `${frameWidth} ${height} ${frameWidth}`);
+      el.appendChild(box2);
+
+      const box3 = document.createElement('a-box');
+      box3.setAttribute('position', `0 ${(height + frameWidth) / 2} 0`);
+      box3.setAttribute('scale', `${width + frameWidth * 2} ${frameWidth} ${frameWidth}`);
+      el.appendChild(box3);
+
+      const box4 = document.createElement('a-box');
+      box4.setAttribute('position', `0 0 ${-frameWidth / 4 - 0.01}`);
+      box4.setAttribute('scale', `${width + frameWidth * 2} ${height + frameWidth * 2} ${frameWidth / 2}`);
+      // Set default look of inner frame (visible in VR/fullscreen mode and from behind in all modes)
+      // @ts-ignore
+      box4.setAttribute('material', { src: '#OIM__NeighborVisualization__Webportal_' });
+      el.appendChild(box4);
     };
 
     if (data.enableReturnButton == true) {
@@ -167,72 +204,37 @@ AFRAME.registerComponent('web-portal', {
       });
     };
 
-    const title = document.createElement('a-text');
-    title.setAttribute('value', data.text);
-    title.setAttribute('position', `0 ${data.height * 0.5 + 0.25 + data.frameWidth} 0`);
-    title.setAttribute('align', 'center');
-    title.setAttribute('side', 'double');
-    el.appendChild(title);
-    data.titleEl = title;
+    if (data.enableCollisionDetection && data.enableReturnButton) {
+      el.addEventListener('hitstart', function () {
+        if (data.enableWebsurface == true) {
+          el.components['websurface'].pause();
 
-    if (data.enableFrame == true) {
-      const frameWidth = data.frameWidth;
-      const width = data.width;
-      const height = data.height;
+          iframe = el.websurface_iframe;
+          const context = el.css3d_context.domElement;
 
-      const box1 = document.createElement('a-box');
-      box1.setAttribute('position', `${(width + frameWidth) / 2} 0 0`);
-      box1.setAttribute('scale', `${frameWidth} ${height} ${frameWidth}`);
-      el.appendChild(box1);
+          data.style_iframe = iframe.style.cssText;
+          data.style_context = context.style.cssText;
+          data.style_contextChild = context.children[0].style.cssText;
 
-      const box2 = document.createElement('a-box');
-      box2.setAttribute('position', `${-(width + frameWidth) / 2} 0 0`);
-      box2.setAttribute('scale', `${frameWidth} ${height} ${frameWidth}`);
-      el.appendChild(box2);
+          iframe.style = '';
+          context.style = '';
+          context.children[0].style = '';
 
-      const box3 = document.createElement('a-box');
-      box3.setAttribute('position', `0 ${(height + frameWidth) / 2} 0`);
-      box3.setAttribute('scale', `${width + frameWidth * 2} ${frameWidth} ${frameWidth}`);
-      el.appendChild(box3);
+          iframe.style.position = 'fixed';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.overflow = 'none';
+        }
 
-      const box4 = document.createElement('a-box');
-      box4.setAttribute('position', `0 0 ${-frameWidth / 4 - 0.01}`);
-      box4.setAttribute('scale', `${width + frameWidth * 2} ${height + frameWidth * 2} ${frameWidth / 2}`);
-      // Set default look of inner frame (visible in VR/fullscreen mode and from behind in all modes)
-      // @ts-ignore
-      box4.setAttribute('material', { src: '#OIM__NeighborVisualization__Webportal_' });
-      el.appendChild(box4);
-    }
+        scene.style.display = 'none';
+        iframe.style.display = 'block';
+        if (data.returnButton) data.returnButton.style.display = 'block';
 
-    /* el.addEventListener('hitstart', function () {
-      if (data.enableWebsurface == true) {
-        el.components['websurface'].pause();
-
-        iframe = el.websurface_iframe;
-        const context = el.css3d_context.domElement;
-
-        data.style_iframe = iframe.style.cssText;
-        data.style_context = context.style.cssText;
-        data.style_contextChild = context.children[0].style.cssText;
-
-        iframe.style = '';
-        context.style = '';
-        context.children[0].style = '';
-
-        iframe.style.position = 'fixed';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.overflow = 'none';
-      }
-
-      scene.style.display = 'none';
-      iframe.style.display = 'block';
-      if (data.returnButton) data.returnButton.style.display = 'block';
-
-      document.exitPointerLock();
-    }); */
+        document.exitPointerLock();
+      });
+    };
   },
 
   update: function () {
