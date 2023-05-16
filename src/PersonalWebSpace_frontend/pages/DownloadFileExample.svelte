@@ -14,16 +14,11 @@
     try {
       console.log("calling api");
       let fileIdsResponse = await $store.backendActor.listUserFileIds();
-      console.log(fileIdsResponse);
-      console.log(fileIdsResponse.Ok.FileIds);
       let fileIds = fileIdsResponse.Ok.FileIds;
-      console.log(fileIds["Ok"]);
+      console.log("Number of FileIds found: " + fileIds.length);
       for (let i = 0; i < fileIds.length; i++)
       {
         let fileData = await $store.backendActor.getFile(fileIds[i]);
-        console.log(fileData)
-        console.log(fileData.Ok.File)
-        console.log(fileData.Ok.File.file_content)
 
         // Assuming you have a Uint8Array named `byteArray`
         const byteArray = new Uint8Array(fileData.Ok.File.file_content);
@@ -39,11 +34,26 @@
 
         // Now you have a File object
         console.log(file);
+        const url = URL.createObjectURL(file);
+        console.log(url);
+
+        // Create an anchor element
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName; // Set the custom file name and extension
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+
+        const assetItem = document.getElementById('item1-glb');
+        console.log(assetItem);
+        console.log(anchor);
+        assetItem.setAttribute('src', url);
+
       }
     } catch (error) {
     console.error("Error:", error);
   }
-  };
+  }; 
 
   onMount(addAFrameTestRoom);
 </script>
