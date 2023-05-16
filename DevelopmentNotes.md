@@ -27,6 +27,11 @@ https://www.w3schools.com/tags/att_iframe_sandbox.asp
 https://developer.mozilla.org/en-US/docs/Web/Security/IFrame_credentialless
 https://www.w3schools.com/tags/att_iframe_referrerpolicy.asp
 
+3D Neighbor visualization in Space view:
+A-Frame libraries:
+  <!-- <script src="https://unpkg.com/aframe-web-portals@1.0.1/dist/aframe-web-portals.umd.js"></script> -->
+  <!-- <script src="https://unpkg.com/aframe-websurfaces@1.4.0/dist/aframe-websurfaces.umd.js"></script> -->
+
 Space Neighbors local testing with dummy entities:
     /* // for local testing, fill with dummy data
         const dummyTestEntity1 = {

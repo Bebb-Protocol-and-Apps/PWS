@@ -7,6 +7,7 @@
       <a-assets>
         <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
         <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        <img id="OIM__NeighborVisualization__Webportal_" src="./OIM_NeighborVisualization_Webportal.png">
         <a-asset-item id="workshop-glb" src="full_workshop_with_props.glb" crossorigin="anonymous"></a-asset-item>
       </a-assets>
 
@@ -15,6 +16,30 @@
       <!-- <a-entity link="on: click; href: https://aframe-aincraft.glitch.me"></a-entity> -->
       <!-- <a-link href="https://hbe6s-raaaa-aaaai-acloa-cai.raw.ic0.app/?tokenid=eoal4-rykor-uwiaa-aaaaa-caas3-qaqca-aaaay-a" title="My Homepage" image="#homeThumbnail" peekMode="true" borderColor="red"></a-link> -->
       <!-- <a-box id="box1" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" link="on: click; href: https://hbe6s-raaaa-aaaai-acloa-cai.raw.ic0.app/?tokenid=eoal4-rykor-uwiaa-aaaaa-caas3-qaqca-aaaay-a"></a-box> -->
+
+      <!-- <a-entity
+        id="player"
+        position="0 1.6 0"
+        camera
+        wasd-controls="acceleration: 15;"
+        look-controls="pointerLockEnabled: false"
+      >
+        <a-cursor position="0 0 -.05" scale=".04 .04 1"></a-cursor>
+        <a-cylinder radius="0.75"></a-cylinder>
+      </a-entity> -->
+      <!-- Portals -->
+      <a-entity
+        position="-6 0 -6"
+        web-portal="url:http://172.25.153.42:3000/#/space/0; text:SpaceZero;"
+      ></a-entity>
+      <a-entity
+        position="-8 0 -6"
+        web-portal="url:https://app.webaverse.com; text:Webaverse;"
+      ></a-entity>
+      <a-entity
+        position="-10 0 -6"
+        web-portal="url:https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/; text:OIM Mainnet Landing page;"
+      ></a-entity>
 
       <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
       <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
