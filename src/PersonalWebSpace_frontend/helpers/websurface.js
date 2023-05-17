@@ -45,6 +45,7 @@ export const component = AFRAME.registerComponent('websurface', {
 
     el.addEventListener('cam-loaded', function () {
       const iframe = document.createElement('iframe');
+      iframe.setAttribute('id', data.url);
       iframe.setAttribute('src', data.url);
       // Secure iframe
       iframe.setAttribute('credentialless', 'true');
