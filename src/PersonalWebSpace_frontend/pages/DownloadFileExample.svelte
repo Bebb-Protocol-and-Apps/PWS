@@ -16,7 +16,7 @@
       let fileIdsResponse = await $store.backendActor.listUserFileIds();
       let fileIds = fileIdsResponse.Ok.FileIds;
       console.log("Number of FileIds found: " + fileIds.length);
-      for (let i = 0; i < fileIds.length; i++)
+      for (let i = 0; i < 1; i++)
       {
         let fileData = await $store.backendActor.getFile(fileIds[i]);
 
@@ -34,7 +34,7 @@
 
         // Now you have a File object
         console.log(file);
-        const url = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file, {type: "text/plain"});
         console.log(url);
 
         // Create an anchor element
@@ -44,10 +44,12 @@
         anchor.style.display = 'none';
         document.body.appendChild(anchor);
 
-        const assetItem = document.getElementById('item1-glb');
+        const assetItem = document.getElementById('item2');
         console.log(assetItem);
         console.log(anchor);
-        assetItem.setAttribute('src', url);
+        console.log(`url(${url})`)
+        assetItem.setAttribute('gltf-model',`url(${url})`);
+        
 
       }
     } catch (error) {

@@ -13,9 +13,6 @@
         <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         <!-- <a-asset-item id="room-glb" src="roomModel.glb"></a-asset-item> -->
         <a-asset-item id="ground-glb" src="ground.glb"></a-asset-item>
-        <a-asset-item id="item1-glb" src=""></a-asset-item>
-        <a-asset-item id="item2-glb" src=""></a-asset-item>
-
       </a-assets>
 
       <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>
@@ -27,12 +24,39 @@
       <a-entity gltf-model="ground.glb" position="5 -0.1 -5" rotation="0 -90 0" id="Ground Panel 3"></a-entity>
       <a-entity gltf-model="ground.glb" position="4.99758 -0.1 -0.00467" rotation="0 -90 0" id="Ground Panel 4"></a-entity>
       <a-entity gltf-model="ground.glb" id="Ground Panel 2" position="0.02808 -0.1 -0.01568" rotation="0 -90 0"></a-entity>
-      <a-entity obj-model="obj: #item1-glb;" position="5 0 -5" rotation="0 45 0"></a-entity>
-      <a-entity obj-model="obj: #item2-glb;" position="0 -5 -5" rotation="0 45 0"></a-entity>
+      <a-entity id="item2" binary-glb-loader="" position="0 -5 -5" rotation="0 45 0"></a-entity>
 
   
 <div class="a-loader-title" style="display: none;"></div>
 <div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div></a-scene>
 
+<script>
+AFRAME.registerComponent('binary-glb-loader', {
+  schema: {
+    src: {type: 'asset'}
+  },
+
+  init: function () {
+    const objectURL = this.data.src;
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(
+      objectURL,
+      (gltf) => {
+        console.log("Loading binbary object");
+        this.el.setObject3D('mesh', gltf.scene);
+      },
+      undefined,
+      (error) => {
+        console.error('An error occurred while loading the GLTF model', error);
+      }
+    );
+  },
+
+  remove: function () {
+    this.el.removeObject3D('mesh');
+  }
+});
+</script>
   </body>
 </html>

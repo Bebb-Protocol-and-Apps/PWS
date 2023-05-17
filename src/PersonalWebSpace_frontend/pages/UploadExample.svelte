@@ -1,44 +1,45 @@
-<!-- ImagePreviewDataUrl.svelte -->
-<script>
-  let file;
-  let url;
+<script lang="ts">
+  import { onMount } from "svelte";
   import { store } from "../store";
+  let files;
 
-  async function handleFileChange(event) {
-    try {
-      console.log("calling api");
-      let fileIdsResponse = await $store.backendActor.listUserFileIds();
-      let fileIds = fileIdsResponse.Ok.FileIds;
-      console.log("Number of FileIds found: " + fileIds.length);
-      for (let i = 0; i < fileIds.length; i++)
-      {
-        let fileData = await $store.backendActor.getFile(fileIds[i]);
+  $: if (files) {
+    handleFiles(files);
+  }
 
-        // Assuming you have a Uint8Array named `byteArray`
-        const byteArray = new Uint8Array(fileData.Ok.File.file_content);
+   // Function will try to upload the passed in files to the canisters
+  async function handleFiles(files) {
+    console.log(files);
 
-        // Step 1: Convert the Uint8Array to a Blob
-        const blob = new Blob([byteArray], { type: "application/octet-stream" });
-
-        // Step 2: Create a File object from the Blob
-        const fileName = fileData.Ok.File.file_name; // Replace with the actual file name
-        const lastModified = Date.now(); // Replace with the actual last modified timestamp if available
-
-        const file = new File([blob], fileName, { type: "application/octet-stream", lastModified });
-
-        // Now you have a File object
-        console.log(file);
-        url = URL.createObjectURL(file);
-
-
-      }
+    for (const file of files) {
+      console.log(`${file.name}: ${file.size} bytes`);
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      console.log(byteArray);
+      try {
+      console.log(await $store.backendActor.listUserFileNames());
     } catch (error) {
     console.error("Error:", error);
   }
+      // Assuming you have a canister object with a method `storeFile`
+      try {
+      console.log(await $store.backendActor.uploadUserFile(file.name, byteArray));
+    } catch (error) {
+    console.error("Error:", error);
   }
+    }
+  }
+
+
+
 </script>
 
-<input type="file" on:change="{handleFileChange}" accept="image/*" />
-{#if url}
-  <img src="{url}" alt="Preview" />
-{/if}
+<label for="many">Upload multiple files of any type:</label>
+<input
+	bind:files
+	id="many"
+	multiple
+	type="file"
+  
+/>
