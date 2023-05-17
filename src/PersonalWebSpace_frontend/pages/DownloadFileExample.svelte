@@ -30,7 +30,8 @@
         let entity = document.createElement('a-entity');
         entity.setAttribute('gltf-model',`url(${url})`);
         entity.setAttribute('id', `item${i}`);
-        entity.setAttribute('position', '0 -5 -5');
+        let y = -i * 2;
+        entity.setAttribute('position', `0 .5 ${y}`);
         entity.setAttribute('rotation', '0 45 0');
         scene.appendChild(entity);
       }
