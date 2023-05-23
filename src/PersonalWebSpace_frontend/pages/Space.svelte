@@ -334,15 +334,12 @@
     menuEntity.appendChild(openMenuText);
     menuEntity.appendChild(closeMenuText);
     menuEntity.appendChild(buttonEntity);
-    console.log("Menu created", menuEntity);
 
     // Find the camera entity
     let cameraEntity = document.querySelector('a-entity[camera]');
-    console.log("cameraEntity", cameraEntity);
 
     // Append the new menu entity as a child of the camera entity (i.e. it will move with the camera)
     cameraEntity.appendChild(menuEntity);
-    console.log("Menu appended to camera", cameraEntity);
     vrMenuLoaded = true;
   };
 
@@ -386,7 +383,6 @@
 
   function loadNeighborsIn3D(spaceNeighbors: Entity[]) {
     // Create a new entity for each neighbor
-    console.log("Space's Neighbors", spaceNeighbors);
     let neighborIndex = 0;
     for (const neighbor of spaceNeighbors) {
       // Only display neighbors that have a valid URL
@@ -414,19 +410,32 @@
     } catch(err) {
         console.log("Error getting SpaceNeighbors", err);
     };
-    // Only reload Neighbors if they haven't been loaded yet or if new Neighbors have been added
-    if (!neighborsIn3DLoaded) {
-      if (spaceNeighborsResponse.length === 0) {
-        console.log("This Space doesn't have Neighbors");
-      } else {
-        // Load visualization for Neighbors in VR/fullscreen mode
-        loadNeighborVisualizationImage();
-        // Load Neighbors in 3D
-        loadNeighborsIn3D(spaceNeighborsResponse);
-      };
+    // Only load Neighbors if they haven't been loaded yet or reload if new Neighbors have been added
+    if (spaceNeighborsResponse.length === 0) {
+      // Show message that this Space doesn't have Neighbors in scene
+      // Create a new entity for the message
+      let messageEntity = document.createElement('a-entity');
+      // Set properties on the new message entity
+      messageEntity.setAttribute('id', 'OIM-VR-noNeighborsMessage');
+      messageEntity.setAttribute('text', `value: This Space doesn't have Neighbors; align: center; color: #000000; width: 5; wrapCount: 20;`);
+      messageEntity.setAttribute('scale', '0.5 0.5 0.5');
+      messageEntity.setAttribute('position', `-1.8 -0.9 -2`);
+      // Find the camera entity
+      let cameraEntity = document.querySelector('a-entity[camera]');
+      // Add the message entity to the camera entity (i.e. it will move with the camera)
+      cameraEntity.appendChild(messageEntity);
+      // Remove message after 4 seconds
+      setTimeout(() => {
+        cameraEntity.removeChild(messageEntity);
+      }, 4000);
+    } else if (!neighborsIn3DLoaded) { // Neighbors haven't been loaded yet
+      // Load visualization for Neighbors in VR/fullscreen mode
+      loadNeighborVisualizationImage();
+      // Load Neighbors in 3D
+      loadNeighborsIn3D(spaceNeighborsResponse);
       numberOfNeighbors = spaceNeighborsResponse.length;
       neighborsIn3DLoaded = true;
-    } else if (spaceNeighborsResponse.length > numberOfNeighbors) {
+    } else if (spaceNeighborsResponse.length > numberOfNeighbors) { // New Neighbors have been added
       // Remove all existing Neighbors from the scene
       const scene = document.querySelector('a-scene');
       const neighborEntities = scene.querySelectorAll('a-entity[id^="OIM-VR-neighbor-"]');
