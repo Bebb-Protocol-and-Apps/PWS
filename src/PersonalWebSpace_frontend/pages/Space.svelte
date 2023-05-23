@@ -17,6 +17,7 @@
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
 
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+  import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
 
 // This is needed for URL params
   export let params;
@@ -232,6 +233,190 @@
     showNeighborsView = true;
   };
 
+// Load customizations for the scene
+  let sceneCustomizationsLoaded = false;
+  let vrMenuLoaded = false;
+  let neighborVisualizationImageLoaded = false;
+  let neighborsIn3DLoaded = false;
+  let numberOfNeighbors = 0;
+
+  function loadSceneCustomizations() {
+    // Ensure a-scene has loaded, otherwise wait and try again
+    const aScene = document.querySelector('a-scene');
+    if (aScene) {
+      // VR menu
+      loadVRMenu();
+      sceneCustomizationsLoaded = true;
+    } else {
+      setTimeout(() => {
+        loadSceneCustomizations();
+      }, 1000);
+    };    
+  };
+
+  function loadVRMenu() {
+    // Create a new element for the VR menu
+    let menuEntity = document.createElement('a-entity');
+
+    // Set properties on the new menu element
+    menuEntity.setAttribute('id', 'OIM-VR-menu');
+    menuEntity.setAttribute('geometry', 'primitive: plane; height: 0.2; width: 0.3');
+    menuEntity.setAttribute('material', 'color: #AAA; opacity: 0.5');
+    menuEntity.setAttribute('position', '-2 -1 -1.5'); // Position relative to the camera
+    // When clicked, the menu items should change visiblity
+    menuEntity.addEventListener('click', function () {
+      document.querySelectorAll('.menu-item').forEach(button => button.setAttribute('visible', `${!button.getAttribute('visible')}`));
+    });
+
+    // Create text entity as child of the menu like to indicate that the menu can be opened
+    let openMenuText = document.createElement('a-text');
+    openMenuText.setAttribute('class', 'menu-item');
+    openMenuText.setAttribute('value', 'Open Menu');
+    openMenuText.setAttribute('align', 'center');
+    openMenuText.setAttribute('color', 'black');
+    openMenuText.setAttribute('position', '0 0.07 0.01'); // Position relative to the menu (top)
+    openMenuText.setAttribute('visible', 'true'); // Initially set to visible
+    // Make the text smaller to fit the menu
+    openMenuText.setAttribute('scale', '0.2 0.2 0.2');
+
+    // Create another text entity as child of the menu to indicate that the menu can be closed
+    let closeMenuText = document.createElement('a-text');
+    closeMenuText.setAttribute('class', 'menu-item');
+    closeMenuText.setAttribute('value', 'Close Menu');
+    closeMenuText.setAttribute('align', 'center');
+    closeMenuText.setAttribute('color', 'black');
+    closeMenuText.setAttribute('position', '0 0.07 0.01'); // Position relative to the menu (top)
+    closeMenuText.setAttribute('visible', 'false'); // Initially set to invisible
+    // Make the text smaller to fit the menu
+    closeMenuText.setAttribute('scale', '0.2 0.2 0.2');  
+
+    // Create a button to load the Space's Neighbors in 3D as a child of the menu
+    let buttonEntity = document.createElement('a-entity');
+    buttonEntity.setAttribute('class', 'menu-item');
+    buttonEntity.setAttribute('visible', 'false'); // Initially set to invisible
+    buttonEntity.setAttribute('geometry', 'primitive: box; height: 0.1; width: 0.25; depth: 0.01');
+    buttonEntity.setAttribute('material', 'color: #555; opacity: 0.5');
+    buttonEntity.setAttribute('position', '0 0 0.01'); // Position relative to the menu
+    buttonEntity.addEventListener('click', loadSpaceNeighborsIn3D);
+    // Add text to the button
+    let buttonText = document.createElement('a-text');
+    buttonText.setAttribute('value', 'Load Neighbors');
+    buttonText.setAttribute('align', 'center');
+    buttonText.setAttribute('color', 'black');
+    buttonText.setAttribute('position', '0 0 0.01'); // Position relative to the button
+    // Make the text smaller to fit the button
+    buttonText.setAttribute('scale', '0.15 0.15 0.15');
+    buttonEntity.appendChild(buttonText);
+
+    // Add the elements to the menu
+    menuEntity.appendChild(openMenuText);
+    menuEntity.appendChild(closeMenuText);
+    menuEntity.appendChild(buttonEntity);
+    console.log("Menu created", menuEntity);
+
+    // Find the camera entity
+    let cameraEntity = document.querySelector('a-entity[camera]');
+    console.log("cameraEntity", cameraEntity);
+
+    // Append the new menu entity as a child of the camera entity (i.e. it will move with the camera)
+    cameraEntity.appendChild(menuEntity);
+    console.log("Menu appended to camera", cameraEntity);
+    vrMenuLoaded = true;
+  };
+
+  const extractSpaceEntityId = () => {
+    if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
+        for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+            let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+            if (fieldKey === "protocolEntityId") {
+                return spaceNft.metadata[0].key_val_data[j].val.TextContent;
+            };
+        };
+    };
+  };
+
+  const entityHasValidUrl = (entity) => {
+    return isValidUrl(entity.externalId);
+  };
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+    return true;
+  };
+
+  function loadNeighborVisualizationImage() {
+    if (!neighborVisualizationImageLoaded) {
+      // Create a new a-asset element
+      var newAsset = document.createElement('img');
+      newAsset.setAttribute('id', 'OIM__NeighborVisualization__Webportal_');
+      newAsset.setAttribute('src', './OIM_NeighborVisualization_Webportal.png');
+      // Append the new a-asset to the a-assets element
+      var assets = document.querySelector('a-assets');
+      assets.appendChild(newAsset);
+      neighborVisualizationImageLoaded = true;
+    };
+  };
+
+  function loadNeighborsIn3D(spaceNeighbors: Entity[]) {
+    // Create a new entity for each neighbor
+    console.log("Space's Neighbors", spaceNeighbors);
+    let neighborIndex = 0;
+    for (const neighbor of spaceNeighbors) {
+      // Only display neighbors that have a valid URL
+      if (entityHasValidUrl(neighbor)) {
+        // Create a new entity for the neighbor
+        let neighborEntity = document.createElement('a-entity');
+        // Set properties on the new neighbor entity
+        neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.internalId}`);
+        neighborEntity.setAttribute('web-portal', `url:${neighbor.externalId}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
+        neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
+        // Add the neighbor entity to the scene
+        let scene = document.querySelector('a-scene');
+        scene.appendChild(neighborEntity);
+        neighborIndex++;
+      };
+    };    
+  };
+
+  const loadSpaceNeighborsIn3D = async () => {
+    // Load the Space's Neighbors from Bebb Protocol and display them in 3D in the scene
+    const spaceEntityId = extractSpaceEntityId();
+    let spaceNeighborsResponse: Entity[] = [];
+    try {
+        spaceNeighborsResponse = await $store.protocolActor.get_bridged_entities_by_entity_id(spaceEntityId, true, false, false);
+    } catch(err) {
+        console.log("Error getting SpaceNeighbors", err);
+    };
+    // Only reload Neighbors if they haven't been loaded yet or if new Neighbors have been added
+    if (!neighborsIn3DLoaded) {
+      if (spaceNeighborsResponse.length === 0) {
+        console.log("This Space doesn't have Neighbors");
+      } else {
+        // Load visualization for Neighbors in VR/fullscreen mode
+        loadNeighborVisualizationImage();
+        // Load Neighbors in 3D
+        loadNeighborsIn3D(spaceNeighborsResponse);
+      };
+      numberOfNeighbors = spaceNeighborsResponse.length;
+      neighborsIn3DLoaded = true;
+    } else if (spaceNeighborsResponse.length > numberOfNeighbors) {
+      // Remove all existing Neighbors from the scene
+      const scene = document.querySelector('a-scene');
+      const neighborEntities = scene.querySelectorAll('a-entity[id^="OIM-VR-neighbor-"]');
+      for (const neighborEntity of neighborEntities) {
+        scene.removeChild(neighborEntity);
+      };
+      // Load Neighbors in 3D
+      loadNeighborsIn3D(spaceNeighborsResponse);
+      numberOfNeighbors = spaceNeighborsResponse.length;
+    };
+  };
+
 // Load Space scene from data stored in backend canister
   let loadingInProgress = true;
   let spaceLoadingError = false;
@@ -243,7 +428,7 @@
   const addSceneFromSpace = async () => {
     // If viewer is logged in, make authenticated call (otherwise, default backendActor in store is used)
     // @ts-ignore
-    const spaceNFTResponse = await $store.backendActor.getSpace(Number(params.spaceId));
+    const spaceNFTResponse: NftResult = await $store.backendActor.getSpace(Number(params.spaceId));
     
     loadingInProgress = false;
     if (spaceNFTResponse.Err) {
@@ -255,6 +440,7 @@
       spaceString = string.replace(/\\"/g, '"');
       spaceLoaded = true;
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
+      loadSceneCustomizations();
     };
   };
 

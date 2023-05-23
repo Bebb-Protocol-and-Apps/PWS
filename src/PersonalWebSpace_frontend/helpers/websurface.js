@@ -59,7 +59,13 @@ export const component = AFRAME.registerComponent('websurface', {
       document.body.appendChild(context.domElement);
 
       const element = new DOMElement(context, iframe, data.width, data.height);
-      el.object3D.add(element);
+      
+      // Add the iframe visualization to the element only if the user currently isn't in VR/fullscreen mode
+      let isInVRMode = el.sceneEl.is('vr-mode'); // returns true if in VR mode
+      let isInFullscreenMode = document.fullscreenElement != null; // returns true if in Fullscreen mode
+      if (!isInVRMode && !isInFullscreenMode) {
+        el.object3D.add(element);
+      };
 
       if (data.isInteractable == true) {
         const div = document.createElement('div');
