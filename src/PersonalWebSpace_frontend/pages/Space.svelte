@@ -260,52 +260,74 @@
 
     // Set properties on the new menu element
     menuEntity.setAttribute('id', 'OIM-VR-menu');
-    menuEntity.setAttribute('geometry', 'primitive: plane; height: 0.2; width: 0.3');
-    menuEntity.setAttribute('material', 'color: #AAA; opacity: 0.5');
-    menuEntity.setAttribute('position', '-2 -1 -1.5'); // Position relative to the camera
-    // When clicked, the menu items should change visiblity
-    menuEntity.addEventListener('click', function () {
+    menuEntity.setAttribute('geometry', 'primitive: plane; height: 0.2; width: 0.6');
+    menuEntity.setAttribute('material', 'color: #333; opacity: 0.6');
+    menuEntity.setAttribute('position', '-1.9 -1 -1.5'); // Position relative to the camera
+    let isMenuOpen = false;
+    const toggleMenu = () => {
+      // When clicked, the menu items should change visiblity
       document.querySelectorAll('.menu-item').forEach(button => button.setAttribute('visible', `${!button.getAttribute('visible')}`));
-    });
+      // The menu itself should also change size
+      isMenuOpen = !isMenuOpen;
+      if(isMenuOpen){
+        openMenuText.setAttribute('position', '0 0.21 0.01'); // Position relative to the menu (top)
+        menuEntity.setAttribute('geometry', 'primitive: plane; height: 0.5; width: 0.6');
+      } else {
+        openMenuText.setAttribute('position', '0 0.01 0.01'); // Position relative to the menu (center)
+        menuEntity.setAttribute('geometry', 'primitive: plane; height: 0.2; width: 0.6');
+      }
+    };
+    menuEntity.addEventListener('click', toggleMenu);
 
     // Create text entity as child of the menu like to indicate that the menu can be opened
     let openMenuText = document.createElement('a-text');
     openMenuText.setAttribute('class', 'menu-item');
     openMenuText.setAttribute('value', 'Open Menu');
     openMenuText.setAttribute('align', 'center');
-    openMenuText.setAttribute('color', 'black');
-    openMenuText.setAttribute('position', '0 0.07 0.01'); // Position relative to the menu (top)
+    openMenuText.setAttribute('color', '#FFF');
+    openMenuText.setAttribute('position', '0 0.01 0.01'); // Position relative to the menu (center)
     openMenuText.setAttribute('visible', 'true'); // Initially set to visible
     // Make the text smaller to fit the menu
-    openMenuText.setAttribute('scale', '0.2 0.2 0.2');
+    openMenuText.setAttribute('scale', '0.5 0.5 0.5');
 
     // Create another text entity as child of the menu to indicate that the menu can be closed
     let closeMenuText = document.createElement('a-text');
     closeMenuText.setAttribute('class', 'menu-item');
     closeMenuText.setAttribute('value', 'Close Menu');
     closeMenuText.setAttribute('align', 'center');
-    closeMenuText.setAttribute('color', 'black');
-    closeMenuText.setAttribute('position', '0 0.07 0.01'); // Position relative to the menu (top)
+    closeMenuText.setAttribute('color', '#FFF');
+    closeMenuText.setAttribute('position', '0 0.17 0.01'); // Position relative to the menu (top)
     closeMenuText.setAttribute('visible', 'false'); // Initially set to invisible
     // Make the text smaller to fit the menu
-    closeMenuText.setAttribute('scale', '0.2 0.2 0.2');  
+    closeMenuText.setAttribute('scale', '0.5 0.5 0.5');  
 
     // Create a button to load the Space's Neighbors in 3D as a child of the menu
     let buttonEntity = document.createElement('a-entity');
     buttonEntity.setAttribute('class', 'menu-item');
     buttonEntity.setAttribute('visible', 'false'); // Initially set to invisible
-    buttonEntity.setAttribute('geometry', 'primitive: box; height: 0.1; width: 0.25; depth: 0.01');
-    buttonEntity.setAttribute('material', 'color: #555; opacity: 0.5');
-    buttonEntity.setAttribute('position', '0 0 0.01'); // Position relative to the menu
-    buttonEntity.addEventListener('click', loadSpaceNeighborsIn3D);
+    buttonEntity.setAttribute('geometry', 'primitive: box; height: 0.15; width: 0.5; depth: 0.01');
+    buttonEntity.setAttribute('material', 'color: #555; opacity: 0.8');
+    buttonEntity.setAttribute('position', '0 -0.01 0.015'); // Position relative to the menu
+    buttonEntity.addEventListener('click', function () {
+      // Only trigger loading if button is visible (and thus was explicitly clicked)
+      if (buttonEntity.getAttribute('visible')) {
+        loadSpaceNeighborsIn3D();
+      };
+    });
+    buttonEntity.addEventListener('mouseenter', function () {
+      buttonEntity.setAttribute('material', 'color: #888');
+    });
+    buttonEntity.addEventListener('mouseleave', function () {
+      buttonEntity.setAttribute('material', 'color: #555');
+    });
     // Add text to the button
     let buttonText = document.createElement('a-text');
     buttonText.setAttribute('value', 'Load Neighbors');
     buttonText.setAttribute('align', 'center');
-    buttonText.setAttribute('color', 'black');
+    buttonText.setAttribute('color', '#FFF');
     buttonText.setAttribute('position', '0 0 0.01'); // Position relative to the button
     // Make the text smaller to fit the button
-    buttonText.setAttribute('scale', '0.15 0.15 0.15');
+    buttonText.setAttribute('scale', '0.3 0.3 0.3');
     buttonEntity.appendChild(buttonText);
 
     // Add the elements to the menu
