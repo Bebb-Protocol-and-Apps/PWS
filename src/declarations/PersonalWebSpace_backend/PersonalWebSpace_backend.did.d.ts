@@ -12,14 +12,19 @@ export interface Dip721NonFungibleToken {
   'name' : string,
   'symbol' : string,
 }
+export interface EmailSubscriber {
+  'subscribedAt' : bigint,
+  'emailAddress' : string,
+  'pageSubmittedFrom' : string,
+}
 export type ExtendedMetadataResult = {
     'Ok' : { 'token_id' : TokenId, 'metadata_desc' : MetadataDesc }
   } |
   { 'Err' : ApiError };
-export type File = Uint8Array;
+export type File = Uint8Array | number[];
 export interface FileInfo {
   'file_name' : string,
-  'file_content' : Uint8Array,
+  'file_content' : Uint8Array | number[],
   'owner_principal' : string,
 }
 export type FileResult = { 'Ok' : FileResultSuccessOptions } |
@@ -42,7 +47,7 @@ export interface LogoResult { 'data' : string, 'logo_type' : string }
 export type MetadataDesc = Array<MetadataPart>;
 export interface MetadataKeyVal { 'key' : string, 'val' : MetadataVal }
 export interface MetadataPart {
-  'data' : Uint8Array,
+  'data' : Uint8Array | number[],
   'key_val_data' : Array<MetadataKeyVal>,
   'purpose' : MetadataPurpose,
 }
@@ -56,7 +61,7 @@ export type MetadataVal = { 'Nat64Content' : bigint } |
   { 'NatContent' : bigint } |
   { 'Nat16Content' : number } |
   { 'TextArrayContent' : Array<string> } |
-  { 'BlobContent' : Uint8Array } |
+  { 'BlobContent' : Uint8Array | number[] } |
   { 'PrincipalContent' : Principal } |
   { 'TextToTextAssocListContent' : AssocList } |
   { 'TextContent' : string };
@@ -76,15 +81,20 @@ export interface PersonalWebSpace {
   'balanceOfDip721' : ActorMethod<[Principal], bigint>,
   'check_user_has_nft' : ActorMethod<[], boolean>,
   'createSpace' : ActorMethod<[string], NftResult>,
+  'deleteEmailSubscriber' : ActorMethod<[string], boolean>,
   'deleteFile' : ActorMethod<[string], FileResult>,
   'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
+  'getEmailSubscribers' : ActorMethod<[], Array<[string, EmailSubscriber]>>,
   'getFile' : ActorMethod<[string], FileResult>,
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
   'getRandomSpace' : ActorMethod<[], NftResult>,
   'getSpace' : ActorMethod<[TokenId], NftResult>,
-  'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
+  'getTokenIdsForUserDip721' : ActorMethod<
+    [Principal],
+    BigUint64Array | bigint[]
+  >,
   'getUserRecord' : ActorMethod<[], FileResult>,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
@@ -98,6 +108,7 @@ export interface PersonalWebSpace {
     [Principal, Principal, TokenId],
     TxReceipt
   >,
+  'submitSignUpForm' : ActorMethod<[SignUpFormInput], string>,
   'supportedInterfacesDip721' : ActorMethod<[], Array<InterfaceId>>,
   'symbolDip721' : ActorMethod<[], string>,
   'testUploadFile' : ActorMethod<[string, File], string>,
@@ -112,15 +123,19 @@ export interface PersonalWebSpace {
 export interface Request {
   'url' : string,
   'method' : string,
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
   'headers' : Array<HeaderField>,
 }
 export interface Response {
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
   'headers' : Array<HeaderField>,
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
   'status_code' : number,
+}
+export interface SignUpFormInput {
+  'emailAddress' : string,
+  'pageSubmittedFrom' : string,
 }
 export type StreamingCallback = ActorMethod<
   [StreamingCallbackToken],
@@ -128,7 +143,7 @@ export type StreamingCallback = ActorMethod<
 >;
 export interface StreamingCallbackResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
 }
 export interface StreamingCallbackToken {
   'key' : string,

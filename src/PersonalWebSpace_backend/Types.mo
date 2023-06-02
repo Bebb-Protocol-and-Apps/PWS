@@ -109,4 +109,15 @@ module {
     updatedSpaceName: Text;
     updatedSpaceData: ?Text;
   };
+
+  public type SignUpFormInput = {
+    emailAddress: Text;
+    pageSubmittedFrom: Text;
+  };
+
+  public type EmailSubscriber = {
+    emailAddress: Text;
+    pageSubmittedFrom: Text;
+    subscribedAt: Nat64;
+  };
 };

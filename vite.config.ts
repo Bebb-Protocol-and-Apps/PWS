@@ -31,11 +31,17 @@ const aliases = Object.entries(dfxJson.canisters || {}).reduce(
   (acc, [name, _value]) => {
     // Get the network name, or `local` by default.
     const networkName = process.env["DFX_NETWORK"] || "local";
-    const outputRoot = path.join(
+    /* const outputRoot = path.join(
       __dirname,
       ".dfx",
       networkName,
       "canisters",
+      name,
+    ); */
+    const outputRoot = path.join(
+      __dirname,
+      "src",
+      "declarations",
       name,
     );
 
@@ -82,14 +88,14 @@ export default defineConfig({
       allow: ["."],
     },
     //__________Local vs Mainnet Development____________
-    /* proxy: {
+    proxy: {
       // This proxies all http requests made to /api to our running dfx instance
       "/api": {
         target: `http://127.0.0.1:4943`,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
-    }, */
+    },
   },
   define: {
     // Here we can define global constants
@@ -97,6 +103,9 @@ export default defineConfig({
     ...canisterDefinitions,
     "process.env.NODE_ENV": JSON.stringify(
       isDev ? "development" : "production",
+    ),
+    "process.env.DFX_NETWORK": JSON.stringify(
+      isDev ? "local" : "ic",
     ),
     global: process.env.NODE_ENV === "development" ? "globalThis" : "global",
   },

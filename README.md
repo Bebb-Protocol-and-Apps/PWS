@@ -49,7 +49,8 @@ dfx deploy --argument "(
     symbol = \"PWS\";
     maxLimit = 65535;
   }
-)"
+)" PersonalWebSpace_backend
+dfx deploy
 
 --> access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
 access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
@@ -84,7 +85,8 @@ dfx deploy --network ic --argument "(
     symbol = \"PWS\";
     maxLimit = 65535;
   }
-)"
+)" PersonalWebSpace_backend
+dfx deploy --network ic
 
 In case there are authentication issues, you could try this command
 Note that only authorized identities which are set up as canister controllers may deploy the production canisters
@@ -99,7 +101,15 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
     symbol = \"PWS\";
     maxLimit = 65535;
   }
-)"
+)" PersonalWebSpace_backend
+dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)"
+
+# Get and delete Email Subscribers
+dfx canister call PersonalWebSpace_backend getEmailSubscribers
+dfx canister call PersonalWebSpace_backend deleteEmailSubscriber 'j@g.com'
+
+dfx canister call PersonalWebSpace_backend getEmailSubscribers --network ic
+dfx canister call PersonalWebSpace_backend deleteEmailSubscriber 'j@g.com' --network ic
 
 # Cycles for Production Canisters
 Fund wallet with cycles (from ICP): https://medium.com/dfinity/internet-computer-basics-part-3-funding-a-cycles-wallet-a724efebd111

@@ -37,6 +37,11 @@ type StreamingCallbackResponse =
  };
 type StreamingCallback = func (StreamingCallbackToken) ->
                           (StreamingCallbackResponse) query;
+type SignUpFormInput = 
+ record {
+   emailAddress: text;
+   pageSubmittedFrom: text;
+ };
 type Response = 
  record {
    body: blob;
@@ -57,8 +62,13 @@ type PersonalWebSpace =
    balanceOfDip721: (principal) -> (nat64) query;
    check_user_has_nft: () -> (bool) query;
    createSpace: (text) -> (NftResult);
+   deleteEmailSubscriber: (text) -> (bool);
    deleteFile: (text) -> (FileResult);
    getCallerSpaces: () -> (vec Nft) query;
+   getEmailSubscribers: () -> (vec record {
+                                     text;
+                                     EmailSubscriber;
+                                   });
    getFile: (text) -> (FileResult);
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
@@ -76,6 +86,7 @@ type PersonalWebSpace =
    nameDip721: () -> (text) query;
    ownerOfDip721: (TokenId) -> (OwnerResult) query;
    safeTransferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
+   submitSignUpForm: (SignUpFormInput) -> (text);
    supportedInterfacesDip721: () -> (vec InterfaceId) query;
    symbolDip721: () -> (text) query;
    testUploadFile: (text, File) -> (text);
@@ -200,6 +211,12 @@ type ExtendedMetadataResult =
          metadata_desc: MetadataDesc;
          token_id: TokenId;
        };
+ };
+type EmailSubscriber = 
+ record {
+   emailAddress: text;
+   pageSubmittedFrom: text;
+   subscribedAt: nat64;
  };
 type Dip721NonFungibleToken = 
  record {

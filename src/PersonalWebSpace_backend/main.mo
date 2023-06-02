@@ -927,11 +927,60 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     return Nat.toText(content.size());
   };
 
+// Email Signups from Website
+  stable var emailSubscribersStorageStable : [(Text, Types.EmailSubscriber)] = [];
+  var emailSubscribersStorage : HashMap.HashMap<Text, Types.EmailSubscriber> = HashMap.HashMap(0, Text.equal, Text.hash);
 
-  // Upgrade Hooks
+  func putEmailSubscriber(emailSubscriber : Types.EmailSubscriber) : Text {
+    emailSubscribersStorage.put(emailSubscriber.emailAddress, emailSubscriber);
+    return emailSubscriber.emailAddress;
+  };
+
+  func getEmailSubscriber(emailAddress : Text) : ?Types.EmailSubscriber {
+    let result = emailSubscribersStorage.get(emailAddress);
+    return result;
+  };
+
+  public func submitSignUpForm(submittedSignUpForm : Types.SignUpFormInput) : async Text {
+    switch(getEmailSubscriber(submittedSignUpForm.emailAddress)) {
+      case null {
+        let emailSubscriber : Types.EmailSubscriber = {
+          emailAddress: Text = submittedSignUpForm.emailAddress;
+          pageSubmittedFrom: Text = submittedSignUpForm.pageSubmittedFrom;
+          subscribedAt: Nat64 = Nat64.fromNat(Int.abs(Time.now()));
+        };
+        let result = putEmailSubscriber(emailSubscriber);
+        if (result != emailSubscriber.emailAddress) {
+          return "There was an error signing up. Please try again.";
+        };
+        return "Successfully signed up!";
+      };
+      case _ { return "Already signed up!"; };
+    };  
+  };
+
+  // Function for custodian to get all email subscribers
+  public shared({ caller }) func getEmailSubscribers() : async [(Text, Types.EmailSubscriber)] {
+    if (List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+      return Iter.toArray(emailSubscribersStorage.entries());
+    };
+    return [];
+  };
+
+  // Function for custodian to delete an email subscriber
+  public shared({ caller }) func deleteEmailSubscriber(emailAddress : Text) : async Bool {
+    if (List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+      emailSubscribersStorage.delete(emailAddress);
+      return true;
+    };
+    return false;
+  };
+
+// Upgrade Hooks
   system func preupgrade() {
     fileDatabaseStable := Iter.toArray(fileDatabase.entries());
     userFileRecordsStable := Iter.toArray(userFileRecords.entries());
+    emailSubscribersStorageStable := Iter.toArray(emailSubscribersStorage.entries());
   };
 
   system func postupgrade() {
@@ -939,5 +988,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     fileDatabaseStable := [];
     userFileRecords := HashMap.fromIter(Iter.fromArray(userFileRecordsStable), userFileRecordsStable.size(), Text.equal, Text.hash);
     userFileRecordsStable := [];
+    emailSubscribersStorage := HashMap.fromIter(Iter.fromArray(emailSubscribersStorageStable), emailSubscribersStorageStable.size(), Text.equal, Text.hash);
+    emailSubscribersStorageStable := [];
   };
 };
