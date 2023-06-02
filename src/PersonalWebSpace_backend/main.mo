@@ -306,7 +306,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         _name : ?Text = ?"Personal Web Space";
         _description : ?Text = ?"Flaming Hot Personal Web Space";
         _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".raw.ic0.app/#/space/" # Nat64.toText(newId));
+        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".ic0.app/#/space/" # Nat64.toText(newId));
         _entitySpecificFields : ?Text = null;
     };
     //__________Local vs Mainnet Development____________
