@@ -923,10 +923,6 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     return #Ok(#Success);
   };
 
-  public shared(msg) func testUploadFile(fileName : Text, content : FileTypes.File) : async Text {
-    return Nat.toText(content.size());
-  };
-
 // Email Signups from Website
   stable var emailSubscribersStorageStable : [(Text, Types.EmailSubscriber)] = [];
   var emailSubscribersStorage : HashMap.HashMap<Text, Types.EmailSubscriber> = HashMap.HashMap(0, Text.equal, Text.hash);
