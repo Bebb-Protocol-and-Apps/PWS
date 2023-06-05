@@ -111,8 +111,8 @@ module {
   };
 
   public type SignUpFormInput = {
-    emailAddress: Text;
-    pageSubmittedFrom: Text;
+    emailAddress: Text; // provided by user on signup
+    pageSubmittedFrom: Text; // capture for analytics
   };
 
   public type EmailSubscriber = {

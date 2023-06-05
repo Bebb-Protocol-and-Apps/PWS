@@ -927,19 +927,24 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
   stable var emailSubscribersStorageStable : [(Text, Types.EmailSubscriber)] = [];
   var emailSubscribersStorage : HashMap.HashMap<Text, Types.EmailSubscriber> = HashMap.HashMap(0, Text.equal, Text.hash);
 
-  func putEmailSubscriber(emailSubscriber : Types.EmailSubscriber) : Text {
+  // Add a user as new email subscriber
+  private func putEmailSubscriber(emailSubscriber : Types.EmailSubscriber) : Text {
     emailSubscribersStorage.put(emailSubscriber.emailAddress, emailSubscriber);
     return emailSubscriber.emailAddress;
   };
 
-  func getEmailSubscriber(emailAddress : Text) : ?Types.EmailSubscriber {
+  // Retrieve an email subscriber by email address
+  private func getEmailSubscriber(emailAddress : Text) : ?Types.EmailSubscriber {
     let result = emailSubscribersStorage.get(emailAddress);
     return result;
   };
 
+  // User can submit a form to sign up for email updates
+    // For now, we only capture the email address provided by the user and on which page they submitted the form
   public func submitSignUpForm(submittedSignUpForm : Types.SignUpFormInput) : async Text {
     switch(getEmailSubscriber(submittedSignUpForm.emailAddress)) {
       case null {
+        // New subscriber
         let emailSubscriber : Types.EmailSubscriber = {
           emailAddress: Text = submittedSignUpForm.emailAddress;
           pageSubmittedFrom: Text = submittedSignUpForm.pageSubmittedFrom;
@@ -957,6 +962,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
 
   // Function for custodian to get all email subscribers
   public shared({ caller }) func getEmailSubscribers() : async [(Text, Types.EmailSubscriber)] {
+    // Only Principals registered as custodians can access this function
     if (List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
       return Iter.toArray(emailSubscribersStorage.entries());
     };
@@ -965,6 +971,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
 
   // Function for custodian to delete an email subscriber
   public shared({ caller }) func deleteEmailSubscriber(emailAddress : Text) : async Bool {
+    // Only Principals registered as custodians can access this function
     if (List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
       emailSubscribersStorage.delete(emailAddress);
       return true;
