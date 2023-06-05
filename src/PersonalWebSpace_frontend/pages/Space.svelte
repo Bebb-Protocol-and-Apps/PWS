@@ -54,11 +54,13 @@
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
     // Close Inspector and hide button Inspect Scene
     // @ts-ignore
-    await AFRAME.INSPECTOR.close();
+    //await AFRAME.INSPECTOR.close();
+    AFRAME.INSPECTOR.close();
+    showVRMenu();
     var elements = document.body.getElementsByClassName("toggle-edit");    
     var toggleElement = elements.item(0);
     // @ts-ignore
-    toggleElement.hidden = true; 
+    toggleElement.hidden = true;
     // Assemble new scene HTML to be stored
     const respUpper = await fetch("spacesUpperHtml.html");
     const upperHTML = await respUpper.text();
@@ -211,6 +213,10 @@
 
   const customizeInspector = () => {
   // Change A-Frame's default Inspector according to our specific requirements
+    // Remove any 3D Neighbors from the scene
+    remove3dNeighborsFromScene();
+    // Hide VR menu
+    hideVRMenu();
     // Initiate Save Button to persist changes made
     loadSaveButton();
     // Customize features on the Right Panel
@@ -437,15 +443,33 @@
       neighborsIn3DLoaded = true;
     } else if (spaceNeighborsResponse.length > numberOfNeighbors) { // New Neighbors have been added
       // Remove all existing Neighbors from the scene
-      const scene = document.querySelector('a-scene');
-      const neighborEntities = scene.querySelectorAll('a-entity[id^="OIM-VR-neighbor-"]');
-      for (const neighborEntity of neighborEntities) {
-        scene.removeChild(neighborEntity);
-      };
+      remove3dNeighborsFromScene();
       // Load Neighbors in 3D
       loadNeighborsIn3D(spaceNeighborsResponse);
       numberOfNeighbors = spaceNeighborsResponse.length;
     };
+  };
+
+  const remove3dNeighborsFromScene = () => {
+    // Remove all existing 3D Neighbors from the scene
+    const scene = document.querySelector('a-scene');
+    const neighborEntities = scene.querySelectorAll('a-entity[id^="OIM-VR-neighbor-"]');
+    for (const neighborEntity of neighborEntities) {
+      scene.removeChild(neighborEntity);
+    };
+    neighborsIn3DLoaded = false;
+  };
+
+  const hideVRMenu = () => {
+    // Hide the VR menu
+    const vrMenu = document.querySelector('#OIM-VR-menu');
+    vrMenu.setAttribute('visible', 'false');
+  };
+
+  const showVRMenu = () => {
+    // Show the VR menu
+    const vrMenu = document.querySelector('#OIM-VR-menu');
+    vrMenu.setAttribute('visible', 'true');
   };
 
 // Load Space scene from data stored in backend canister

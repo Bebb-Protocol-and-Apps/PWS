@@ -27,7 +27,7 @@ export interface LogoResult { 'data' : string, 'logo_type' : string }
 export type MetadataDesc = Array<MetadataPart>;
 export interface MetadataKeyVal { 'key' : string, 'val' : MetadataVal }
 export interface MetadataPart {
-  'data' : Uint8Array,
+  'data' : Uint8Array | number[],
   'key_val_data' : Array<MetadataKeyVal>,
   'purpose' : MetadataPurpose,
 }
@@ -41,7 +41,7 @@ export type MetadataVal = { 'Nat64Content' : bigint } |
   { 'NatContent' : bigint } |
   { 'Nat16Content' : number } |
   { 'TextArrayContent' : Array<string> } |
-  { 'BlobContent' : Uint8Array } |
+  { 'BlobContent' : Uint8Array | number[] } |
   { 'PrincipalContent' : Principal } |
   { 'TextToTextAssocListContent' : AssocList } |
   { 'TextContent' : string };
@@ -67,7 +67,10 @@ export interface PersonalWebSpace {
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
   'getRandomSpace' : ActorMethod<[], NftResult>,
   'getSpace' : ActorMethod<[TokenId], NftResult>,
-  'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
+  'getTokenIdsForUserDip721' : ActorMethod<
+    [Principal],
+    BigUint64Array | bigint[]
+  >,
   'greet' : ActorMethod<[string], string>,
   'http_request' : ActorMethod<[Request], Response>,
   'logoDip721' : ActorMethod<[], LogoResult>,
@@ -90,11 +93,11 @@ export interface PersonalWebSpace {
 export interface Request {
   'url' : string,
   'method' : string,
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
   'headers' : Array<HeaderField>,
 }
 export interface Response {
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
   'headers' : Array<HeaderField>,
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
@@ -106,7 +109,7 @@ export type StreamingCallback = ActorMethod<
 >;
 export interface StreamingCallbackResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Uint8Array,
+  'body' : Uint8Array | number[],
 }
 export interface StreamingCallbackToken {
   'key' : string,
