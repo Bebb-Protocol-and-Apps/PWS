@@ -46,7 +46,7 @@ export const component = AFRAME.registerComponent('websurface', {
       const iframe = document.createElement('iframe');
       iframe.setAttribute('src', data.url);
       // Secure iframe
-      iframe.setAttribute('credentialless', 'true');
+      //iframe.setAttribute('credentialless', 'true');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');      
       iframe.style.border = 'none';

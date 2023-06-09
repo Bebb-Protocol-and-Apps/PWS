@@ -47,7 +47,7 @@ AFRAME.registerComponent('web-portal', {
       iframe.style.zIndex = 10;
       iframe.style.display = 'none';
       // Secure iframe
-      iframe.setAttribute('credentialless', 'true');
+      //iframe.setAttribute('credentialless', 'true');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); 
     }
