@@ -8,6 +8,8 @@
 
   import { getStringForSpaceFromModel } from "../helpers/space_helpers";
 
+  import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
+
   let webHostedGlbModelUrl : string = "";
 
 // Subtexts to display
@@ -45,12 +47,16 @@
   let files;
   let userUploadedFileURL;
 
-  const userFileInputHandler = function(userFiles) {
+  const userFileInputHandler = function(userFiles = files) {
+    if (!userFiles || userFiles.length === 0) {
+      return false;
+    };
     const userFile = userFiles[0];
     let fileName = userFile.name; // get the name of the file
     if (fileName.endsWith('.glb')) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
+        addUserFileToScene(files);
         return true;
       } catch (e) {
         console.error(e);
@@ -82,14 +88,18 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 0 -5');
             modelEntity.setAttribute('id', 'modelFromUserFile');
-            aScene.appendChild(modelEntity);
+            if (!aScene.querySelector('#modelFromUserFile')) {
+              aScene.appendChild(modelEntity);
+            }
           } else {
             aScene.addEventListener('loaded', function () {
               var modelEntity = aScene.ownerDocument.createElement('a-entity');
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 0 -5');
               modelEntity.setAttribute('id', 'modelFromUserFile');
-              aScene.appendChild(modelEntity);
+              if (!aScene.querySelector('#modelFromUserFile')) {
+                aScene.appendChild(modelEntity);
+              }
             });
           }
         } else {
@@ -113,7 +123,45 @@
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
       const space = await $store.backendActor.createSpace(spaceHtml);
     };
-    // TODO: add UserUploadedGlbModel
+    // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler()) {
+      // Store file for user
+      console.log(`${files[0].name}: ${files[0].size} bytes`);
+      const arrayBuffer = await files[0].arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      console.log(byteArray);
+      let fileUploadResult;
+      try {
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
+        console.log("fileUploadResult ", fileUploadResult);
+        console.log("fileUploadResult Ok", fileUploadResult.Ok);
+      } catch (error) {
+        console.error("File Upload Error:", error);
+      };
+      if (fileUploadResult.Ok) {
+        console.log("fileUploadResult Ok[0]", fileUploadResult.Ok.FileId);
+        //const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+        
+        console.log(process.env.DFX_NETWORK);
+        console.log("backendCanisterId ", backendCanisterId);
+        console.log(process.env.DFX_NETWORK === "ic");
+        const url = process.env.DFX_NETWORK === "ic"
+          ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+          : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+        console.log("url ", url);
+        const spaceHtml = getStringForSpaceFromModel(url);
+        try {
+          const space = await $store.backendActor.createSpace(spaceHtml);
+          console.log("space ", space);
+        } catch (error) {
+          console.error("Create Space Error:", error);
+        };
+      } else {
+        console.error("File Upload Error:", fileUploadResult);
+      };
+    };
+
     await setSpaceWasCreated();
   };
 
@@ -192,7 +240,6 @@
         {#key userUploadedFileURL}  <!-- Element to rerender everything inside when userUploadedFileURL changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
           <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
         {/key}
-        {addUserFileToScene(files)}
         {#if !$store.isAuthed}
           <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
           <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>

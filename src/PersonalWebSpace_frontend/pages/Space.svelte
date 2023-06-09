@@ -16,8 +16,6 @@
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
 
-  import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
-
 // This is needed for URL params
   export let params;
 

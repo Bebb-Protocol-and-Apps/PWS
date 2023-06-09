@@ -49,7 +49,8 @@ dfx deploy --argument "(
     symbol = \"PWS\";
     maxLimit = 65535;
   }
-)"
+)" PersonalWebSpace_backend
+dfx deploy
 
 --> access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
 access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom

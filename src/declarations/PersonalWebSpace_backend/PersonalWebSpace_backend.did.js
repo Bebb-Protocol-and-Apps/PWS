@@ -132,7 +132,7 @@ export const idlFactory = ({ IDL }) => {
     'createSpace' : IDL.Func([IDL.Text], [NftResult], []),
     'deleteFile' : IDL.Func([IDL.Text], [FileResult], []),
     'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
-    'getFile' : IDL.Func([IDL.Text], [FileResult], []),
+    'getFile' : IDL.Func([IDL.Text], [FileResult], ['query']),
     'getMaxLimitDip721' : IDL.Func([], [IDL.Nat16], ['query']),
     'getMetadataDip721' : IDL.Func([TokenId], [MetadataResult], ['query']),
     'getMetadataForUserDip721' : IDL.Func(
