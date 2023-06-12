@@ -12,6 +12,12 @@ import Char "mo:base/Char";
 import AssocList "mo:base/AssocList";
 import Buffer "mo:base/Buffer";
 import Random "mo:base/Random";
+import RBTree "mo:base/RBTree";
+import HashMap "mo:base/HashMap";
+import Array "mo:base/Array";
+
+import FileTypes "./types/FileStorageTypes";
+import Utils "./Utils";
 
 import Types "./Types";
 import HTTP "./Http";
@@ -20,6 +26,9 @@ import Stoic "./EXT/Stoic";
 
 import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
+import Blob "mo:base/Blob";
+
+
 
 shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
 // TODO: instead add functions to manage cycles balance and gather stats
@@ -87,7 +96,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         ) {
           return #Err(#Unauthorized);
         } else if (Principal.notEqual(from, token.owner)) {
-          return #Err(#Other);
+          return #Err(#Unauthorized);
         } else {
           nfts := List.map(nfts, func (item : Types.Nft) : Types.Nft {
             if (item.id == token.id) {
@@ -150,7 +159,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     let item = List.find(nfts, func(token: Types.Nft) : Bool { token.owner == user });
     switch (item) {
       case null {
-        return #Err(#Other);
+        return #Err(#Other("No token found for this user"));
       };
       case (?token) {
         return #Ok({
@@ -404,7 +413,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
       switch (random.range(p)) {
         case (null) {
-          return #Err(#Other);
+          return #Err(#Other("Error retrieving a random space"));
         };
         case (?randomNumber) {
           let spaceId = randomNumber % numberOfSpaces;
@@ -420,7 +429,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
       };
     } else {
-      return #Err(#Other);
+      return #Err(#Other("No space available"));
     };
   };
 
@@ -599,4 +608,333 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     };
   };
 
+
+/* 
+ * 
+ *
+ *
+ *
+ *  Code for uploading files
+ *
+ *
+ *
+*/
+// 1 MB is the max size for a single file
+let oneMB : Nat = 1048576; // 1 MB
+private let maxFileSize : Nat = oneMB; 
+private let maxTotalSize : Nat = 10 * oneMB;
+private let maxFiles : Nat = 10;
+
+// A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
+//  defined by RFC 4122
+// Files should be synced with the UserRecord associated with it to keep the user/data scheme in sync
+private var fileDatabase : HashMap.HashMap<Text, FileTypes.FileInfo> = HashMap.HashMap(0, Text.equal, Text.hash);
+// Stable version of the file database for cansiter upgrades
+stable var fileDatabaseStable : [(Text, FileTypes.FileInfo)] = [];
+
+// Variable stores reference of a user with all the files they have uploaded to their account.
+//  The user record stores reference to all the UUIDs for the files they have stored
+private var userFileRecords : HashMap.HashMap<Text, FileTypes.UserRecord> = HashMap.HashMap(0, Text.equal, Text.hash); 
+// Stable version of the userFileRecords for canister upgrades
+stable var userFileRecordsStable : [(Text, FileTypes.UserRecord)] = [];
+
+/*
+ * Function retrieves the total size of the files uploaded to their account
+ * 
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return The total size of files uploaded to their account 
+*/
+private func getUserFilesTotalSize(user: FileTypes.FileUserId) : Nat {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return 0; };
+    case (?userRecord) { return userRecord.totalSize; };
+  };
+};
+
+/*
+ * Function all the file ids associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the File Ids associated with the user account. The file Ids can be used to retrieve the files
+ *  stored within the fileDatabase
+*/
+private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return []; };
+    case (?userRecord) {
+       return userRecord.file_ids; 
+       };
+  };
+};
+
+/*
+ * Function retrives all the FileInfo (i.e files) associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the FileInfo structs for the user account which contain the file and other relevant information
+*/
+private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.FileInfo> {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return Buffer.Buffer<FileTypes.FileInfo>(0); };
+    case (?userRecord) { 
+      var userFileInfo = Buffer.Buffer<FileTypes.FileInfo>(userRecord.file_ids.size());
+      for (file_id in userRecord.file_ids.vals())
+      {
+        let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
+          switch (retrievedFileInfo) {
+            case(null) {};
+            case(?checkedFileInfo) {
+                userFileInfo.add(checkedFileInfo);
+            }
+        };
+
+      };      
+      return userFileInfo;      
+      };
+  };
+};
+
+/*
+ * Function which checks the file extension and ensures that it is within the supported formats
+ * 
+ * @params fileName: The file name to check to see if it is valid
+ * @return Whether the file name is a valid type
+ *
+ * @note: Checking if a file is valid via the file extension is generally  dumb since it is easy to change.
+ *          In the future we want to add the ability to inspect the file and ensure it is actually the file
+ *          it claims to be.
+*/
+private func isValidFileExtension(fileName : Text) : Bool {
+  let validExtensions : [Text] = ["glb", "gltf" ];
+  var extensionMatched : Bool = false;
+  for (extension in validExtensions.vals())
+  {
+    if (Text.endsWith(fileName, #text extension))
+    {
+      extensionMatched := true;
+    };
+  };
+
+  return extensionMatched;
+};
+
+/*
+ * Public Function which enables a logged in user to upload a file to their account if they have enough space available
+ * @params fileName: The file name that the uploaded file should be called 
+ * @params content: The file to be uploaded 
+ * @return A text of the results of the uploading status
+*/
+public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File) : async FileTypes.FileResult {
+
+  let user = msg.caller;
+
+  if (Principal.isAnonymous(user))
+  {
+    return #Err(#Unauthorized);
+  };
+
+  // Ensure that the file extension is supported
+  let validExtension : Bool = isValidFileExtension(fileName);
+  if (validExtension == false) {
+    return #Err(#Other("File Extension not valid"));
+  };
+
+  // Make sure the new file isn't above the limit
+  let fileSize = content.size();
+  if (fileSize > maxFileSize) {
+    return #Err(#Other("Error: File size exceeds the limit."));
+  };
+
+  // Ensure that the user isn't uploading an empty file
+  if (fileSize <= 0) {
+    return #Err(#Other("Error: File Empty"));
+  };
+
+  // Check to make sure a file with that name isn't already uploaded
+  let userFiles = getUserFiles(user);
+  var fileNameAlreadyExists : Bool = false;
+  for (fileInfo in userFiles.vals())
+  {
+    if (fileInfo.file_name == fileName)
+    {
+      fileNameAlreadyExists := true;
+    };
+  };
+  if (fileNameAlreadyExists)
+  {
+    return #Err(#Other("Error: File Name Already Exists"));
+  };
+
+  // Retrieve the total amount of data stored by the user
+  let userTotalSize = getUserFilesTotalSize(user);
+  if (userTotalSize + fileSize > maxTotalSize) {
+    return #Err(#Other("Error: Total size limit reached."));
+  };
+
+  // Retrieve all the file ids used by the current user
+  let userFilesIds = getUserFileIds(user);
+  if (userFilesIds.size() >= maxFiles) {
+    return #Err(#Other("Error: File limit reached."));
+  };
+
+  var found_unique_file_id : Bool = false;
+  var counter : Nat = 0;
+  var newFileId : Text = "";
+
+  // Keep searching for a unique name until one is found, the chances of collisions are really low
+  //  but in case it happens keep looping until a file id is not found
+  while(not found_unique_file_id)
+  {
+    // 100 is chosen arbitarily to ensure that in case of something weird happening
+    //  there is a timeout and it errors rather then looking forever
+    if (counter > 100)
+    {
+      return #Err(#Other("Error: Failed to upload file due to not finding a unique identifier, please contact support"));
+    };
+
+    // Technically there is a race condition here... lets see if we can make this an atomic 
+    //  operation. For now since the chance of a collision is realllly low, the chance that two names within
+    //  the time the UUID is checked and then aquired 1 line later happens to be the same is small
+    //  we can leave this for now. When we have higher usage we probably should integrate to a more robust
+    //  database system with atomic operations anyways.
+    // The only risk is if the randomness in the names isn't that random? We will have to see how robust the Random module is.
+    //  Checking for race conditions in the uploading will need to be checked in the future
+    newFileId := await Utils.newRandomUniqueId();
+    if (fileDatabase.get(newFileId) == null)
+    {
+      // Claim the id by putting an empty record into it
+      fileDatabase.put(newFileId, { file_name = "blank"; file_content = ""; owner_principal = "blank"});
+      found_unique_file_id := true;
+    };
+
+    counter := counter + 1;
+  };
+
+  // Add the new file to the file database
+  let file_info = { file_name = fileName; file_content = content; owner_principal = Principal.toText(user) };
+  fileDatabase.put(newFileId, file_info);
+
+  // Add the new file id to the user record
+  let newFilesId = Array.append(userFilesIds,[newFileId]);
+  let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
+  userFileRecords.put(Principal.toText(user), newUserRecord);
+
+  return #Ok(#Success);
+};
+
+/*
+ * Public Function which displays all the file names that the user has uploaded to their account
+ * @return An array of text that contain all the file names uploaded to the current users account
+*/
+public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
+  let user = msg.caller;
+  let userFiles = getUserFiles(user);
+  return #Ok(#FileNames(Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name)));
+};
+
+/*
+ * Public Function which displays all the file ids that the user has uploaded to their account
+ * @return An array of text that contain all the file ids uploaded to the current users account
+*/
+public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
+  let user = msg.caller;
+  let userFileIds = getUserFileIds(user);
+  return #Ok(#FileIds(userFileIds));
+};
+
+/*
+ * Public Function which retrieves a file info by file id
+ * Currently there are no visability constraints on files, but once visability is built it can be added here
+ *
+ * @return The file info associated with the file id
+*/
+public shared(msg) func getFile(fileId: Text) : async FileTypes.FileResult {
+  let retrievedFile = fileDatabase.get(fileId);
+  switch (retrievedFile)
+  {
+    case(null) {return #Err(#Other("Error getting file"));};
+    case(?file) {
+      return #Ok(#File(file));
+    };
+  };
+};
+
+/*
+ * Public Function which retrieves the logged in users userRecord
+ *
+ * @return The user record associated with the logged in users
+*/
+public shared(msg) func getUserRecord() : async FileTypes.FileResult {
+  let user = msg.caller;
+  let retrievedUserRecord = userFileRecords.get(Principal.toText(user));
+  switch(retrievedUserRecord) {
+    case(null) {#Err(#Other("Error getting user record"));};
+    case(?userRecord) {#Ok(#UserRecord(userRecord));};
+  };
+};
+
+/*
+ * Public Function which deletes the file_id that is passed in
+ * The file must be owned by the current logged in user to allow deleting the file
+ *
+ * @return The file info associated with the file id
+*/
+public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
+  let user = msg.caller;
+
+  if (Principal.isAnonymous(user))
+  {
+    return #Err(#Unauthorized);
+  };
+
+  // Check to make sure that the user owns the file attempting to be deleted
+  let userFileIds = getUserFileIds(user);
+  let fileIdOwnedByUser : Bool = Array.find<Text>(userFileIds, func x = fileId == x) != null;
+  if (fileIdOwnedByUser == false)
+  {
+    return #Err(#Other("Error deleting file"));
+  };
+
+  // Figure out the size of the file attempting to be deleted
+  let fileInfo : ?FileTypes.FileInfo = fileDatabase.get(fileId);
+  var fileSize = 0;
+  switch (fileInfo) {
+    case (null) { fileSize := 0;};
+    case (?value) { fileSize := value.file_content.size(); };
+  };
+
+  // // Attempt to retrieve the user record and then delete the file and then update
+  //  the user record to reflect the file being deleted
+  let optionalUserRecord : ?FileTypes.UserRecord = userFileRecords.get(Principal.toText(user));
+  switch (optionalUserRecord) {
+    case (null) {
+      return  #Err(#Other("Error deleting file"));
+    };
+    case (?userRecord) {
+
+      // Delete the file
+      let deleteFileResult = fileDatabase.remove(fileId);
+
+      // Delete the file from the user record and reduce the file size
+      let updatedFileIds : [Text] = Array.filter<Text>(userFileIds, func x = x != fileId);
+      let newUserRecord : FileTypes.UserRecord = {file_ids = updatedFileIds; totalSize = userRecord.totalSize - fileSize; };
+      userFileRecords.put(Principal.toText(user), newUserRecord);
+    };
+  };
+
+    return #Ok(#Success);
+  };
+
+
+
+  // Upgrade Hooks
+  system func preupgrade() {
+    fileDatabaseStable := Iter.toArray(fileDatabase.entries());
+    userFileRecordsStable := Iter.toArray(userFileRecords.entries());
+  };
+
+  system func postupgrade() {
+    fileDatabase := HashMap.fromIter(Iter.fromArray(fileDatabaseStable), fileDatabaseStable.size(), Text.equal, Text.hash);
+    fileDatabaseStable := [];
+    userFileRecords := HashMap.fromIter(Iter.fromArray(userFileRecordsStable), userFileRecordsStable.size(), Text.equal, Text.hash);
+    userFileRecordsStable := [];
+  };
 };
