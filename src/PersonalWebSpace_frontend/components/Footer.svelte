@@ -1,13 +1,11 @@
 <script lang="ts">
   import { location } from 'svelte-spa-router';
   import { submitEmailSignUpForm } from "../helpers/utils.js";
+  
   let message = "";
   const submitForm = async (event) => {
-    console.log('submitting form');
     event.preventDefault();
     const email = document.getElementById('hero-email').value;
-    console.log(email);
-    console.log(location);
     message = await submitEmailSignUpForm(email, $location);
   };
 </script>
