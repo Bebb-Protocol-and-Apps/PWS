@@ -1,7 +1,7 @@
 <script lang="ts">
   import { location } from 'svelte-spa-router';
   import { submitEmailSignUpForm } from "../helpers/utils.js";
-  
+
   let message = "";
   const submitForm = async (event) => {
     event.preventDefault();
@@ -21,7 +21,7 @@
       <h2>{message}</h2>
     {/if}
   </div>
-  <p>Powered by <a href='https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/' target='_blank' rel="noreferrer" class='underline'>Open Internet Metaverse</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' rel="noreferrer" class='underline'>Internet Computer</a></p>
+  <p>Powered by <a href='https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/' target='_blank' rel="noreferrer" class='underline'>Open Internet Metaverse</a>, part of <a href='https://u4375-ryaaa-aaaai-acqsq-cai.icp0.io/' target='_blank' rel="noreferrer" class='underline'>Future Web Initiative</a> and hosted on <a href='https://internetcomputer.org/' target='_blank' rel="noreferrer" class='underline'>Internet Computer</a></p>
 </footer>
 
 <style>  
