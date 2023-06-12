@@ -1,6 +1,7 @@
 //uses a modified version of https://github.com/CodyJasonBennett/three-dom-elements
 import { DOMContext } from './lib/DOMContext';
 import { DOMElement } from './lib/DOMElement';
+
 export const component = AFRAME.registerComponent('websurface', {
   schema: {
     url: { default: 'https://aframe.io' },
@@ -44,6 +45,7 @@ export const component = AFRAME.registerComponent('websurface', {
 
     el.addEventListener('cam-loaded', function () {
       const iframe = document.createElement('iframe');
+      iframe.setAttribute('id', data.url);
       iframe.setAttribute('src', data.url);
       // Secure iframe
       //iframe.setAttribute('credentialless', 'true');
@@ -57,7 +59,13 @@ export const component = AFRAME.registerComponent('websurface', {
       document.body.appendChild(context.domElement);
 
       const element = new DOMElement(context, iframe, data.width, data.height);
-      el.object3D.add(element);
+      
+      // Add the iframe visualization to the element only if the user currently isn't in VR/fullscreen mode
+      let isInVRMode = el.sceneEl.is('vr-mode'); // returns true if in VR mode
+      let isInFullscreenMode = document.fullscreenElement != null; // returns true if in Fullscreen mode
+      if (!isInVRMode && !isInFullscreenMode) {
+        el.object3D.add(element);
+      };
 
       if (data.isInteractable == true) {
         const div = document.createElement('div');
@@ -82,6 +90,24 @@ export const component = AFRAME.registerComponent('websurface', {
         context.setSize(window.innerWidth, window.innerHeight);
       });
     });
+
+    // Iframes don't work in VR/fullscreen mode, so we remove the texture based on them
+    el.sceneEl.addEventListener('enter-vr', function () {
+      el.object3D.remove(data.element);
+    });
+  
+    el.sceneEl.addEventListener('exit-vr', function () {
+      el.object3D.add(data.element);
+    });
+
+    el.sceneEl.addEventListener('enter-fullscreen', function () {
+      el.object3D.remove(data.element);
+    });
+  
+    el.sceneEl.addEventListener('exit-fullscreen', function () {
+      el.object3D.add(data.element);
+    });
+
     data.frames = 0;
     data.isCamLoaded = false;
   },
