@@ -29,7 +29,7 @@
     "/uploadExample": UploadExample,
     "/downloadFileExample" : DownloadFileExample,
     // Catch-all (this is optional, but if present it must be the last)
-    // "*": NotFound,
+    "*": NotFound,
   };
 </script>
 
