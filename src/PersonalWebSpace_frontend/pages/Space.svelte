@@ -15,10 +15,10 @@
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
-
+  
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
   import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
-
+  
 // This is needed for URL params
   export let params;
 

@@ -6,7 +6,7 @@ export const formatUserSpaces = (userSpaces) => {
   for (let i = 0; i < userSpaces.length; i++) {
     const space = userSpaces[i];
     userSpacesString += `<div class='responsive' width="100%" height="auto"> <div class='space'> `;
-    const spaceURL = `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`;
+    const spaceURL = `https://${PersonalWebSpace_frontend_canister_id}.ic0.app/#/space/${space.id}`;
     userSpacesString += `<a target='_blank' href="${spaceURL}" > <iframe src="${spaceURL}" alt='Your flaming hot Personal Web Space' width="100%" height="auto"></iframe> </a> `;
     userSpacesString += `<button onclick="window.open('${spaceURL}','_blank')" class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button> `;
     userSpacesString += `<button type='button' class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>`;
@@ -67,8 +67,8 @@ export const getStringForSpaceFromModel = (modelUrl) => {
   return `<html>
     <head><script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script></head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
-        <a-assets>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" renderer="preserveDrawingBuffer: true">
+        <a-assets timeout="10000">
           <a-asset-item id="model-glb" src=${modelUrl} crossorigin="anonymous"></a-asset-item>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">

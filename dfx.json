@@ -23,7 +23,10 @@
       "frontend": {
         "entrypoint": "dist/index.html"
       },
-      "source": ["dist/"],
+      "source": [
+        "dist/",
+        "src/assets"
+      ],
       "type": "assets"
     }
   },
