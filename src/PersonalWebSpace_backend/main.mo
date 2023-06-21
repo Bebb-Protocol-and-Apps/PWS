@@ -597,6 +597,47 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           return(response);
         };
       };
+    } else if (Text.contains(request.url, #text("/file/"))) {
+      if (Text.contains(request.url, #text("fileId"))) {
+        var fileId = Iter.toArray(Text.tokens(request.url, #text("fileId=")))[1];
+        if (Text.contains(fileId, #text("canisterId"))) {
+          // for local retrievals during development
+          fileId := Iter.toArray(Text.tokens(fileId, #text("?canisterId")))[0];
+        };
+        let item = fileDatabase.get(fileId);
+        switch (item) {
+          case (null) {
+            let response = {
+              body = Text.encodeUtf8("Invalid fileId " # fileId);
+              headers = [];
+              status_code = 404 : Nat16;
+              streaming_strategy = null;
+              upgrade = false;
+            };
+            return(response);
+          };
+          case (?file) {
+            let body = file.file_content;
+            let response = {
+              body = body;
+              headers = [("Content-Disposition", "inline; filename=\""#file.file_name#"\""), ("Content-Type", "model/gltf-binary"), ("Content-Length", Nat.toText(body.size())), ("Access-Control-Allow-Origin", "*"), ("X-Frame-Options", "ALLOWALL")];
+              status_code = 200 : Nat16;
+              streaming_strategy = null;
+              upgrade = false;
+            };
+            return(response);
+          };
+        };        
+      } else {
+        let response = {
+          body = Text.encodeUtf8("Not implemented");
+          headers = [];
+          status_code = 404 : Nat16;
+          streaming_strategy = null;
+          upgrade = false;
+        };
+        return(response);
+      };
     } else {
       return {
         upgrade = false; // ← If this is set to true, the request will be sent to http_request_update()
@@ -817,7 +858,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
   let newUserRecord = {file_ids = newFilesId; totalSize = userTotalSize + fileSize };
   userFileRecords.put(Principal.toText(user), newUserRecord);
 
-  return #Ok(#Success);
+  return #Ok(#FileId(newFileId));
 };
 
 /*
@@ -846,7 +887,7 @@ public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
  *
  * @return The file info associated with the file id
 */
-public shared(msg) func getFile(fileId: Text) : async FileTypes.FileResult {
+public query func getFile(fileId: Text) : async FileTypes.FileResult {
   let retrievedFile = fileDatabase.get(fileId);
   switch (retrievedFile)
   {

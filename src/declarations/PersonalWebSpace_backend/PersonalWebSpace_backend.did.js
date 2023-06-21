@@ -142,12 +142,12 @@ export const idlFactory = ({ IDL }) => {
     'deleteEmailSubscriber' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteFile' : IDL.Func([IDL.Text], [FileResult], []),
     'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
+    'getFile' : IDL.Func([IDL.Text], [FileResult], ['query']),
     'getEmailSubscribers' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Text, EmailSubscriber))],
         [],
       ),
-    'getFile' : IDL.Func([IDL.Text], [FileResult], []),
     'getMaxLimitDip721' : IDL.Func([], [IDL.Nat16], ['query']),
     'getMetadataDip721' : IDL.Func([TokenId], [MetadataResult], ['query']),
     'getMetadataForUserDip721' : IDL.Func(

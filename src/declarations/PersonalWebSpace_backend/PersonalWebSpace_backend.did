@@ -65,11 +65,11 @@ type PersonalWebSpace =
    deleteEmailSubscriber: (text) -> (bool);
    deleteFile: (text) -> (FileResult);
    getCallerSpaces: () -> (vec Nft) query;
+   getFile: (text) -> (FileResult) query;
    getEmailSubscribers: () -> (vec record {
                                      text;
                                      EmailSubscriber;
                                    });
-   getFile: (text) -> (FileResult);
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
    getMetadataForUserDip721: (principal) -> (ExtendedMetadataResult);
