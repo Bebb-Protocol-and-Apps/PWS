@@ -1,3 +1,14 @@
+import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+
+export async function submitEmailSignUpForm(emailAddress, pageSubmittedFrom) {
+  const input = {
+    emailAddress: emailAddress,
+    pageSubmittedFrom: pageSubmittedFrom,
+  };
+  let result = await PersonalWebSpace_backend.submitSignUpForm(input);
+  return result;
+}
+
 export function getNumber(value) {
   return parseFloat(value.toFixed(3));
 }

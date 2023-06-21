@@ -11,7 +11,7 @@
 
   const spaceURL =
     process.env.NODE_ENV !== "development"
-      ? `https://${PersonalWebSpace_frontend_canister_id}.raw.ic0.app/#/space/${space.id}`
+      ? `https://${PersonalWebSpace_frontend_canister_id}.ic0.app/#/space/${space.id}`
       : `#/space/${space.id}`;
       //: `http://localhost:4943/?canisterId=${PersonalWebSpace_frontend_canister_id}#/space/${space.id}`;
 
@@ -105,7 +105,7 @@
 <div class="responsive">
   <div class="space space-y-1"> 
     <a target="_blank" rel="noreferrer" href={spaceURL} >
-      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" credentialless referrerpolicy="no-referrer"></iframe>
+      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
     </a>
     {#if isViewerSpaceOwner() && entityIdToLinkTo !== ""}
       {#if linkCreationInProgress}

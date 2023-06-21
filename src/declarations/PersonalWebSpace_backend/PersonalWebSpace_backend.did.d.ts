@@ -12,6 +12,11 @@ export interface Dip721NonFungibleToken {
   'name' : string,
   'symbol' : string,
 }
+export interface EmailSubscriber {
+  'subscribedAt' : bigint,
+  'emailAddress' : string,
+  'pageSubmittedFrom' : string,
+}
 export type ExtendedMetadataResult = {
     'Ok' : { 'token_id' : TokenId, 'metadata_desc' : MetadataDesc }
   } |
@@ -76,8 +81,10 @@ export interface PersonalWebSpace {
   'balanceOfDip721' : ActorMethod<[Principal], bigint>,
   'check_user_has_nft' : ActorMethod<[], boolean>,
   'createSpace' : ActorMethod<[string], NftResult>,
+  'deleteEmailSubscriber' : ActorMethod<[string], boolean>,
   'deleteFile' : ActorMethod<[string], FileResult>,
   'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
+  'getEmailSubscribers' : ActorMethod<[], Array<[string, EmailSubscriber]>>,
   'getFile' : ActorMethod<[string], FileResult>,
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
@@ -101,6 +108,7 @@ export interface PersonalWebSpace {
     [Principal, Principal, TokenId],
     TxReceipt
   >,
+  'submitSignUpForm' : ActorMethod<[SignUpFormInput], string>,
   'supportedInterfacesDip721' : ActorMethod<[], Array<InterfaceId>>,
   'symbolDip721' : ActorMethod<[], string>,
   'totalSupplyDip721' : ActorMethod<[], bigint>,
@@ -123,6 +131,10 @@ export interface Response {
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
   'status_code' : number,
+}
+export interface SignUpFormInput {
+  'emailAddress' : string,
+  'pageSubmittedFrom' : string,
 }
 export type StreamingCallback = ActorMethod<
   [StreamingCallbackToken],
