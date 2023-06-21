@@ -88,14 +88,14 @@ export default defineConfig({
       allow: ["."],
     },
     //__________Local vs Mainnet Development____________
-    /* proxy: {
+    proxy: {
       // This proxies all http requests made to /api to our running dfx instance
       "/api": {
         target: `http://127.0.0.1:4943`,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
-    }, */
+    },
   },
   define: {
     // Here we can define global constants
