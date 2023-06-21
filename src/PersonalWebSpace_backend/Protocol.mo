@@ -2,7 +2,7 @@ import Text "mo:base/Text";
 // from https://github.com/patnorris/NewWavePre/tree/firstMotokoVersion/NewWaveV0/0.0.3
 module {
     public let CANISTER_ID : Text = "pzrof-pyaaa-aaaai-acnha-cai";
-    public let LOCAL_CANISTER_ID : Text = "be2us-64aaa-aaaaa-qaabq-cai";
+    public let LOCAL_CANISTER_ID : Text = "by6od-j4aaa-aaaaa-qaadq-cai";
     
     public class EntitySettings() {
         var mainSetting : Text = "default";

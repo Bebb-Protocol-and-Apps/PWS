@@ -12,7 +12,7 @@
         "candid": "src/integrations/BebbProtocol/newwave.did",
         "id": {
           "ic": "pzrof-pyaaa-aaaai-acnha-cai",
-          "local": "be2us-64aaa-aaaaa-qaabq-cai"
+          "local": "by6od-j4aaa-aaaaa-qaadq-cai"
         }
       }
     },
@@ -24,8 +24,7 @@
         "entrypoint": "dist/index.html"
       },
       "source": [
-        "dist/",
-        "src/assets"
+        "dist/"
       ],
       "type": "assets"
     }
