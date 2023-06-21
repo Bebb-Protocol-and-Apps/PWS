@@ -620,7 +620,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
             let body = file.file_content;
             let response = {
               body = body;
-              headers = [("Content-Type", "application/gltf-buffer"), ("Content-Length", Nat.toText(body.size())), ("Access-Control-Allow-Origin", "*"), ("X-Frame-Options", "ALLOWALL")];
+              headers = [("Content-Disposition", "inline; filename=\""#file.file_name#"\""), ("Content-Type", "model/gltf-binary"), ("Content-Length", Nat.toText(body.size())), ("Access-Control-Allow-Origin", "*"), ("X-Frame-Options", "ALLOWALL")];
               status_code = 200 : Nat16;
               streaming_strategy = null;
               upgrade = false;

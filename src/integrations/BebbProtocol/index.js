@@ -6,7 +6,7 @@ import { idlFactory } from "./newwave.did.js";
 export { idlFactory } from "./newwave.did.js";
 
 // CANISTER_ID is put manually
-export const canisterId = process.env.NODE_ENV !== "development" ? "pzrof-pyaaa-aaaai-acnha-cai" : "by6od-j4aaa-aaaaa-qaadq-cai";
+export const canisterId = process.env.NODE_ENV !== "development" ? "pzrof-pyaaa-aaaai-acnha-cai" : "br5f7-7uaaa-aaaaa-qaaca-cai";
 
 export const createActor = (canisterId, options = {}) => {
   const agent = options.agent || new HttpAgent({ ...options.agentOptions });

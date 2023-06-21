@@ -69,9 +69,8 @@ export const getStringForSpaceFromModel = (modelUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene id="aSceneForModelPreview" cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
         <a-assets>
-          <a-asset-item id="model-glb" src=${modelUrl} crossorigin="anonymous"></a-asset-item>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         </a-assets>
@@ -82,7 +81,7 @@ export const getStringForSpaceFromModel = (modelUrl) => {
         <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
         <a-sky color="#ECECEC"></a-sky>
 
-        <a-entity gltf-model="#model-glb" position="0 0 -5"></a-entity>
+        <a-entity gltf-model="url(${modelUrl}).glb" position="0 0 -5"></a-entity>
       </a-scene>
     </body>
   </html>`;
