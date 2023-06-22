@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.3/dist/aframe-extras.min.js"></script>
+    <script src="https://mannymeadows.github.io/Noosa/aframe-sun-sky.min.js"></script>
+  </head>
+  <body>
+
+    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="" device-orientation-permission-ui="" raycaster="direction: 0.9544506796854287 -0.10164039183312146 -0.2805229594810959; origin: -4.846717797159805 5.074580504821491 2.3289351396596443; useWorldCoordinates: true">
+      <a-assets>
+        <a-asset-item id="island-glb" src="tropical_island_modified.glb"></a-asset-item> <!-- Credits: "Tropical Island" (https://skfb.ly/6THzW) by Elin is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). -->
+        <a-asset-item id="sunbed-glb" src="at_a_beach_modified.glb"></a-asset-item> <!-- Credits:"At a beach" (https://skfb.ly/6SUss) by barcin is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). -->
+      </a-assets>
+
+      <a-entity id='cameraWrapper' position="0 3 0">
+        <a-camera></a-camera>
+      </a-entity>
+
+      <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>
+      <a-light type="directional" intensity="1.0" position="2 1 -1" light=""></a-light>
+
+      <a-entity environment="preset: arches" position="7 -7 -9"></a-entity>
+      <a-ocean color="#92E2E2" width="350" depth="250" density="150" speed="2" opacity="0.5"></a-ocean>
+      
+      <a-entity gltf-model="#island-glb" scale="1 1 1" position="0 3 -5" ></a-entity>
+      <a-entity gltf-model="#sunbed-glb" scale="1 1 1" position="7 2.3 -4" rotation="0 90 0" ></a-entity>
+      
+      <div class="a-loader-title" style="display: none;"></div>
+      <div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div>
+    </a-scene>
+
+  </body>
+</html>
