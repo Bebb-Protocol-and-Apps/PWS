@@ -73,7 +73,6 @@
     if (userFile) {
       var fileURL = URL.createObjectURL(userFile);
       // create a new A-Frame entity for the GLB model
-      //var modelEntity = document.createElement('a-entity');
       // First, get the iframe element
       let iframe = document.querySelector('.glb-model-space-preview iframe');
       if (iframe) {
@@ -130,34 +129,22 @@
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
     if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files)) {
       // Store file for user
-      console.log(`${files[0].name}: ${files[0].size} bytes`);
       const arrayBuffer = await files[0].arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       const byteArray = Array.from(uint8Array);
-      console.log(byteArray);
       let fileUploadResult;
       try {
         fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
-        console.log("fileUploadResult ", fileUploadResult);
-        console.log("fileUploadResult Ok", fileUploadResult.Ok);
       } catch (error) {
         console.error("File Upload Error:", error);
       };
       if (fileUploadResult.Ok) {
-        console.log("fileUploadResult Ok[0]", fileUploadResult.Ok.FileId);
-        //const blob = new Blob([uint8Array], { type: "application/octet-stream" });
-        
-        console.log(process.env.DFX_NETWORK);
-        console.log("backendCanisterId ", backendCanisterId);
-        console.log(process.env.DFX_NETWORK === "ic");
         const url = process.env.DFX_NETWORK === "ic"
           ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
           : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
-        console.log("url ", url);
         const spaceHtml = getStringForSpaceFromModel(url);
         try {
           const space = await $store.backendActor.createSpace(spaceHtml);
-          console.log("space ", space);
         } catch (error) {
           console.error("Create Space Error:", error);
         };
