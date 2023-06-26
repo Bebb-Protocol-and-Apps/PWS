@@ -344,8 +344,14 @@
     // Find the camera entity
     let cameraEntity = document.querySelector('a-entity[camera]');
 
-    // Append the new menu entity as a child of the camera entity (i.e. it will move with the camera)
-    cameraEntity.appendChild(menuEntity);
+    // Check that there isn't a menuEntity already attached to the camera and only append it if not
+    if (!document.getElementById('OIM-VR-menu')) {
+      // Append the new menu entity as a child of the camera entity (i.e. it will move with the camera)
+      cameraEntity.appendChild(menuEntity);
+    } else {
+      // Replace the existing menu entity with the new one
+      cameraEntity.replaceChild(menuEntity, document.getElementById('OIM-VR-menu'));
+    };
     vrMenuLoaded = true;
   };
 
