@@ -18,6 +18,7 @@
   const clickFromModelSubtext = "Click and we'll generate this Space from the provided model for you. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!";
   const inProgressSubtext = "Creating your Personal Web Space, just a moment...";
   const createdSubtext = "Ohh yeah, you just got yourself a new Personal Web Space! You can see it on the My Spaces tab.";
+  const fileTooBigText = "Hmm, this file is too big. Please select a file smaller than 2 MB.";
 
 // Manage status of creation to show buttons and subtexts appropriately
   let isSpaceCreationInProgress = false;
@@ -46,6 +47,8 @@
 
   let files;
   let userUploadedFileURL;
+  let fileSizeToUpload;
+  let fileSizeUploadLimit = 2000000; // 2 MB
 
   const userFileInputHandler = function(userFiles = files) {
     if (!userFiles || userFiles.length === 0) {
@@ -56,6 +59,7 @@
     if (fileName.endsWith('.glb')) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
+        fileSizeToUpload = userFile.size;
         addUserFileToScene(files);
         return true;
       } catch (e) {
@@ -127,7 +131,7 @@
       const space = await $store.backendActor.createSpace(spaceHtml);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
-    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files)) {
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
       // Store file for user
       const arrayBuffer = await files[0].arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
@@ -247,8 +251,13 @@
                 <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
               {/if}
             {:else}
-              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-              <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+              {#if fileSizeToUpload <= fileSizeUploadLimit}
+                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+              {:else}
+                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                <p id='createSubtextUserUploadedGlbModel'>{fileTooBigText}</p>
+              {/if}
             {/if}  
           {/if}
         {:else}
