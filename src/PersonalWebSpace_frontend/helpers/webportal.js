@@ -1,4 +1,4 @@
-//import './lib/aframe-aabb-collider-component.min'; // Not enabled currently
+//import './lib/aframe-aabb-collider-component.min'; // Not enabled currently; add in index.html: <script src="https://unpkg.com/aframe-aabb-collider-component@3.1.0/dist/aframe-aabb-collider-component.min.js"></script>
 import './websurface';
 
 AFRAME.registerComponent('web-portal', {
