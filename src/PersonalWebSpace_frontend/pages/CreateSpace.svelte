@@ -90,6 +90,8 @@
             modelEntity.setAttribute('id', 'modelFromUserFile');
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
+            } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
             }
           } else {
             aScene.addEventListener('loaded', function () {
@@ -99,7 +101,9 @@
               modelEntity.setAttribute('id', 'modelFromUserFile');
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
-              }
+              } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
             });
           }
         } else {
@@ -236,35 +240,35 @@
       class="urlInput text-black font-bold"
     />
     {#if files}
-      {#if userFileInputHandler(files)}
-        {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-          <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
-        {/key}
-        {#if !$store.isAuthed}
-          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>
-        {:else}
-          {#if isSpaceCreationInProgress}
+      {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+        <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+        {#if userFileInputHandler(files)}
+          {#if !$store.isAuthed}
             <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-            {#if spaceToCreate === "UserUploadedGlbModel"}
-              <p id='createSubtextUserUploadedGlbModel'>{inProgressSubtext}</p>
-            {/if}
-          {:else if wasSpaceCreatedSuccessfully}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            {#if spaceToCreate === "UserUploadedGlbModel"}
-              <p id='createSubtextUserUploadedGlbModel'>{createdSubtext}</p>
-            {:else}
-              <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
-            {/if}
+            <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>
           {:else}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
-          {/if}  
+            {#if isSpaceCreationInProgress}
+              <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedGlbModel"}
+                <p id='createSubtextUserUploadedGlbModel'>{inProgressSubtext}</p>
+              {/if}
+            {:else if wasSpaceCreatedSuccessfully}
+              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedGlbModel"}
+                <p id='createSubtextUserUploadedGlbModel'>{createdSubtext}</p>
+              {:else}
+                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+              {/if}
+            {:else}
+              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+              <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+            {/if}  
+          {/if}
+        {:else}
+          <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
         {/if}
-      {:else}
-        <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-        <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
-      {/if}
+      {/key}
     {/if}
   </form>
   <!-- Web-Hosted GLB Model -->
