@@ -124,7 +124,7 @@
       const space = await $store.backendActor.createSpace(spaceHtml);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
-    if (modelType === "UserUploadedGlbModel" && userFileInputHandler()) {
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files)) {
       // Store file for user
       console.log(`${files[0].name}: ${files[0].size} bytes`);
       const arrayBuffer = await files[0].arrayBuffer();
@@ -237,7 +237,7 @@
     />
     {#if files}
       {#if userFileInputHandler(files)}
-        {#key userUploadedFileURL}  <!-- Element to rerender everything inside when userUploadedFileURL changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+        {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
           <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
         {/key}
         {#if !$store.isAuthed}
