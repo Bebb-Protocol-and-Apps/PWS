@@ -13,17 +13,17 @@
       </a-assets>
 
       <a-entity id='cameraWrapper' position="0 3 0">
-        <a-camera></a-camera>
+        <a-entity camera="active: true" look-controls wasd-controls position="0 1.6 0"></a-entity>
       </a-entity>
 
       <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>
       <a-light type="directional" intensity="1.0" position="2 1 -1" light=""></a-light>
 
-      <a-entity environment="preset: arches" position="7 -7 -9"></a-entity>
+      <a-entity environment="preset: arches" position="7 -7 -9" ></a-entity>
       <a-ocean color="#92E2E2" width="350" depth="250" density="150" speed="2" opacity="0.5"></a-ocean>
       
-      <a-entity gltf-model="#island-glb" scale="1 1 1" position="0 3 -5" ></a-entity>
-      <a-entity gltf-model="#sunbed-glb" scale="1 1 1" position="7 2.3 -4" rotation="0 90 0" ></a-entity>
+      <a-entity gltf-model="#island-glb" scale="1 1 1" position="0 3 -5" id="Island"></a-entity>
+      <a-entity gltf-model="#sunbed-glb" scale="1 1 1" position="7 2.3 -4" rotation="0 90 0" id="Sunbed"></a-entity>
       
       <div class="a-loader-title" style="display: none;"></div>
       <div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div>
