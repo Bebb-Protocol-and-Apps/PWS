@@ -54,7 +54,6 @@
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]); // Get final updated HTML
     // Close Inspector and hide button Inspect Scene
     // @ts-ignore
-    //await AFRAME.INSPECTOR.close();
     AFRAME.INSPECTOR.close();
     showVRMenu();
     var elements = document.body.getElementsByClassName("toggle-edit");    
@@ -82,24 +81,29 @@
     //document.body.innerHTML = updatedSceneHtml; // there shouldn't be any need to manually update the viewed page
   };
 
+  // Initiate functionality to save edits user made to scene in Inspector
   const loadSaveButton = () => {
-    // Initiate functionality to save edits user made to scene in Inspector
-    var elements = document.body.getElementsByClassName("button fa fa-save");
+    // Use Back To Scene button for saving edits made in Inspector
+    var elements = document.body.getElementsByClassName("toggle-edit");
     var saveButton = elements.item(0);
     if(saveButton) {
-      var elements = document.body.getElementsByClassName("toggle-edit");    
-      var toggleElement = elements.item(0);
-      // @ts-ignore
-      toggleElement.hidden = false;
       var clone = saveButton.cloneNode(true);
       // @ts-ignore
       clone.onclick = saveButtonOnClick;
-      saveButton.replaceWith(clone);         
+      clone.textContent = "Save My Changes and Exit";
+      // @ts-ignore
+      clone.title = "Click to confirm your edits and store the updated space";
+      saveButton.replaceWith(clone);
+      // Hide button with save icon
+      var elements = document.body.getElementsByClassName("button fa fa-save");
+      var toggleElement = elements.item(0);
+      // @ts-ignore
+      toggleElement.style.display = 'none';    
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
         loadSaveButton();
-      }, 1000);
+      }, 500);
     };
   };
 
@@ -128,7 +132,7 @@
       // Inspector hasn't loaded yet
       setTimeout(() => {
         captureUpdateEvents();
-      }, 1000);
+      }, 500);
     };
   };
 
@@ -178,8 +182,10 @@
                 const property = labelElement.textContent.trim();
                 if (["position", "rotation", "scale"].includes(property)) {
                   // Only perform updates for these types of attribute changes (as these are the ones available in the scene view and scene graph panel on the left)
+                  // @ts-ignore
                   const currentAttribute = AFRAME.INSPECTOR.selectedEntity.getAttribute(property);
                   // Set the value explicitly on the entity element (which will also add the class propertyRowDefined to the PropertyRow such that it appears bold in the Inspector's right panel)
+                  // @ts-ignore
                   AFRAME.INSPECTOR.selectedEntity.setAttribute(property, currentAttribute);
                 };
               };
@@ -207,7 +213,134 @@
       // Inspector hasn't loaded yet
       setTimeout(() => {
         customizeRightPanel();
-      }, 1000);
+      }, 500);
+    };
+  };
+
+  const customizeLeftPanel = () => {
+    const leftPanelElement = document.getElementById("scenegraph");
+    if(leftPanelElement) {
+      // Initiate Save Button to persist changes made
+      loadSaveButton();
+      // Remove elements of the Inspector that we don't want
+      removeUndesiredInspectorButtons();
+      // Add dropdown menu with options to add elements to the space
+      addDropdownMenuForNewElements();
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        customizeLeftPanel();
+      }, 500);
+    };
+  };
+
+  const addDropdownMenuForNewElements = () => {
+    var elements = document.body.getElementsByClassName("button fa fa-plus");
+    var addEntityButton = elements.item(0);
+    if(addEntityButton) {
+      const dropdownMenu = document.createElement("div");
+      dropdownMenu.id = "dropdownMenu";
+      // Style dropdownMenu
+      dropdownMenu.style.backgroundColor = "white";
+      dropdownMenu.style.boxSizing = "content-box";
+      dropdownMenu.style.color = "#92374d";
+      dropdownMenu.style.fontSize = "13px";
+      dropdownMenu.style.left = "5px";
+      dropdownMenu.style.lineHeight = "normal";
+      dropdownMenu.style.padding = "6px 10px";
+      dropdownMenu.style.textAlign = "center";
+      dropdownMenu.style.textDecoration = "none";
+      dropdownMenu.style.top = "3px";
+      dropdownMenu.style.width = "210px";
+
+      // Create dropdown button
+      const dropdownMenuButton = document.createElement("button");
+      // @ts-ignore
+      dropdownMenuButton.id = "dropdownMenuButton";
+      // @ts-ignore
+      dropdownMenuButton.innerHTML = "Add Items to Space";
+      // Style dropdownMenuButton
+      dropdownMenuButton.style.cursor = "pointer";
+      dropdownMenuButton.style.border = "none";
+      dropdownMenuButton.style.textAlign = "center";
+      dropdownMenuButton.style.fontWeight = "bold";
+      dropdownMenuButton.style.width = "100%";
+
+      // Create dropdown content div
+      const dropdownMenuContent = document.createElement("div");
+      dropdownMenuContent.id = "dropdownMenuContent";
+      dropdownMenuContent.classList.add("dropdown-content");
+
+      // Create "Upload File" option
+      const uploadFileOption = document.createElement("a");
+      uploadFileOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      uploadFileOption.id = "uploadFile";
+      uploadFileOption.classList.add("dropdownOption");
+      uploadFileOption.innerHTML = "Upload File";
+      uploadFileOption.onclick = function() {
+          // TODO: Handle upload file action
+          console.log("Upload File clicked");
+      }
+
+      // Create "Add New Entity" option (from the + button ("Add Entity"), i.e. it keeps the onclick behavior of adding a new a-entity)
+      const addNewEntityOption = addEntityButton;
+      // @ts-ignore
+      addNewEntityOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      addNewEntityOption.id = "addNewEntity";
+      addNewEntityOption.classList.remove("button");
+      addNewEntityOption.classList.remove("fa");
+      addNewEntityOption.classList.remove("fa-plus");
+      addNewEntityOption.classList.add("dropdownOption");
+      addNewEntityOption.innerHTML = "Add New Entity";
+
+      // Add options to dropdown menu
+      dropdownMenuContent.appendChild(uploadFileOption);
+      dropdownMenuContent.appendChild(addNewEntityOption);
+
+      // Add button and dropdown menu to div
+      dropdownMenu.appendChild(dropdownMenuButton);
+      dropdownMenu.appendChild(dropdownMenuContent);
+
+      // Add event listener to dropdown button
+      // @ts-ignore
+      dropdownMenuButton.onclick = function() {
+        if (dropdownMenuContent.style.display === "block") {
+          dropdownMenuContent.style.display = "none";
+        } else {
+          dropdownMenuContent.style.display = "block";
+          var dropdownOptions = document.getElementsByClassName("dropdownOption");
+          for (var i = 0; i < dropdownOptions.length; i++) {
+            var dropdownOption = dropdownOptions[i];
+            // @ts-ignore
+            dropdownOption.style.color = "white";
+            // @ts-ignore
+            dropdownOption.style.fontWeight = "bold";
+          }
+        }
+      }
+
+      window.onclick = function(event) {
+        if (!event.target.matches('#dropdownMenuButton')) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            // @ts-ignore
+            if (openDropdown.style.display === 'block') {
+              // @ts-ignore
+              openDropdown.style.display = 'none';
+            }
+          }
+        }
+      }
+
+      var elements = document.body.getElementsByClassName("button fa fa-save");
+      var toggleElement = elements.item(0);
+      toggleElement.replaceWith(dropdownMenu);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        addDropdownMenuForNewElements();
+      }, 500);
     };
   };
 
@@ -219,17 +352,16 @@
       // Remove the resume button since it isn't useful
       document.getElementById('playPauseScene').style.display = 'none';
       // Remove the gltfIcon since it isn't useful
-      for (let i =0; i < document.getElementsByClassName('gltfIcon').length; i++)
-      {
+      for (let i =0; i < document.getElementsByClassName('gltfIcon').length; i++) {
+        // @ts-ignore
         document.getElementsByClassName('gltfIcon')[i].style.display = 'none';
       }
 
       // Now that we removed the button update the padding to make it look better
-      for (let i =0; i < document.getElementsByClassName('toolbarActions').length; i++)
-      {
+      for (let i =0; i < document.getElementsByClassName('toolbarActions').length; i++) {
+        // @ts-ignore
         document.getElementsByClassName('toolbarActions')[i].style.paddingTop = '10px';
       }
-
   }
 
   /**
@@ -239,32 +371,29 @@
     // Update the helper text of the save button
     var elements = document.body.getElementsByClassName("button fa fa-save");
     for (const saveButton of elements) {
-        // @ts-ignore
-        saveButton.title = "Save changes to your canister";
+      // @ts-ignore
+      saveButton.title = "Save changes to your canister";
     };
 
     // Update helper text of adding item
     var elements = document.body.getElementsByClassName("button fa fa-plus");
     for (const addButton of elements) {
-        // @ts-ignore
-        addButton.title = "Add a new item";
+      // @ts-ignore
+      addButton.title = "Add a new item";
     };
   }
 
-  const customizeInspector = () => {
   // Change A-Frame's default Inspector according to our specific requirements
+    // TODO: put camera to same position as when scene is loaded
+  const customizeInspector = () => {
     // Remove any 3D Neighbors from the scene
     remove3dNeighborsFromScene();
     // Hide VR menu
     hideVRMenu();
-    // Initiate Save Button to persist changes made
-    loadSaveButton();
+    // Customizes the left panel
+    customizeLeftPanel();
     // Customize features on the Right Panel
     customizeRightPanel();
-    // Remove elements of the Inspector that we don't want
-    removeUndesiredInspectorButtons();
-    // Update the helper text to what we want
-    updateHelperText();
   };
 
   const editButtonOnClick = async () => {
@@ -275,7 +404,7 @@
     // Wait until the Inspector has loaded
     setTimeout(() => {
       customizeInspector();     
-    }, 700);
+    }, 500);
   };
 
   const neighborsButtonOnClick = () => {
@@ -300,7 +429,7 @@
     } else {
       setTimeout(() => {
         loadSceneCustomizations();
-      }, 1000);
+      }, 500);
     };    
   };
 
@@ -682,4 +811,23 @@
     opacity: 80%;
     color: #eef;
   }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content a {
+    color: antiquewhite;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-content a:hover {background-color: #ddd;}
+
 </style>
