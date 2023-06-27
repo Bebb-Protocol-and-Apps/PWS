@@ -32,7 +32,7 @@
   function handleEscape({ key }) {
     if (key === "Escape") {
       open = false;
-    };
+    }
   };
 
 // Check whether the current space viewer is its owner
@@ -211,6 +211,46 @@
     };
   };
 
+  /**
+   * This function removes any undesired buttons from the Aframe inspector
+   * This should only be called once the Aframe inspector is loaded
+   */
+  const removeUndesiredInspectorButtons = () => {
+      // Remove the resume button since it isn't useful
+      document.getElementById('playPauseScene').style.display = 'none';
+      // Remove the gltfIcon since it isn't useful
+      for (let i =0; i < document.getElementsByClassName('gltfIcon').length; i++)
+      {
+        document.getElementsByClassName('gltfIcon')[i].style.display = 'none';
+      }
+
+      // Now that we removed the button update the padding to make it look better
+      for (let i =0; i < document.getElementsByClassName('toolbarActions').length; i++)
+      {
+        document.getElementsByClassName('toolbarActions')[i].style.paddingTop = '10px';
+      }
+
+  }
+
+  /**
+   * This function updates any helper text for relevant buttons on the Aframe inspector
+   */
+  const updateHelperText = () => {
+    // Update the helper text of the save button
+    var elements = document.body.getElementsByClassName("button fa fa-save");
+    for (const saveButton of elements) {
+        // @ts-ignore
+        saveButton.title = "Save changes to your canister";
+    };
+
+    // Update helper text of adding item
+    var elements = document.body.getElementsByClassName("button fa fa-plus");
+    for (const addButton of elements) {
+        // @ts-ignore
+        addButton.title = "Add a new item";
+    };
+  }
+
   const customizeInspector = () => {
   // Change A-Frame's default Inspector according to our specific requirements
     // Remove any 3D Neighbors from the scene
@@ -221,6 +261,10 @@
     loadSaveButton();
     // Customize features on the Right Panel
     customizeRightPanel();
+    // Remove elements of the Inspector that we don't want
+    removeUndesiredInspectorButtons();
+    // Update the helper text to what we want
+    updateHelperText();
   };
 
   const editButtonOnClick = async () => {
@@ -231,7 +275,7 @@
     // Wait until the Inspector has loaded
     setTimeout(() => {
       customizeInspector();     
-    }, 1000);
+    }, 700);
   };
 
   const neighborsButtonOnClick = () => {
