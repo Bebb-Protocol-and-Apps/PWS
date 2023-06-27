@@ -32,10 +32,32 @@ type Request =
    method: text;
    url: text;
  };
+type NewWaveError = 
+ variant {
+   BridgeNotFound;
+   EntityNotFound;
+   ExistedNFT;
+   OperatorNotFound;
+   Other: text;
+   OwnerNotFound;
+   SelfApprove;
+   SelfTransfer;
+   TokenNotFound;
+   TxNotFound;
+   Unauthorized: text;
+ };
 type HeaderField = 
  record {
    text;
    text;
+ };
+type EntityUpdateObject = 
+ record {
+   description: opt text;
+   internalId: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt EntitySettings;
  };
 type EntityType = 
  variant {
@@ -45,6 +67,11 @@ type EntityType =
    Webasset;
  };
 type EntitySettings = record {};
+type EntityResult = 
+ variant {
+   Err: NewWaveError;
+   Ok: opt Entity;
+ };
 type EntityInitiationObject = 
  record {
    _creator: opt principal;
@@ -79,6 +106,21 @@ type BridgeState =
    Confirmed;
    Pending;
    Rejected;
+ };
+type BridgeResult = 
+ variant {
+   Err: NewWaveError;
+   Ok: opt BridgeEntity;
+ };
+type BridgeEntityUpdateObject = 
+ record {
+   bridgeType: opt BridgeType;
+   description: opt text;
+   internalId: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt EntitySettings;
+   state: opt BridgeState;
  };
 type BridgeEntityInitiationObject = 
  record {
@@ -117,16 +159,11 @@ type BridgeEntity =
    toEntityId: text;
  };
 service : {
-  createBridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
-  createEntity: (EntityInitiationObject) -> (Entity);
-  createEntityAndBridge: (EntityInitiationObject,
-   BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
   create_bridge: (BridgeEntityInitiationObject) -> (opt BridgeEntity);
   create_entity: (EntityInitiationObject) -> (Entity);
   create_entity_and_bridge: (EntityInitiationObject,
    BridgeEntityInitiationObject) -> (Entity, opt BridgeEntity);
-  deleteBridge: (text) -> (opt BridgeEntity);
-  delete_bridge: (text) -> (opt BridgeEntity);
+  delete_bridge: (text) -> (BridgeResult);
   get_bridge: (text) -> (opt BridgeEntity) query;
   get_bridge_ids_by_entity_id: (text, bool, bool, bool) -> (vec text) query;
   get_bridged_entities_by_entity_id: (text, bool, bool, bool) ->
@@ -138,4 +175,6 @@ service : {
    vec text) query;
   http_request: (Request) -> (Response) query;
   http_request_update: (Request) -> (Response);
+  update_bridge: (BridgeEntityUpdateObject) -> (BridgeResult);
+  update_entity: (EntityUpdateObject) -> (EntityResult);
 }

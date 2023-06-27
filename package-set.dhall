@@ -40,6 +40,16 @@ let
     , repo = "https://github.com/usergeek/canistergeek-ic-motoko"
     , version = "v0.0.3"
     , dependencies = ["base"] : List Text
+    },
+    { name = "uuid"
+    , version = "v0.2.0"
+    , repo = "https://github.com/aviate-labs/uuid.mo"
+    , dependencies = [ "base", "io", "encoding" ]
+    },
+    { name = "io"
+    , version = "v0.3.1"
+    , repo = "https://github.com/aviate-labs/io.mo"
+    , dependencies = [ "base" ]
     }
   ] : List Package
 

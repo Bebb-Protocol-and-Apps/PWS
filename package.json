@@ -23,11 +23,13 @@
     "stop": "dfx stop"
   },
   "dependencies": {
-    "@dfinity/agent": "0.15.1",
-    "@dfinity/auth-client": "^0.15.1",
+    "@dfinity/agent": "0.15.6",
+    "@dfinity/auth-client": "^0.15.6",
     "@dfinity/authentication": "^0.14.2",
-    "@dfinity/candid": "0.15.1",
-    "@dfinity/principal": "0.15.1",
+    "@dfinity/candid": "0.15.6",
+    "@dfinity/principal": "0.15.6",
+    "axios": "^1.4.0",
+    "html2canvas": "^1.4.1",
     "svelte-spa-router": "^3.3.0",
     "three": "^0.148.0"
   },

@@ -1,22 +1,43 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { store } from "../store";
+  let files;
 
-  let spaceString;
+  $: if (files) {
+    handleFiles(files);
+  }
 
-  const addAFrameTestRoom = async () => {
-    console.log('in Testroom addAFrameTestRoom');
-    const resp = await fetch("testroom.html");
-    //console.log('in index addAFrameTestRoom resp', resp);
-    spaceString = await resp.text();
-    //console.log('in index addAFrameTestRoom html', html);
-    //document.write(html);
-  };
+  async function handleFiles(files) {
+    console.log(files);
 
-  onMount(addAFrameTestRoom);
+    for (const file of files) {
+      console.log(`${file.name}: ${file.size} bytes`);
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      console.log(byteArray);
+      try {
+      console.log(await $store.backendActor.listUserFileNames());
+    } catch (error) {
+    console.error("Error:", error);
+  }
+      // Assuming you have a canister object with a method `storeFile`
+      try {
+      console.log(await $store.backendActor.uploadUserFile(file.name, byteArray));
+    } catch (error) {
+    console.error("Error:", error);
+  }
+    }
+  }
+
+
+
 </script>
 
-{#if spaceString}
-  <div style="position: absolute; height: 100%; width: 100%;">
-    {@html spaceString}
-  </div>
-{/if}
+<label for="many">Upload multiple files of any type:</label>
+<input
+	bind:files
+	id="many"
+	multiple
+	type="file"
+/>

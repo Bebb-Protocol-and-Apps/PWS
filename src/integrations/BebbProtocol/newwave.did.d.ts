@@ -35,6 +35,17 @@ export interface BridgeEntityInitiationObject {
   '_toEntityId' : string,
   '_name' : [] | [string],
 }
+export interface BridgeEntityUpdateObject {
+  'internalId' : string,
+  'name' : [] | [string],
+  'description' : [] | [string],
+  'keywords' : [] | [Array<string>],
+  'state' : [] | [BridgeState],
+  'settings' : [] | [EntitySettings],
+  'bridgeType' : [] | [BridgeType],
+}
+export type BridgeResult = { 'Ok' : [] | [BridgeEntity] } |
+  { 'Err' : NewWaveError };
 export type BridgeState = { 'Confirmed' : null } |
   { 'Rejected' : null } |
   { 'Pending' : null };
@@ -65,20 +76,40 @@ export interface EntityInitiationObject {
   '_internalId' : [] | [string],
   '_name' : [] | [string],
 }
+export type EntityResult = { 'Ok' : [] | [Entity] } |
+  { 'Err' : NewWaveError };
 export type EntitySettings = {};
 export type EntityType = { 'Webasset' : null } |
   { 'BridgeEntity' : null } |
   { 'Person' : null } |
   { 'Location' : null };
+export interface EntityUpdateObject {
+  'internalId' : string,
+  'name' : [] | [string],
+  'description' : [] | [string],
+  'keywords' : [] | [Array<string>],
+  'settings' : [] | [EntitySettings],
+}
 export type HeaderField = [string, string];
+export type NewWaveError = { 'SelfTransfer' : null } |
+  { 'TokenNotFound' : null } |
+  { 'EntityNotFound' : null } |
+  { 'TxNotFound' : null } |
+  { 'SelfApprove' : null } |
+  { 'OperatorNotFound' : null } |
+  { 'Unauthorized' : string } |
+  { 'BridgeNotFound' : null } |
+  { 'ExistedNFT' : null } |
+  { 'OwnerNotFound' : null } |
+  { 'Other' : string };
 export interface Request {
   'url' : string,
   'method' : string,
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
 }
 export interface Response {
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
   'upgrade' : boolean,
   'streaming_strategy' : [] | [StreamingStrategy],
@@ -86,11 +117,11 @@ export interface Response {
 }
 export type StreamingCallback = ActorMethod<
   [StreamingCallbackToken],
-  StreamingCallbackResponse,
+  StreamingCallbackResponse
 >;
 export interface StreamingCallbackResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Array<number>,
+  'body' : Uint8Array,
 }
 export interface StreamingCallbackToken {
   'key' : string,
@@ -104,44 +135,36 @@ export type StreamingStrategy = {
     }
   };
 export interface _SERVICE {
-  'createBridge' : ActorMethod<
-    [BridgeEntityInitiationObject],
-    [] | [BridgeEntity],
-  >,
-  'createEntity' : ActorMethod<[EntityInitiationObject], Entity>,
-  'createEntityAndBridge' : ActorMethod<
-    [EntityInitiationObject, BridgeEntityInitiationObject],
-    [Entity, [] | [BridgeEntity]],
-  >,
   'create_bridge' : ActorMethod<
     [BridgeEntityInitiationObject],
-    [] | [BridgeEntity],
+    [] | [BridgeEntity]
   >,
   'create_entity' : ActorMethod<[EntityInitiationObject], Entity>,
   'create_entity_and_bridge' : ActorMethod<
     [EntityInitiationObject, BridgeEntityInitiationObject],
-    [Entity, [] | [BridgeEntity]],
+    [Entity, [] | [BridgeEntity]]
   >,
-  'deleteBridge' : ActorMethod<[string], [] | [BridgeEntity]>,
-  'delete_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
+  'delete_bridge' : ActorMethod<[string], BridgeResult>,
   'get_bridge' : ActorMethod<[string], [] | [BridgeEntity]>,
   'get_bridge_ids_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<string>,
+    Array<string>
   >,
   'get_bridged_entities_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<Entity>,
+    Array<Entity>
   >,
   'get_bridges_by_entity_id' : ActorMethod<
     [string, boolean, boolean, boolean],
-    Array<BridgeEntity>,
+    Array<BridgeEntity>
   >,
   'get_entity' : ActorMethod<[string], [] | [Entity]>,
   'get_entity_and_bridge_ids' : ActorMethod<
     [string, boolean, boolean, boolean],
-    [[] | [Entity], Array<string>],
+    [[] | [Entity], Array<string>]
   >,
   'http_request' : ActorMethod<[Request], Response>,
   'http_request_update' : ActorMethod<[Request], Response>,
+  'update_bridge' : ActorMethod<[BridgeEntityUpdateObject], BridgeResult>,
+  'update_entity' : ActorMethod<[EntityUpdateObject], EntityResult>,
 }

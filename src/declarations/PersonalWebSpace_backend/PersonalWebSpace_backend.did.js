@@ -42,9 +42,36 @@ export const idlFactory = ({ IDL }) => {
     'ZeroAddress' : IDL.Null,
     'InvalidTokenId' : IDL.Null,
     'Unauthorized' : IDL.Null,
-    'Other' : IDL.Null,
+    'Other' : IDL.Text,
   });
   const NftResult = IDL.Variant({ 'Ok' : Nft, 'Err' : ApiError });
+  const FileInfo = IDL.Record({
+    'file_name' : IDL.Text,
+    'file_content' : IDL.Vec(IDL.Nat8),
+    'owner_principal' : IDL.Text,
+  });
+  const UserRecord = IDL.Record({
+    'totalSize' : IDL.Nat,
+    'file_ids' : IDL.Vec(IDL.Text),
+  });
+  const FileResultSuccessOptions = IDL.Variant({
+    'File' : FileInfo,
+    'FileNames' : IDL.Vec(IDL.Text),
+    'Success' : IDL.Null,
+    'FileId' : IDL.Text,
+    'Other' : IDL.Text,
+    'FileIds' : IDL.Vec(IDL.Text),
+    'UserRecord' : UserRecord,
+  });
+  const FileResult = IDL.Variant({
+    'Ok' : FileResultSuccessOptions,
+    'Err' : ApiError,
+  });
+  const EmailSubscriber = IDL.Record({
+    'subscribedAt' : IDL.Nat64,
+    'emailAddress' : IDL.Text,
+    'pageSubmittedFrom' : IDL.Text,
+  });
   const MetadataResult = IDL.Variant({ 'Ok' : MetadataDesc, 'Err' : ApiError });
   const ExtendedMetadataResult = IDL.Variant({
     'Ok' : IDL.Record({ 'token_id' : TokenId, 'metadata_desc' : MetadataDesc }),
@@ -88,6 +115,10 @@ export const idlFactory = ({ IDL }) => {
   const MintReceipt = IDL.Variant({ 'Ok' : MintReceiptPart, 'Err' : ApiError });
   const OwnerResult = IDL.Variant({ 'Ok' : IDL.Principal, 'Err' : ApiError });
   const TxReceipt = IDL.Variant({ 'Ok' : IDL.Nat, 'Err' : ApiError });
+  const SignUpFormInput = IDL.Record({
+    'emailAddress' : IDL.Text,
+    'pageSubmittedFrom' : IDL.Text,
+  });
   const InterfaceId = IDL.Variant({
     'Burn' : IDL.Null,
     'Mint' : IDL.Null,
@@ -103,11 +134,20 @@ export const idlFactory = ({ IDL }) => {
     'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
   });
+  const File = IDL.Vec(IDL.Nat8);
   const PersonalWebSpace = IDL.Service({
     'balanceOfDip721' : IDL.Func([IDL.Principal], [IDL.Nat64], ['query']),
     'check_user_has_nft' : IDL.Func([], [IDL.Bool], ['query']),
     'createSpace' : IDL.Func([IDL.Text], [NftResult], []),
+    'deleteEmailSubscriber' : IDL.Func([IDL.Text], [IDL.Bool], []),
+    'deleteFile' : IDL.Func([IDL.Text], [FileResult], []),
     'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
+    'getEmailSubscribers' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, EmailSubscriber))],
+        [],
+      ),
+    'getFile' : IDL.Func([IDL.Text], [FileResult], ['query']),
     'getMaxLimitDip721' : IDL.Func([], [IDL.Nat16], ['query']),
     'getMetadataDip721' : IDL.Func([TokenId], [MetadataResult], ['query']),
     'getMetadataForUserDip721' : IDL.Func(
@@ -122,8 +162,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(TokenId)],
         ['query'],
       ),
+    'getUserRecord' : IDL.Func([], [FileResult], []),
     'greet' : IDL.Func([IDL.Text], [IDL.Text], []),
     'http_request' : IDL.Func([Request], [Response], ['query']),
+    'listUserFileIds' : IDL.Func([], [FileResult], []),
+    'listUserFileNames' : IDL.Func([], [FileResult], []),
     'logoDip721' : IDL.Func([], [LogoResult], ['query']),
     'mintDip721' : IDL.Func([IDL.Principal, MetadataDesc], [MintReceipt], []),
     'nameDip721' : IDL.Func([], [IDL.Text], ['query']),
@@ -133,6 +176,7 @@ export const idlFactory = ({ IDL }) => {
         [TxReceipt],
         [],
       ),
+    'submitSignUpForm' : IDL.Func([SignUpFormInput], [IDL.Text], []),
     'supportedInterfacesDip721' : IDL.Func(
         [],
         [IDL.Vec(InterfaceId)],
@@ -146,6 +190,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
+    'uploadUserFile' : IDL.Func([IDL.Text, File], [FileResult], []),
   });
   return PersonalWebSpace;
 };

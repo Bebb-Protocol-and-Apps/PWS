@@ -4,6 +4,18 @@
       "main": "src/PersonalWebSpace_backend/main.mo",
       "type": "motoko"
     },
+    "newwave": {
+      "type": "custom",
+      "candid": "src/integrations/BebbProtocol/newwave.did",
+      "wasm": "src/integrations/BebbProtocol/newwave.wasm",
+      "remote": {
+        "candid": "src/integrations/BebbProtocol/newwave.did",
+        "id": {
+          "ic": "pzrof-pyaaa-aaaai-acnha-cai",
+          "local": "br5f7-7uaaa-aaaaa-qaaca-cai"
+        }
+      }
+    },
     "PersonalWebSpace_frontend": {
       "dependencies": [
         "PersonalWebSpace_backend"
@@ -11,7 +23,9 @@
       "frontend": {
         "entrypoint": "dist/index.html"
       },
-      "source": ["dist/"],
+      "source": [
+        "dist/"
+      ],
       "type": "assets"
     }
   },
