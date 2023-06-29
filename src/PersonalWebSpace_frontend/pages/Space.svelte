@@ -12,11 +12,13 @@
   import NotFound from "./NotFound.svelte";
   import SpaceNeighbors from "../components/SpaceNeighbors.svelte";
   import SpaceInfo from "../components/SpaceInfo.svelte";
+  import GlbModelPreview from "../components/GlbModelPreview.svelte";
+  import ItemLibrary from "../components/ItemLibrary.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
   
-  import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
+  import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
 
 // This is needed for URL params
@@ -234,6 +236,184 @@
     };
   };
 
+  // Edit mode options
+  //  Function to toggle whether any Edit Mode option's popup is open
+  let openEditModelPopup = false;
+  const toggleOpenEditModePopup = () => {
+    // Close all option popups
+    openUploadModelFilePopup = false;
+    openItemsToAddLibraryPopup = false;
+    // Toggle whether the Edit Mode popup is open
+    openEditModelPopup = !openEditModelPopup;
+  };
+
+  // Library
+  let openItemsToAddLibraryPopup = false;
+  let userSelectedLibraryItemURL = "";
+  // Manage status of adding item to show buttons and subtexts appropriately
+  let isAddingLibraryItemInProgress = false;
+  let wasLibraryItemAddedSuccessfully = false;
+  const setAddingLibraryItemInProgress = async () => {
+    isAddingLibraryItemInProgress = true;
+  };
+  const setLibraryItemWasAdded = async () => {
+    isAddingLibraryItemInProgress = false;
+    wasLibraryItemAddedSuccessfully = true;
+  };
+
+  const addLibraryItemToSpace = async () => {
+    await setAddingLibraryItemInProgress();
+    // Include the library item selected by the user as a new entity in the Space
+    if (isValidUrl(userSelectedLibraryItemURL)) {
+      try {
+        let scene = document.querySelector('a-scene');
+        var modelEntity = scene.ownerDocument.createElement('a-entity');
+        modelEntity.setAttribute('gltf-model', `url(${userSelectedLibraryItemURL})`);
+        modelEntity.setAttribute('position', '0 3 -6');
+        modelEntity.setAttribute('id', 'userAddedLibraryItem_' + Math.random().toString(36).substr(2, 9));
+        scene.appendChild(modelEntity);
+      } catch (error) {
+        console.error("Adding Library Item to Space Error:", error);
+      };
+    };
+    await setLibraryItemWasAdded();
+  };
+
+  // Upload model file
+  let openUploadModelFilePopup = false;
+  let files;
+  let userUploadedFileURL;
+  let fileSizeToUpload;
+  let fileSizeUploadLimit = 2000000; // 2 MB
+  // Subtexts to display
+  const clickFileUploadSubtext = "Click and we'll upload this item to your Space for you.";
+  const inProgressSubtext = "Uploading the item to your Space, just a moment...";
+  const createdSubtext = "Ohh yeah, your item made it to your Space! You can see it in the Space now and might want to change its position and other attributes in the Edit Mode.";
+  const fileTooBigText = "Hmm, this file is too big. Please select a file smaller than 2 MB.";
+  // Manage status of creation to show buttons and subtexts appropriately
+  let isFileUploadInProgress = false;
+  let fileToUpload = "";
+  let wasFileUploadedSuccessfully = false;
+
+  const setFileUploadInProgress = async (space) => {
+    isFileUploadInProgress = true;
+    fileToUpload = space;
+  };
+
+  const setFileWasUploaded = async () => {
+    isFileUploadInProgress = false;
+    wasFileUploadedSuccessfully = true;
+  };
+
+  const userFileInputHandler = function(userFiles = files) {
+    if (!userFiles || userFiles.length === 0) {
+      return false;
+    };
+    const userFile = userFiles[0];
+    let fileName = userFile.name; // get the name of the file
+    if (fileName.endsWith('.glb')) {
+      try {
+        userUploadedFileURL = URL.createObjectURL(userFile);
+        fileSizeToUpload = userFile.size;
+        addUserFileToScene(files);
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    } else {
+      console.log('The uploaded file is not a .glb file.');
+      return false;
+    }
+  };
+
+  const addUserFileToScene = function(userFiles) {
+    const userFile = userFiles[0];
+    if (userFile) {
+      var fileURL = URL.createObjectURL(userFile);
+      // create a new A-Frame entity for the GLB model
+      // First, get the iframe element
+      let iframe = document.querySelector('.glb-model-space-preview iframe');
+      if (iframe) {
+        // Use the 'load' event to ensure the iframe's contents are fully loaded
+        // Get the A-Frame scene inside the iframe
+        // @ts-ignore
+        let aScene = iframe.contentWindow.document.querySelector('#aSceneForModelPreview');
+        // Now you can interact with the scene...
+        if (aScene) {
+          if (aScene.hasLoaded) {
+            var modelEntity = aScene.ownerDocument.createElement('a-entity');
+            modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+            modelEntity.setAttribute('position', '0 3 -6');
+            modelEntity.setAttribute('id', 'modelFromUserFile');
+            if (!aScene.querySelector('#modelFromUserFile')) {
+              aScene.appendChild(modelEntity);
+            } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
+          } else {
+            aScene.addEventListener('loaded', function () {
+              var modelEntity = aScene.ownerDocument.createElement('a-entity');
+              modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+              modelEntity.setAttribute('position', '0 3 -6');
+              modelEntity.setAttribute('id', 'modelFromUserFile');
+              if (!aScene.querySelector('#modelFromUserFile')) {
+                aScene.appendChild(modelEntity);
+              } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
+            });
+          }
+        } else {
+          // Set timeout and try again
+          setTimeout(() => {
+            addUserFileToScene(userFiles);
+          }, 500);
+        }
+      } else {
+        // Set timeout and try again
+        setTimeout(() => {
+          addUserFileToScene(userFiles);
+        }, 500);
+      }    
+    }
+  };
+
+  const createNewItemInSpaceFromModel = async (modelType) => {
+    await setFileUploadInProgress(modelType);
+    // Upload the user's file to the backend canister and include it as a new entity in the Space for the user
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+      // Store file for user
+      const arrayBuffer = await files[0].arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      let fileUploadResult;
+      try {
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
+      } catch (error) {
+        console.error("File Upload Error:", error);
+      };
+      if (fileUploadResult.Ok) {
+        const fileURL = process.env.DFX_NETWORK === "ic"
+          ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+          : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+        try {
+          let scene = document.querySelector('a-scene');
+          var modelEntity = scene.ownerDocument.createElement('a-entity');
+          modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+          modelEntity.setAttribute('position', '0 3 -6');
+          modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
+          scene.appendChild(modelEntity);
+        } catch (error) {
+          console.error("Adding Uploaded Model to Space Error:", error);
+        };
+      } else {
+        console.error("File Upload Error:", fileUploadResult);
+      };
+    };
+    await setFileWasUploaded();
+  };
+
   const addDropdownMenuForNewElements = () => {
     var elements = document.body.getElementsByClassName("button fa fa-plus");
     var addEntityButton = elements.item(0);
@@ -271,6 +451,33 @@
       dropdownMenuContent.id = "dropdownMenuContent";
       dropdownMenuContent.classList.add("dropdown-content");
 
+      // Close popups for adding items to space if user clicks outside of it
+      const closePopupsOnClickOutside = function(event) {
+        if (!event.target.closest('#editOptionPopupsContainer')) {
+          /* if (openUploadModelFilePopup) {
+            openUploadModelFilePopup = false;
+            window.removeEventListener("click", closePopupsOnClickOutside , false);
+          } */
+          toggleOpenEditModePopup();
+          window.removeEventListener("click", closePopupsOnClickOutside , false);
+        }
+      };
+
+      // Create "Library" option
+      const libraryOption = document.createElement("a");
+      libraryOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      libraryOption.id = "itemsToAddLbrary";
+      libraryOption.classList.add("dropdownOption");
+      libraryOption.innerHTML = "Items Library";
+      libraryOption.onclick = function() {
+        toggleOpenEditModePopup();
+        // Handle library action
+        openItemsToAddLibraryPopup = true;
+        setTimeout(() => {
+          window.addEventListener("click", closePopupsOnClickOutside , false);
+        }, 1000);
+      }
+
       // Create "Upload File" option
       const uploadFileOption = document.createElement("a");
       uploadFileOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
@@ -278,8 +485,12 @@
       uploadFileOption.classList.add("dropdownOption");
       uploadFileOption.innerHTML = "Upload File";
       uploadFileOption.onclick = function() {
-          // TODO: Handle upload file action
-          console.log("Upload File clicked");
+        toggleOpenEditModePopup();
+        // Handle upload file action
+        openUploadModelFilePopup = true;
+        setTimeout(() => {
+          window.addEventListener("click", closePopupsOnClickOutside , false);
+        }, 1000);
       }
 
       // Create "Add New Entity" option (from the + button ("Add Entity"), i.e. it keeps the onclick behavior of adding a new a-entity)
@@ -294,6 +505,7 @@
       addNewEntityOption.innerHTML = "Add New Entity";
 
       // Add options to dropdown menu
+      dropdownMenuContent.appendChild(libraryOption);
       dropdownMenuContent.appendChild(uploadFileOption);
       dropdownMenuContent.appendChild(addNewEntityOption);
 
@@ -319,6 +531,7 @@
         }
       }
 
+      // Close dropdown menu if user clicks outside of it
       window.onclick = function(event) {
         if (!event.target.matches('#dropdownMenuButton')) {
           var dropdowns = document.getElementsByClassName("dropdown-content");
@@ -331,7 +544,7 @@
             }
           }
         }
-      }
+      };
 
       var elements = document.body.getElementsByClassName("button fa fa-save");
       var toggleElement = elements.item(0);
@@ -763,6 +976,94 @@
     <div style="position: absolute; height: 100%; width: 100%;">
       {@html spaceString}
     </div>
+  <!-- Edit Mode Popups -->
+    {#if openEditModelPopup}
+      <div id="editOptionPopupsContainer">
+        <!-- Upload Model File -->
+        {#if openUploadModelFilePopup}
+          <div class="editOptionPopup">
+            <!-- Edit Button may only be displayed if logged-in user is space's owner -->
+            {#if isViewerSpaceOwner()}
+              <h3 class="text-l font-semibold">Upload a GLB Model File</h3>
+              <form on:submit|preventDefault={() => createNewItemInSpaceFromModel("UserUploadedGlbModel")}>
+                <label for="userUploadedFileInput" class="text-base">Select a glb file from your device:</label>
+                <input
+                  bind:files
+                  id="userUploadedFileInput"
+                  type="file"
+                  class="urlInput text-black font-bold"
+                />
+                {#if files}
+                  {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+                    <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+                    {#if userFileInputHandler(files)}
+                      {#if isFileUploadInProgress}
+                        <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Model!</button>
+                        <p id='fileUploadSubtext'>{inProgressSubtext}</p>
+                      {:else if wasFileUploadedSuccessfully}
+                        <button type=submit id='fileUploadButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Model!</button>
+                        <p id='fileUploadSubtext'>{createdSubtext}</p>
+                      {:else}
+                        {#if fileSizeToUpload <= fileSizeUploadLimit}
+                          <button type=submit id='fileUploadButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Model!</button>
+                          <p id='fileUploadSubtext'>{clickFileUploadSubtext}</p>
+                        {:else}
+                          <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Model!</button>
+                          <p id='fileUploadSubtext'>{fileTooBigText}</p>
+                        {/if}
+                      {/if}
+                    {:else}
+                      <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Model!</button>
+                      <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
+                    {/if}
+                  {/key}
+                {/if}
+              </form>
+            {:else}
+              <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
+                You need to be the space's owner to use this feature.
+              </p>
+            {/if}
+          </div>
+
+          <hr transition:scale={{ duration: 650, easing: quadOut, opacity: 1 }} />
+        <!-- Library option -->
+        {:else if openItemsToAddLibraryPopup}
+          <div class="editOptionPopup">
+            <!-- Edit Button may only be displayed if logged-in user is space's owner -->
+            {#if isViewerSpaceOwner()}
+              <h3 class="text-l font-semibold">Add an Item to Your Space</h3>
+              <form on:submit|preventDefault={() => addLibraryItemToSpace()}>
+                <p class="text-base">Select an item from the Library:</p>
+                {#key userSelectedLibraryItemURL}  <!-- Element to rerender everything inside when the item changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+                  <GlbModelPreview bind:modelUrl={userSelectedLibraryItemURL} modelType={"WebHosted"}/>
+                  {#if isValidUrl(userSelectedLibraryItemURL)}
+                    {#if isAddingLibraryItemInProgress}
+                      <button type='button' id='addLibraryItemButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                      <p id='addLibraryItemSubtext'>{inProgressSubtext}</p>
+                    {:else if wasLibraryItemAddedSuccessfully}
+                      <button type=submit id='addLibraryItemButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                      <p id='addLibraryItemSubtext'>{createdSubtext}</p>
+                    {:else}
+                      <button type=submit id='addLibraryItemButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                      <p id='addLibraryItemSubtext'>{clickFileUploadSubtext}</p>
+                    {/if}
+                  {:else}
+                    <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                    <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please try another item.</h3>
+                  {/if}
+                {/key}
+              </form>
+              <ItemLibrary bind:modelUrl={userSelectedLibraryItemURL}/>
+            {:else}
+              <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
+                You need to be the space's owner to use this feature.
+              </p>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -829,5 +1130,22 @@
   }
 
   .dropdown-content a:hover {background-color: #ddd;}
+
+  div.editOptionPopup {
+    z-index: 10;
+    position: relative;
+    height: 35%; 
+    width: 35%;
+    margin: auto;
+    text-align: center;
+    font-size: 1.5em;
+    letter-spacing: 0.15em;
+    padding: 1em;
+    padding-top: 50px;
+    padding-left: 50px;
+    background: #1d1d2f;
+    opacity: 95%;
+    color: #eef;
+  }
 
 </style>

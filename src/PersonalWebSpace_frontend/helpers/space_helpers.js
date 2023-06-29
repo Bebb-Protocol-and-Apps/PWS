@@ -81,7 +81,7 @@ export const getStringForSpaceFromModel = (modelUrl) => {
         <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
         <a-sky color="#ECECEC"></a-sky>
 
-        <a-entity gltf-model="url(${modelUrl}).glb" position="0 0 -5"></a-entity>
+        <a-entity gltf-model="url(${modelUrl}).glb" position="0 3 -6"></a-entity>
       </a-scene>
     </body>
   </html>`;
