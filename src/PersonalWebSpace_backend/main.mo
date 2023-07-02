@@ -744,13 +744,14 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
  *          it claims to be.
 */
 private func isValidFileExtension(fileName : Text) : Bool {
-  let validExtensions : [Text] = ["glb", "gltf" ];
+  let validExtensions : [Text] = ["glb", "gltf", "jpg", "jpeg", "png", "gif", "svg", "mp4", "mov"];
   var extensionMatched : Bool = false;
   for (extension in validExtensions.vals())
   {
     if (Text.endsWith(fileName, #text extension))
     {
       extensionMatched := true;
+      return extensionMatched;
     };
   };
 

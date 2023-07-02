@@ -14,6 +14,7 @@
   import SpaceInfo from "../components/SpaceInfo.svelte";
   import GlbModelPreview from "../components/GlbModelPreview.svelte";
   import ItemLibrary from "../components/ItemLibrary.svelte";
+  import MediaContentPreview from "../components/MediaContentPreview.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
@@ -247,6 +248,11 @@
     openEditModelPopup = !openEditModelPopup;
   };
 
+  // Media Content
+    // uses several variables from Upload model file option
+  let openAddMediaContentPopup = false;
+
+
   // Library
   let openItemsToAddLibraryPopup = false;
   let userSelectedLibraryItemURL = "";
@@ -321,9 +327,93 @@
         console.error(e);
         return false;
       }
+    } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.svg')) {
+      try {
+        userUploadedFileURL = URL.createObjectURL(userFile);
+        fileSizeToUpload = userFile.size;
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
+      try {
+        userUploadedFileURL = URL.createObjectURL(userFile);
+        fileSizeToUpload = userFile.size;
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
     } else {
       console.log('The uploaded file is not a .glb file.');
       return false;
+    }
+  };
+
+  const addImageFileToScene = function(userFiles) {
+    const userFile = userFiles[0];
+    if (userFile) {
+      //var fileURL = URL.createObjectURL(userFile);
+      // create a new A-Frame entity for the image
+      // First, get the iframe element
+      let iframe = document.querySelector('.media-content-space-preview iframe');
+      if (iframe) {
+        var fileURL = iframe.contentWindow.URL.createObjectURL(userFile);
+        console.log('fileURL', fileURL);
+        // Use the 'load' event to ensure the iframe's contents are fully loaded
+        // Get the A-Frame scene inside the iframe
+        // @ts-ignore
+        let aScene = iframe.contentWindow.document.querySelector('#aSceneForModelPreview');
+        // Now you can interact with the scene...
+        if (aScene) {
+          if (aScene.hasLoaded) {
+            // Create a new A-Frame entity for the image
+            var imageEntity = aScene.ownerDocument.createElement('a-image');
+            // Set the src attribute to the URL of your image
+            imageEntity.setAttribute('src', `url(${fileURL}).jpg`);
+            // Set the width and height
+            imageEntity.setAttribute('width', '2');
+            imageEntity.setAttribute('height', '1');
+            // Set the position
+            imageEntity.setAttribute('position', '0 1.6 -2');
+            imageEntity.setAttribute('id', 'imageFromUserFile');
+            if (!aScene.querySelector('#imageFromUserFile')) {
+              aScene.appendChild(imageEntity);
+            } else {
+              aScene.replaceChild(imageEntity, aScene.querySelector('#imageFromUserFile'));
+            }
+          } else {
+            aScene.addEventListener('loaded', function () {
+              // Create a new A-Frame entity for the image
+              var imageEntity = aScene.ownerDocument.createElement('a-image');
+              // Set the src attribute to the URL of your image
+              imageEntity.setAttribute('src', `url(${fileURL}).jpg`);
+              // Set the width and height
+              imageEntity.setAttribute('width', '2');
+              imageEntity.setAttribute('height', '1');
+              // Set the position
+              imageEntity.setAttribute('position', '0 1.6 -2');
+              imageEntity.setAttribute('id', 'imageFromUserFile');
+              if (!aScene.querySelector('#imageFromUserFile')) {
+                aScene.appendChild(imageEntity);
+              } else {
+                aScene.replaceChild(imageEntity, aScene.querySelector('#imageFromUserFile'));
+              }
+            });
+          }
+        } else {
+          // Set timeout and try again
+          setTimeout(() => {
+            addUserFileToScene(userFiles);
+          }, 500);
+        }
+      } else {
+        // Set timeout and try again
+        setTimeout(() => {
+          addImageFileToScene(userFiles);
+        }, 500);
+      }    
     }
   };
 
@@ -379,39 +469,106 @@
     }
   };
 
-  const createNewItemInSpaceFromModel = async (modelType) => {
-    await setFileUploadInProgress(modelType);
-    // Upload the user's file to the backend canister and include it as a new entity in the Space for the user
-    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
-      // Store file for user
-      const arrayBuffer = await files[0].arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const byteArray = Array.from(uint8Array);
-      let fileUploadResult;
-      try {
-        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
-      } catch (error) {
-        console.error("File Upload Error:", error);
-      };
-      if (fileUploadResult.Ok) {
-        const fileURL = process.env.DFX_NETWORK === "ic"
-          ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
-          : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+  const createNewItemInSpace = async (sourceType) => {
+    if (userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+      await setFileUploadInProgress(sourceType);
+      // Upload the user's file to the backend canister and include it as a new entity in the Space for the user
+      if (sourceType === "UserUploadedGlbModel") {
+        // Store file for user
+        const arrayBuffer = await files[0].arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const byteArray = Array.from(uint8Array);
+        let fileUploadResult;
         try {
-          let scene = document.querySelector('a-scene');
-          var modelEntity = scene.ownerDocument.createElement('a-entity');
-          modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
-          modelEntity.setAttribute('position', '0 3 -6');
-          modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
-          scene.appendChild(modelEntity);
+          fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
         } catch (error) {
-          console.error("Adding Uploaded Model to Space Error:", error);
+          console.error("File Upload Error:", error);
         };
-      } else {
-        console.error("File Upload Error:", fileUploadResult);
+        if (fileUploadResult.Ok) {
+          const fileURL = process.env.DFX_NETWORK === "ic"
+            ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+            : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          try {
+            let scene = document.querySelector('a-scene');
+            var modelEntity = scene.ownerDocument.createElement('a-entity');
+            modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+            modelEntity.setAttribute('position', '0 3 -6');
+            modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
+            scene.appendChild(modelEntity);
+          } catch (error) {
+            console.error("Adding Uploaded Model to Space Error:", error);
+          };
+        } else {
+          console.error("File Upload Error:", fileUploadResult);
+        };
+      } else if (sourceType === "UserUploadedMediaContent") {
+        // Store file for user
+        const arrayBuffer = await files[0].arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const byteArray = Array.from(uint8Array);
+        let fileUploadResult;
+        try {
+          fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
+        } catch (error) {
+          console.error("File Upload Error:", error);
+        };
+        if (fileUploadResult.Ok) {
+          const fileURL = process.env.DFX_NETWORK === "ic"
+            ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+            : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          try {
+            let fileName = files[0].name; // get the name of the file
+            let scene = document.querySelector('a-scene');
+            var contentEntity;
+            if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.svg')) {
+              // Create a new a-asset element
+              var newImageAsset = document.createElement('img');
+              newImageAsset.setAttribute('id', 'userUploadedMediaAsset_' + fileUploadResult.Ok.FileId);
+              newImageAsset.setAttribute('crossorigin', 'anonymous');
+              newImageAsset.setAttribute('src', fileURL);
+              // Append the new a-asset to the a-assets element
+              var assets = document.querySelector('a-assets');
+              assets.appendChild(newImageAsset);
+              function loaded() {
+                contentEntity = scene.ownerDocument.createElement('a-image');
+                contentEntity.setAttribute('src', '#userUploadedMediaAsset_' + fileUploadResult.Ok.FileId);
+                contentEntity.setAttribute('position', '0 3 -6');
+                contentEntity.setAttribute('id', 'userUploadedMedia_' + fileUploadResult.Ok.FileId);
+                scene.appendChild(contentEntity);
+              };
+              newImageAsset.addEventListener('load', loaded);
+            } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
+              // Create a new a-asset element
+              var newVideoAsset = document.createElement('video');
+              newVideoAsset.setAttribute('id', 'userUploadedMediaAsset_' + fileUploadResult.Ok.FileId);
+              newVideoAsset.setAttribute('crossorigin', 'anonymous');
+              newVideoAsset.setAttribute('src', fileURL);
+              // Append the new a-asset to the a-assets element
+              var assets = document.querySelector('a-assets');
+              assets.appendChild(newVideoAsset);
+              function loaded() {
+                contentEntity = scene.ownerDocument.createElement('a-video');
+                contentEntity.setAttribute('src', '#userUploadedMediaAsset_' + fileUploadResult.Ok.FileId);
+                contentEntity.setAttribute('position', '0 3 -6');
+                contentEntity.setAttribute('id', 'userUploadedMedia_' + fileUploadResult.Ok.FileId);
+                scene.appendChild(contentEntity);
+              };
+              newVideoAsset.addEventListener('loadeddata', loaded);
+            } else {
+              console.log('The uploaded file type is not supported.');
+              return false;
+            };
+          } catch (error) {
+            console.error("Adding Uploaded File to Space Error:", error);
+          };
+        } else {
+          console.error("File Upload Error:", fileUploadResult);
+        };
       };
-    };
-    await setFileWasUploaded();
+      await setFileWasUploaded();
+    } else {
+      console.error("File Failed Check Before Upload");
+    };    
   };
 
   const addDropdownMenuForNewElements = () => {
@@ -454,19 +611,30 @@
       // Close popups for adding items to space if user clicks outside of it
       const closePopupsOnClickOutside = function(event) {
         if (!event.target.closest('#editOptionPopupsContainer')) {
-          /* if (openUploadModelFilePopup) {
-            openUploadModelFilePopup = false;
-            window.removeEventListener("click", closePopupsOnClickOutside , false);
-          } */
           toggleOpenEditModePopup();
           window.removeEventListener("click", closePopupsOnClickOutside , false);
         }
       };
 
+      // Create "Media Content" option
+      const mediaContentOption = document.createElement("a");
+      mediaContentOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      mediaContentOption.id = "mediaContentOption";
+      mediaContentOption.classList.add("dropdownOption");
+      mediaContentOption.innerHTML = "Add Media";
+      mediaContentOption.onclick = function() {
+        toggleOpenEditModePopup();
+        // Handle media content action
+        openAddMediaContentPopup = true;
+        setTimeout(() => {
+          window.addEventListener("click", closePopupsOnClickOutside , false);
+        }, 1000);
+      };
+
       // Create "Library" option
       const libraryOption = document.createElement("a");
       libraryOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
-      libraryOption.id = "itemsToAddLbrary";
+      libraryOption.id = "itemsToAddLibrary";
       libraryOption.classList.add("dropdownOption");
       libraryOption.innerHTML = "Items Library";
       libraryOption.onclick = function() {
@@ -476,7 +644,7 @@
         setTimeout(() => {
           window.addEventListener("click", closePopupsOnClickOutside , false);
         }, 1000);
-      }
+      };
 
       // Create "Upload File" option
       const uploadFileOption = document.createElement("a");
@@ -491,7 +659,7 @@
         setTimeout(() => {
           window.addEventListener("click", closePopupsOnClickOutside , false);
         }, 1000);
-      }
+      };
 
       // Create "Add New Entity" option (from the + button ("Add Entity"), i.e. it keeps the onclick behavior of adding a new a-entity)
       const addNewEntityOption = addEntityButton;
@@ -506,6 +674,7 @@
 
       // Add options to dropdown menu
       dropdownMenuContent.appendChild(libraryOption);
+      dropdownMenuContent.appendChild(mediaContentOption);
       dropdownMenuContent.appendChild(uploadFileOption);
       dropdownMenuContent.appendChild(addNewEntityOption);
 
@@ -529,7 +698,7 @@
             dropdownOption.style.fontWeight = "bold";
           }
         }
-      }
+      };
 
       // Close dropdown menu if user clicks outside of it
       window.onclick = function(event) {
@@ -985,7 +1154,7 @@
             <!-- Edit Button may only be displayed if logged-in user is space's owner -->
             {#if isViewerSpaceOwner()}
               <h3 class="text-l font-semibold">Upload a GLB Model File</h3>
-              <form on:submit|preventDefault={() => createNewItemInSpaceFromModel("UserUploadedGlbModel")}>
+              <form on:submit|preventDefault={() => createNewItemInSpace("UserUploadedGlbModel")}>
                 <label for="userUploadedFileInput" class="text-base">Select a glb file from your device:</label>
                 <input
                   bind:files
@@ -1055,6 +1224,52 @@
                 {/key}
               </form>
               <ItemLibrary bind:modelUrl={userSelectedLibraryItemURL}/>
+            {:else}
+              <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
+                You need to be the space's owner to use this feature.
+              </p>
+            {/if}
+          </div>
+        <!-- Media Content option -->
+        {:else if openAddMediaContentPopup}
+          <div class="editOptionPopup">
+            <!-- Edit Button may only be displayed if logged-in user is space's owner -->
+            {#if isViewerSpaceOwner()}
+              <h3 class="text-l font-semibold">Upload an Image or Video</h3>
+              <form on:submit|preventDefault={() => createNewItemInSpace("UserUploadedMediaContent")}>
+                <label for="userUploadedFileInput" class="text-base">Select the file from your device:</label>
+                <input
+                  bind:files
+                  id="userUploadedFileInput"
+                  type="file"
+                  class="urlInput text-black font-bold"
+                />
+                {#if files}
+                  {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+                    {#if userFileInputHandler(files)}
+                      <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files}/>
+                      {#if isFileUploadInProgress}
+                        <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                        <p id='fileUploadSubtext'>{inProgressSubtext}</p>
+                      {:else if wasFileUploadedSuccessfully}
+                        <button type=submit id='fileUploadButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                        <p id='fileUploadSubtext'>{createdSubtext}</p>
+                      {:else}
+                        {#if fileSizeToUpload <= fileSizeUploadLimit}
+                          <button type=submit id='fileUploadButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                          <p id='fileUploadSubtext'>{clickFileUploadSubtext}</p>
+                        {:else}
+                          <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                          <p id='fileUploadSubtext'>{fileTooBigText}</p>
+                        {/if}
+                      {/if}
+                    {:else}
+                      <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                      <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid file.</h3>
+                    {/if}
+                  {/key}
+                {/if}
+              </form>
             {:else}
               <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
                 You need to be the space's owner to use this feature.
