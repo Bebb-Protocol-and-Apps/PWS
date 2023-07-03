@@ -4,18 +4,18 @@
 
   // Define the items
   let items = [
-    { name: 'Discovery Space Shuttle', url: 'http://172.31.141.171:3000/discovery_space_shuttle.glb' },
-    { name: 'Couch', url: 'http://172.31.141.171:3000/couch.glb' },
-    { name: 'Laptop', url: 'http://172.31.141.171:3000/laptop.glb' },
-    { name: 'Table', url: 'http://172.31.141.171:3000/rectangle_table.glb' },
-    { name: 'Bed', url: 'http://172.31.141.171:3000/single_bed.glb' },
-    { name: 'Spacestation', url: 'http://172.31.141.171:3000/spacestation_scene_texture_test.glb' },
-    { name: 'Bookshelf', url: 'http://172.31.141.171:3000/standart_bookshelf.glb' },
-    { name: 'Wardrobe', url: 'http://172.31.141.171:3000/twin_wardrobe.glb' },
-    { name: 'Gaming Chair', url: 'http://172.31.141.171:3000/gaming_chair.glb' },
-    { name: 'Lamp', url: 'http://172.31.141.171:3000/cylinder_lamp.glb' },
-    { name: 'Blue Flower', url: 'http://172.31.141.171:3000/blue_flower.glb' },
-    { name: 'Armchair', url: 'http://172.31.141.171:3000/armchair.glb' },
+    { name: 'Couch', url: './couch.glb' },
+    { name: 'Discovery Space Shuttle', url: './discovery_space_shuttle.glb' },
+    { name: 'Laptop', url: './laptop.glb' },
+    { name: 'Table', url: './rectangle_table.glb' },
+    { name: 'Bed', url: './single_bed.glb' },
+    { name: 'Spacestation', url: './spacestation_scene_texture_test.glb' },
+    { name: 'Bookshelf', url: './standart_bookshelf.glb' },
+    { name: 'Wardrobe', url: './twin_wardrobe.glb' },
+    { name: 'Gaming Chair', url: './gaming_chair.glb' },
+    { name: 'Lamp', url: './cylinder_lamp.glb' },
+    { name: 'Blue Flower', url: './blue_flower.glb' },
+    { name: 'Armchair', url: './armchair.glb' },
   ];
 
   // Function to handle click on preview button
