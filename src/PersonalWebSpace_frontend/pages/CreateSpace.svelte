@@ -94,7 +94,7 @@
           if (aScene.hasLoaded) {
             var modelEntity = aScene.ownerDocument.createElement('a-entity');
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
-            modelEntity.setAttribute('position', '0 0 -5');
+            modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
@@ -103,7 +103,7 @@
             aScene.addEventListener('loaded', function () {
               var modelEntity = aScene.ownerDocument.createElement('a-entity');
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
-              modelEntity.setAttribute('position', '0 0 -5');
+              modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
