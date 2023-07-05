@@ -6,7 +6,6 @@
   contentFiles = contentFiles;
 
 // Note: HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
-  //let mediaContentPreviewString = getStringForSpaceFromUserUploadedModel();
   let mediaContentPreviewString
   if (contentFiles[0].name.endsWith('.jpg')) {
     mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
