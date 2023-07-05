@@ -587,6 +587,7 @@
                   contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
                   contentEntity.setAttribute('position', '0 3 -6');
                   contentEntity.setAttribute('id', 'userUploadedVideo_' + fileUploadResult.Ok.FileId);
+                  contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
                   scene.appendChild(contentEntity);
                 };
                 newVideoAsset.addEventListener('loadeddata', loaded);
