@@ -372,8 +372,8 @@
       // First, get the iframe element
       let iframe = document.querySelector('.media-content-space-preview iframe');
       if (iframe) {
+        // @ts-ignore
         var fileURL = iframe.contentWindow.URL.createObjectURL(userFile);
-        console.log('fileURL', fileURL);
         // Use the 'load' event to ensure the iframe's contents are fully loaded
         // Get the A-Frame scene inside the iframe
         // @ts-ignore
