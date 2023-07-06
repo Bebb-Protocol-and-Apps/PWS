@@ -23,7 +23,7 @@
     - Please install the extension in your browser (if you click on Login and then Plug, you should be taken to where you can install it)
     - Make sure it is enabled for the OIM page (should be by default)
     - With the browser extension installed and enabled, click on Login and then Plug and a Plug popup should show up prompting you to log in
-    - Afterwards, the popup will ask you to confirm logging in to the OIM app (and shows you which other software on the Internet Computer OIM is using for extra transparency)
+    - Afterwards, the popup will ask you to confirm logging into the OIM app (and shows you which other software on the Internet Computer OIM is using for extra transparency)
     - Confirm and you will be logged into the OIM app via Plug
   - Stoic wallet
     - This is another wallet on the Internet Computer blockchain platform
@@ -33,7 +33,7 @@
     - Click on Login and then Stoic, and in a new tab Stoic will ask you to confirm your login to the OIM app
     - Confirm and you will be logged into the OIM app via Stoic
 ### After you’re logged in
-- Triumph, you’re logged in to the OIM app! Can you feel how close you are to owning your personal Webspace and designing it the way you want to?
+- Triumph, you’re logged into the OIM app! Can you feel how close you are to owning your personal Webspace and designing it the way you want to?
 - To create your personal Webspace (3D Webpage), go to the “Create” tab
   - There, you’ve got several options to create a Webspace
   - For each of them, you can first preview how the Webspace would look once created and then confirm the creation
@@ -55,7 +55,7 @@
   - You can visit the Webspace by browsing to that URL in your browser
   - You can also share the URL for others to visit the Webspace (they just need to open the URL in their browser)
   - If you are the owner of the Webspace, you’ll have more options what you can do with the Webspace compared to other visitors
-  - To see these options (as owner or as visitor), make sure you;re logged in
+  - To see these options (as owner or as visitor), make sure you're logged in
   - As the Webspace’s owner you can
     - Do everything a visitor can do too
     - Edit the Webspace
