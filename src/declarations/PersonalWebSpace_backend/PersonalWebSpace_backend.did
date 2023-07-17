@@ -69,7 +69,7 @@ type PersonalWebSpace =
                                      text;
                                      EmailSubscriber;
                                    });
-   getFile: (text) -> (FileResult);
+   getFile: (text) -> (FileResult) query;
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
    getMetadataForUserDip721: (principal) -> (ExtendedMetadataResult);

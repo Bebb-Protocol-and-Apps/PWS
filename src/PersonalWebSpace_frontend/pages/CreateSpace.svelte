@@ -8,6 +8,8 @@
 
   import { getStringForSpaceFromModel } from "../helpers/space_helpers";
 
+  import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
+
   let webHostedGlbModelUrl : string = "";
 
 // Subtexts to display
@@ -16,6 +18,7 @@
   const clickFromModelSubtext = "Click and we'll generate this Space from the provided model for you. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!";
   const inProgressSubtext = "Creating your Personal Web Space, just a moment...";
   const createdSubtext = "Ohh yeah, you just got yourself a new Personal Web Space! You can see it on the My Spaces tab.";
+  const fileTooBigText = "Hmm, this file is too big. Please select a file smaller than 2 MB.";
 
 // Manage status of creation to show buttons and subtexts appropriately
   let isSpaceCreationInProgress = false;
@@ -42,12 +45,118 @@
     await setSpaceWasCreated();
   };
 
+  let files;
+  let userUploadedFileURL;
+  let fileSizeToUpload;
+  let fileSizeUploadLimit = 2000000; // 2 MB
+
+  const userFileInputHandler = function(userFiles = files) {
+    if (!userFiles || userFiles.length === 0) {
+      return false;
+    };
+    const userFile = userFiles[0];
+    let fileName = userFile.name; // get the name of the file
+    if (fileName.endsWith('.glb')) {
+      try {
+        userUploadedFileURL = URL.createObjectURL(userFile);
+        fileSizeToUpload = userFile.size;
+        addUserFileToScene(files);
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    } else {
+      console.log('The uploaded file is not a .glb file.');
+      return false;
+    }
+  };
+
+  const addUserFileToScene = function(userFiles) {
+    const userFile = userFiles[0];
+    if (userFile) {
+      var fileURL = URL.createObjectURL(userFile);
+      // create a new A-Frame entity for the GLB model
+      // First, get the iframe element
+      let iframe = document.querySelector('.glb-model-space-preview iframe');
+      if (iframe) {
+        // Use the 'load' event to ensure the iframe's contents are fully loaded
+        // Get the A-Frame scene inside the iframe
+        // @ts-ignore
+        let aScene = iframe.contentWindow.document.querySelector('#aSceneForModelPreview');
+        // Now you can interact with the scene...
+        if (aScene) {
+          if (aScene.hasLoaded) {
+            var modelEntity = aScene.ownerDocument.createElement('a-entity');
+            modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+            modelEntity.setAttribute('position', '0 0 -5');
+            modelEntity.setAttribute('id', 'modelFromUserFile');
+            if (!aScene.querySelector('#modelFromUserFile')) {
+              aScene.appendChild(modelEntity);
+            } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
+          } else {
+            aScene.addEventListener('loaded', function () {
+              var modelEntity = aScene.ownerDocument.createElement('a-entity');
+              modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+              modelEntity.setAttribute('position', '0 0 -5');
+              modelEntity.setAttribute('id', 'modelFromUserFile');
+              if (!aScene.querySelector('#modelFromUserFile')) {
+                aScene.appendChild(modelEntity);
+              } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
+            });
+          }
+        } else {
+          // Set timeout and try again
+          setTimeout(() => {
+            addUserFileToScene(userFiles);
+          }, 1000);
+        }
+      } else {
+        // Set timeout and try again
+        setTimeout(() => {
+          addUserFileToScene(userFiles);
+        }, 1000);
+      }    
+    }
+  };
+
   const createNewUserSpaceFromModel = async (modelType) => {
     await setCreationInProgress(modelType);
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
       const space = await $store.backendActor.createSpace(spaceHtml);
     };
+    // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+      // Store file for user
+      const arrayBuffer = await files[0].arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      let fileUploadResult;
+      try {
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
+      } catch (error) {
+        console.error("File Upload Error:", error);
+      };
+      if (fileUploadResult.Ok) {
+        const url = process.env.DFX_NETWORK === "ic"
+          ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+          : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+        const spaceHtml = getStringForSpaceFromModel(url);
+        try {
+          const space = await $store.backendActor.createSpace(spaceHtml);
+        } catch (error) {
+          console.error("Create Space Error:", error);
+        };
+      } else {
+        console.error("File Upload Error:", fileUploadResult);
+      };
+    };
+
     await setSpaceWasCreated();
   };
 
@@ -111,6 +220,53 @@
   {/if}
   <!-- From Model -->
   <h3 class=" text-xl font-semibold">Create Your Space From an Existing Model:</h3>
+  <!-- User-Uploaded GLB Model File -->
+  <h3 class="text-l font-semibold">Upload a GLB Model File</h3>
+  <form on:submit|preventDefault={() => createNewUserSpaceFromModel("UserUploadedGlbModel")}>
+    <label for="userUploadedFileInput">Select a glb file from your device:</label>
+    <input
+      bind:files
+      id="userUploadedFileInput"
+      type="file"
+      class="urlInput text-black font-bold"
+    />
+    {#if files}
+      {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+        <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+        {#if userFileInputHandler(files)}
+          {#if !$store.isAuthed}
+            <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+            <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>
+          {:else}
+            {#if isSpaceCreationInProgress}
+              <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedGlbModel"}
+                <p id='createSubtextUserUploadedGlbModel'>{inProgressSubtext}</p>
+              {/if}
+            {:else if wasSpaceCreatedSuccessfully}
+              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedGlbModel"}
+                <p id='createSubtextUserUploadedGlbModel'>{createdSubtext}</p>
+              {:else}
+                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+              {/if}
+            {:else}
+              {#if fileSizeToUpload <= fileSizeUploadLimit}
+                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+              {:else}
+                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                <p id='createSubtextUserUploadedGlbModel'>{fileTooBigText}</p>
+              {/if}
+            {/if}  
+          {/if}
+        {:else}
+          <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
+        {/if}
+      {/key}
+    {/if}
+  </form>
   <!-- Web-Hosted GLB Model -->
   <h3 class="text-l font-semibold">GLB Model Hosted on the Web</h3>
   <form on:submit|preventDefault={() => createNewUserSpaceFromModel("WebHostedGlbModel")}>
@@ -122,7 +278,7 @@
     {#if webHostedGlbModelUrl !== ""}
       {#if urlInputHandler(webHostedGlbModelUrl)}
         {#key webHostedGlbModelUrl}  <!-- Element to rerender everything inside when webHostedGlbModelUrl changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-          <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl}/>
+          <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl} modelType={"WebHosted"}/>
         {/key}
         {#if !$store.isAuthed}
           <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>

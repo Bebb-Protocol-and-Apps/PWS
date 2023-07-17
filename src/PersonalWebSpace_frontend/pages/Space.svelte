@@ -18,7 +18,7 @@
   
   import { PersonalWebSpace_backend } from "canisters/PersonalWebSpace_backend";
   import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
-  
+
 // This is needed for URL params
   export let params;
 
