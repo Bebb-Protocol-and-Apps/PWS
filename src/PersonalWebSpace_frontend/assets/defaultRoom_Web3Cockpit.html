@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.3/dist/aframe-extras.min.js"></script>
+    <script src="https://mannymeadows.github.io/Noosa/aframe-sun-sky.min.js"></script>
+  </head>
+  <body>
+
+    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="" device-orientation-permission-ui="" raycaster="direction: 0.9544506796854287 -0.10164039183312146 -0.2805229594810959; origin: -4.846717797159805 5.074580504821491 2.3289351396596443; useWorldCoordinates: true" >
+      <a-assets>
+        <a-asset-item id="ground-glb" src="ground.glb"></a-asset-item>
+        <a-asset-item id="spaceshuttle-glb" src="discovery_space_shuttle.glb"></a-asset-item> <!-- Credits: "Discovery Space Shuttle" (https://skfb.ly/6R6Iu) by rsatenza is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). -->
+        <a-asset-item id="spacestation1-glb" src="space_station_scene_hd.glb"></a-asset-item> <!-- Credits: "Spacestation Scene Texture Test" (https://skfb.ly/QFEx) by 3DHaupt is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/). -->
+        <a-asset-item id="spacestation2-glb" src="spacestation_scene_texture_test.glb"></a-asset-item> <!-- Credits: "Space Station Scene HD" (https://skfb.ly/QGRr) by 3DHaupt is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/). -->
+        <a-asset-item id="iss-glb" src="ISS_stationary.glb"></a-asset-item> <!-- Credits: NASA Visualization Technology Applications and Development (VTAD) (https://solarsystem.nasa.gov/resources/2378/international-space-station-3d-model/) -->
+      </a-assets>
+
+      <a-entity camera="active: true" look-controls wasd-controls position="0 2.5 0">
+        <a-entity light="type: spot; angle: 25"></a-entity>
+      </a-entity>
+
+      <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>
+      <a-light type="directional" intensity="1.0" position="2 1 -1" light=""></a-light>
+
+      <a-entity environment="preset: starry; ground: canyon; groundYScale: 9.76; groundTexture: walkernoise; groundColor: #D1D1D1; groundColor2: #494949; dressing: stones; dressingAmount: 500; dressingColor: #494949; dressingScale: 0.06; dressingVariance: { x: 0.2, y: 0.1, z: 0.2}; dressingUniformScale: true; dressingOnPlayArea: 1; grid: none; gridColor: #239893;" position="0 -0.2 -0"></a-entity>
+      
+      <a-entity gltf-model="#spaceshuttle-glb" scale="0.5 0.5 0.5" position="-18 5.5 -5" rotation="" id="Spaceshuttle"></a-entity>
+      <a-entity gltf-model="#spacestation1-glb" scale="0.5 0.5 0.5" position="28.376 1.2 -5" rotation="0 -10 0" id="Spacestation Landing Dock"></a-entity>
+      <a-entity gltf-model="#spacestation2-glb" scale="0.01 0.01 0.01" position="-1.27162 1.2 -5" rotation="0 90 0" id="Spacestation Cockpit"></a-entity>
+      <a-entity gltf-model="#iss-glb" scale="1 1 1" position="-1.27162 55.20305 -110.3544" rotation="0 45 0" id="ISS"></a-entity>
+
+      <div class="a-loader-title" style="display: none;"></div>
+      <div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div>
+    </a-scene>
+
+  </body>
+</html>

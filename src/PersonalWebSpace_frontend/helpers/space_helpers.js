@@ -65,11 +65,12 @@ export const initiateCollapsibles = () => {
 
 export const getStringForSpaceFromModel = (modelUrl) => {
   return `<html>
-    <head><script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script></head>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" renderer="preserveDrawingBuffer: true">
-        <a-assets timeout="10000">
-          <a-asset-item id="model-glb" src=${modelUrl} crossorigin="anonymous"></a-asset-item>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         </a-assets>
@@ -80,7 +81,79 @@ export const getStringForSpaceFromModel = (modelUrl) => {
         <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
         <a-sky color="#ECECEC"></a-sky>
 
-        <a-entity gltf-model="#model-glb" position="0 0 -5"></a-entity>
+        <a-entity gltf-model="url(${modelUrl}).glb" position="0 3 -6"></a-entity>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
+export const getStringForSpaceFromUserUploadedModel = () => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
+    <body>
+      <a-scene id="aSceneForModelPreview" cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+          <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
+        <a-sky color="#ECECEC"></a-sky>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
+export const getStringForSpaceFromVideoFile = (videoUrl) => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+          <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+          <video id="videoToPreview" autoplay loop="true" src="${videoUrl}"></video>
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
+        <a-sky color="#ECECEC"></a-sky>
+
+        <a-video src="#videoToPreview" position="0 1.6 -3"></a-video>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
+export const getStringForSpaceFromImageFile = (imageUrl) => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+          <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+          <img crossorigin="anonymous" id="imageToPreview" src="${imageUrl}">
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-plane src="#groundTexture" rotation="-90 0 0" position="0 -0.01 0" height="100" width="100"></a-plane>
+        <a-sky color="#ECECEC"></a-sky>
+
+        <a-image src="#imageToPreview" position="0 1.6 -3"></a-image>
       </a-scene>
     </body>
   </html>`;

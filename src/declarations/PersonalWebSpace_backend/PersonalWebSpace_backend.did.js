@@ -147,7 +147,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Text, EmailSubscriber))],
         [],
       ),
-    'getFile' : IDL.Func([IDL.Text], [FileResult], []),
+    'getFile' : IDL.Func([IDL.Text], [FileResult], ['query']),
     'getMaxLimitDip721' : IDL.Func([], [IDL.Nat16], ['query']),
     'getMetadataDip721' : IDL.Func([TokenId], [MetadataResult], ['query']),
     'getMetadataForUserDip721' : IDL.Func(
