@@ -2,16 +2,8 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // Imports and re-exports candid interface
-import { idlFactory } from "./bebb.did.js";
-export { idlFactory } from "./bebb.did.js";
-
-/* CANISTER_ID is replaced by webpack based on node environment
- * Note: canister environment variable will be standardized as
- * process.env.CANISTER_ID_<CANISTER_NAME_UPPERCASE>
- * beginning in dfx 0.15.0
-export const canisterId =
-  process.env.CANISTER_ID_BEBB ||
-  process.env.BEBB_CANISTER_ID; */
+import { idlFactory } from "./newwave.did.js";
+export { idlFactory } from "./newwave.did.js";
 
 // CANISTER_ID is put manually
 export const canisterId = process.env.NODE_ENV !== "development" ? "pzrof-pyaaa-aaaai-acnha-cai" : "br5f7-7uaaa-aaaaa-qaaca-cai";
@@ -43,4 +35,4 @@ export const createActor = (canisterId, options = {}) => {
   });
 };
 
-export const bebb = createActor(canisterId);
+export const newwave = createActor(canisterId);

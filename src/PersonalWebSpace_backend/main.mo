@@ -298,28 +298,38 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
     // create space as Entity in Protocol
     let entityInitiationObject : Protocol.EntityInitiationObject = {
-        _internalId : ?Text = null;
-        _creator : ?Principal = ?caller;
-        _owner : ?Principal = ?caller;
-        _settings : ?Protocol.EntitySettings = null;
-        _entityType : Protocol.EntityType = #Webasset;
-        _name : ?Text = ?"Personal Web Space";
-        _description : ?Text = ?"Flaming Hot Personal Web Space";
-        _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".ic0.app/#/space/" # Nat64.toText(newId));
-        _entitySpecificFields : ?Text = null;
+      settings : ?Protocol.EntitySettings = null;
+      entityType : Protocol.EntityType = #Resource(#Web);
+      name : ?Text = ?"Personal Web Space";
+      description : ?Text = ?"Flaming Hot Personal Web Space";
+      keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
+      entitySpecificFields : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".ic0.app/#/space/" # Nat64.toText(newId));
     };
     //__________Local vs Mainnet Development____________
     var protocolEntityId : Text = ""; // enough for local development
     if (Principal.fromActor(Self) == Principal.fromText(personalWebSpace_backend_canister_id_mainnet)) {
       // Live on Mainnet
-      let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
-      protocolEntityId := spaceEntity.internalId;
+      let spaceEntity : Protocol.EntityIdResult = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
+      switch (spaceEntity) {
+        case (#Ok(spaceEntityId)) {
+          protocolEntityId := spaceEntityId;
+        };
+        case (_) {
+          return #Err(#Other("Error creating space entity"));
+        };
+      };
     } else {
       // Local
       let localProtocol  : Protocol.Interface  = actor(Protocol.LOCAL_CANISTER_ID);
-      let spaceEntity : Protocol.Entity = await localProtocol.create_entity(entityInitiationObject);
-      protocolEntityId := spaceEntity.internalId;
+      let spaceEntity : Protocol.EntityIdResult = await localProtocol.create_entity(entityInitiationObject);
+      switch (spaceEntity) {
+        case (#Ok(spaceEntityId)) {
+          protocolEntityId := spaceEntityId;
+        };
+        case (_) {
+          return #Err(#Other("Error creating space entity"));
+        };
+      };
     };    
 
     // create space for caller

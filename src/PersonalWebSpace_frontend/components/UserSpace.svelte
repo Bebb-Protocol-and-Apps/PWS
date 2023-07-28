@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Principal } from "@dfinity/principal";
-  import type { BridgeState } from "src/integrations/BebbProtocol/newwave.did";
+    import type { BridgeInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { onMount } from "svelte";
 

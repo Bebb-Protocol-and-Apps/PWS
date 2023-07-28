@@ -4,12 +4,12 @@
       "main": "src/PersonalWebSpace_backend/main.mo",
       "type": "motoko"
     },
-    "newwave": {
+    "bebbprotocol": {
       "type": "custom",
-      "candid": "src/integrations/BebbProtocol/newwave.did",
-      "wasm": "src/integrations/BebbProtocol/newwave.wasm",
+      "candid": "src/integrations/BebbProtocol/bebb.did",
+      "wasm": "src/integrations/BebbProtocol/bebb.wasm",
       "remote": {
-        "candid": "src/integrations/BebbProtocol/newwave.did",
+        "candid": "src/integrations/BebbProtocol/bebb.did",
         "id": {
           "ic": "pzrof-pyaaa-aaaai-acnha-cai",
           "local": "br5f7-7uaaa-aaaaa-qaaca-cai"

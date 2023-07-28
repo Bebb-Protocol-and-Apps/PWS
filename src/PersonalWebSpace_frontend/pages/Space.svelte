@@ -20,7 +20,7 @@
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
-  import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
+  import type { Entity } from "src/integrations/BebbProtocol/bebb.did";
 
 // This is needed for URL params
   export let params;
