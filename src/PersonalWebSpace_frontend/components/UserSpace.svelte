@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Principal } from "@dfinity/principal";
-    import type { BridgeInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
+  import type { BridgeInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { onMount } from "svelte";
 
@@ -45,26 +45,24 @@
     const spaceEntityId = extractSpaceEntityId();
     if (entityIdToLinkTo !== "" && spaceEntityId) {
       // Create link as Bridge from Space in Bebb Protocol
-      const bridgeEntityInitiationObject = {
-          _internalId: [],
-          _creator: [$store.principal] as [Principal],
-          _owner: [$store.principal] as [Principal],
-          _settings: [],
-          _entityType: { 'BridgeEntity' : null },
-          _name: [],
-          _description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}.ic0.app/`] as [string],
-          _keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-          _externalId: [],
-          _entitySpecificFields: [],
-          _bridgeType: { 'OwnerCreated' : null },
-          _fromEntityId: spaceEntityId,
-          _toEntityId: entityIdToLinkTo,
-          _state: [{ 'Confirmed' : null }] as [BridgeState],
+      const bridgeEntityInitiationObject : BridgeInitiationObject = {
+          settings: [],
+          name: [],
+          description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}.ic0.app/`] as [string],
+          keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
+          entitySpecificFields: [],
+          bridgeType: { 'IsRelatedto' : null },
+          fromEntityId: spaceEntityId,
+          toEntityId: entityIdToLinkTo,
       };
       try {
-          // @ts-ignore
           const createBridgeResponse = await $store.protocolActor.create_bridge(bridgeEntityInitiationObject);
-          successfullyCreatedLink = true;
+          // @ts-ignore
+          if (createBridgeResponse && createBridgeResponse.Ok) {
+            successfullyCreatedLink = true;
+          } else {
+            errorCreatingLink = true;
+          };
       } catch(err) {
           console.log("Link Space err", err);
           errorCreatingLink = true;
