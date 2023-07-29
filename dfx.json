@@ -35,5 +35,25 @@
       "args": ""
     }
   },
+  "networks": {
+    "development": {
+      "providers": [
+       "https://ic0.app"
+      ],
+      "type": "persistent"
+    },
+    "staging": {
+      "providers": [
+        "https://ic0.app"
+      ],
+      "type": "persistent"
+    },
+    "production": {
+      "providers": [
+        "https://ic0.app"
+     ],
+      "type": "persistent"
+    }
+  },
   "version": 1
 }

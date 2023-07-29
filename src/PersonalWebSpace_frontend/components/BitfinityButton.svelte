@@ -9,16 +9,16 @@
   export let toggleModal;
 
   onMount(async () => {
-    const connected = await window.ic?.plug?.isConnected();
+    const connected = await window.ic?.infinityWallet?.isConnected();
     if (connected) {
-      console.log("plug connection detected");
-      store.plugConnect();
+      console.log("bitfinity connection detected");
+      store.bitfinityConnect();
     }
   });
 
   async function connect() {
-    loading = "plug";
-    await store.plugConnect();
+    loading = "bitfinity";
+    await store.bitfinityConnect();
     loading = "";
     toggleModal();
   }
@@ -29,9 +29,9 @@
   disabled={loading}
   style={"lg:h-16 2xl:h-20 lg:rounded-[55px]"}
 >
-  {#if loading === "plug"}
+  {#if loading === "bitfinity"}
     <img class="h-6 block" src={spinner} alt="loading animation" />
   {:else}
-    Plug
+    Bitfinity
   {/if}
 </Button>
