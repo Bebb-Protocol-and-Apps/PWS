@@ -36,8 +36,20 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     return "Hello, " # name # "!";
   };
 
+// Different Stages
+  var protocol_canister_id : Text = Protocol.CANISTER_ID; // update according to stage
+
+  var personalWebSpace_frontend_canister_id : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // update according to stage
+  var personalWebSpace_backend_canister_id : Text = "vee64-zyaaa-aaaai-acpta-cai"; // update according to stage
+
   let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
   let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
+
+  let personalWebSpace_frontend_canister_id_development : Text = "c5rfj-tqaaa-aaaan-qd5qq-cai"; // deployed on mainnet for development
+  let personalWebSpace_backend_canister_id_development : Text = "5pd2u-2aaaa-aaaal-acv2a-cai"; // deployed on mainnet for development
+
+  let personalWebSpace_frontend_canister_id_testing : Text = "556gz-nyaaa-aaaak-qcjka-cai"; // deployed on mainnet for testing
+  let personalWebSpace_backend_canister_id_testing : Text = "zmsq5-4yaaa-aaaap-qblra-cai"; // deployed on mainnet for testing
 
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
@@ -296,6 +308,28 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
     let newId = Nat64.fromNat(List.size(nfts));
 
+    //__________Different Stages____________
+    let currentCanisterId : Text = Principal.toText(Principal.fromActor(Self));
+    if (currentCanisterId == personalWebSpace_backend_canister_id_mainnet) {
+      // Production (live on Mainnet)
+      protocol_canister_id := Protocol.CANISTER_ID;
+      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_mainnet;
+      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_mainnet;
+    } else if (currentCanisterId == personalWebSpace_backend_canister_id_development) {
+      // Development (live on Mainnet)
+      protocol_canister_id := Protocol.DEVELOPMENT_CANISTER_ID;
+      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_development;
+      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_development;
+    } else if (currentCanisterId == personalWebSpace_backend_canister_id_testing) {
+      // Testing (live on Mainnet)
+      protocol_canister_id := Protocol.TESTING_CANISTER_ID;
+      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_testing;
+      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_testing;
+    } else {
+      // Local (running on local replica)
+      protocol_canister_id := Protocol.LOCAL_CANISTER_ID;
+    };
+
     // create space as Entity in Protocol
     let entityInitiationObject : Protocol.EntityInitiationObject = {
       settings : ?Protocol.EntitySettings = null;
@@ -303,34 +337,21 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       name : ?Text = ?"Personal Web Space";
       description : ?Text = ?"Flaming Hot Personal Web Space";
       keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-      entitySpecificFields : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".ic0.app/#/space/" # Nat64.toText(newId));
+      entitySpecificFields : ?Text = ?("https://" # personalWebSpace_frontend_canister_id # ".ic0.app/#/space/" # Nat64.toText(newId));
     };
-    //__________Local vs Mainnet Development____________
+    
+    // Protocol integration
+    var protocol  : Protocol.Interface  = actor(protocol_canister_id);
     var protocolEntityId : Text = ""; // enough for local development
-    if (Principal.fromActor(Self) == Principal.fromText(personalWebSpace_backend_canister_id_mainnet)) {
-      // Live on Mainnet
-      let spaceEntity : Protocol.EntityIdResult = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
-      switch (spaceEntity) {
-        case (#Ok(spaceEntityId)) {
-          protocolEntityId := spaceEntityId;
-        };
-        case (_) {
-          return #Err(#Other("Error creating space entity"));
-        };
+    let spaceEntity : Protocol.EntityIdResult = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
+    switch (spaceEntity) {
+      case (#Ok(spaceEntityId)) {
+        protocolEntityId := spaceEntityId;
       };
-    } else {
-      // Local
-      let localProtocol  : Protocol.Interface  = actor(Protocol.LOCAL_CANISTER_ID);
-      let spaceEntity : Protocol.EntityIdResult = await localProtocol.create_entity(entityInitiationObject);
-      switch (spaceEntity) {
-        case (#Ok(spaceEntityId)) {
-          protocolEntityId := spaceEntityId;
-        };
-        case (_) {
-          return #Err(#Other("Error creating space entity"));
-        };
+      case (_) {
+        return #Err(#Other("Error creating space entity"));
       };
-    };    
+    };
 
     // create space for caller
     let textArrayContent : [Text] = [];
@@ -545,10 +566,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     };
   };
-
-// Protocol integration
-  private let protocol  : Protocol.Interface  = actor(Protocol.CANISTER_ID);
-
 
 // HTTP interface
   public query func http_request(request : HTTP.Request) : async HTTP.Response {

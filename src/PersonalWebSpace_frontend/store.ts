@@ -220,7 +220,7 @@ export const createStore = ({
     }
 
     // Fetch root key for certificate validation during development
-    if (process.env.DFX_NETWORK !== "ic") {
+    if (process.env.DFX_NETWORK === "local") {
       window.ic.plug.agent.fetchRootKey().catch((err) => {
         console.warn(
           "Unable to fetch root key. Check to ensure that your local replica is running",
@@ -318,7 +318,7 @@ export const createStore = ({
     };
 
     // Fetch root key for certificate validation during development
-    if (process.env.DFX_NETWORK !== "ic") {
+    if (process.env.DFX_NETWORK === "local") {
       /* window.ic.infinityWallet.agent.fetchRootKey().catch((err) => {
         console.warn(
           "Unable to fetch root key. Check to ensure that your local replica is running",

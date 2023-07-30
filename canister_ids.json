@@ -2,10 +2,13 @@
   "PersonalWebSpace_backend": {
     "ic": "vee64-zyaaa-aaaai-acpta-cai",
     "local": "vee64-zyaaa-aaaai-acpta-cai",
-    "development": "5pd2u-2aaaa-aaaal-acv2a-cai"
+    "development": "5pd2u-2aaaa-aaaal-acv2a-cai",
+    "testing": "zmsq5-4yaaa-aaaap-qblra-cai"
   },
   "PersonalWebSpace_frontend": {
     "ic": "vdfyi-uaaaa-aaaai-acptq-cai",
-    "local": "vdfyi-uaaaa-aaaai-acptq-cai"
+    "local": "vdfyi-uaaaa-aaaai-acptq-cai",
+    "development": "c5rfj-tqaaa-aaaan-qd5qq-cai",
+    "testing": "556gz-nyaaa-aaaak-qcjka-cai"
   }
 }

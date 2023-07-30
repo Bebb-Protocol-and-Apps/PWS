@@ -12,7 +12,9 @@
         "candid": "src/integrations/BebbProtocol/bebb.did",
         "id": {
           "ic": "pzrof-pyaaa-aaaai-acnha-cai",
-          "local": "br5f7-7uaaa-aaaaa-qaaca-cai"
+          "local": "br5f7-7uaaa-aaaaa-qaaca-cai",
+          "development": "tsmol-tqaaa-aaaag-abt2a-cai",
+          "testing": "t6nyb-faaaa-aaaal-qcbaa-cai"
         }
       }
     },
@@ -38,20 +40,14 @@
   "networks": {
     "development": {
       "providers": [
-       "https://ic0.app"
+        "https://icp0.io"
       ],
       "type": "persistent"
     },
-    "staging": {
+    "testing": {
       "providers": [
-        "https://ic0.app"
+        "https://icp0.io"
       ],
-      "type": "persistent"
-    },
-    "production": {
-      "providers": [
-        "https://ic0.app"
-     ],
       "type": "persistent"
     }
   },

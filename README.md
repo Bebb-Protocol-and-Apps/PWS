@@ -74,6 +74,37 @@ dfx start --background
 Deploy to Mainnet (live IC):
 Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
 
+Development Canisters:
+dfx deploy --network development --argument "(
+  principal\"$(dfx identity get-principal)\",
+  record {
+    logo = record {
+      logo_type = \"image/png\";
+      data = \"\";
+    };
+    name = \"PersonalWebSpace\";
+    symbol = \"PWS\";
+    maxLimit = 65535;
+  }
+)" PersonalWebSpace_backend
+dfx deploy --network development PersonalWebSpace_frontend
+
+Testing Canisters:
+dfx deploy --network testing --argument "(
+  principal\"$(dfx identity get-principal)\",
+  record {
+    logo = record {
+      logo_type = \"image/png\";
+      data = \"\";
+    };
+    name = \"PersonalWebSpace\";
+    symbol = \"PWS\";
+    maxLimit = 65535;
+  }
+)" PersonalWebSpace_backend
+dfx deploy --network testing PersonalWebSpace_frontend
+
+Production Canisters:
 dfx deploy --network ic --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
@@ -86,7 +117,7 @@ dfx deploy --network ic --argument "(
     maxLimit = 65535;
   }
 )" PersonalWebSpace_backend
-dfx deploy --network ic
+dfx deploy --network ic PersonalWebSpace_frontend
 
 In case there are authentication issues, you could try this command
 Note that only authorized identities which are set up as canister controllers may deploy the production canisters

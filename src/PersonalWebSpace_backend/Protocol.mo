@@ -6,6 +6,8 @@ import Types "./Types";
 module {
     public let CANISTER_ID : Text = "pzrof-pyaaa-aaaai-acnha-cai";
     public let LOCAL_CANISTER_ID : Text = "br5f7-7uaaa-aaaaa-qaaca-cai";
+    public let DEVELOPMENT_CANISTER_ID : Text = "tsmol-tqaaa-aaaag-abt2a-cai";
+    public let TESTING_CANISTER_ID : Text = "t6nyb-faaaa-aaaal-qcbaa-cai";
 
     /**
     * Defines the base entity that is shared accross multiple entity types such as Entities themselvse and bridges
