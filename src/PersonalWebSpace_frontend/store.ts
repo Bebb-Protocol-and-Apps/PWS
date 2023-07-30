@@ -28,6 +28,11 @@ export const HOST =
     ? "https://ic0.app"
     : "http://localhost:4943";
 
+console.log("HOST", HOST);
+console.log("backendCanisterId", backendCanisterId);
+console.log("protocolCanisterId", protocolCanisterId);
+console.log(process.env.DFX_NETWORK);
+
 let authClient : AuthClient;
 const APPLICATION_NAME = "DeVinci";
 const APPLICATION_LOGO_URL = "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/favicon.ico"; //TODO: change to faviconFutureWebInitiative (once deployed with OIM)

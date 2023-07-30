@@ -5,6 +5,8 @@ import dfxJson from "./dfx.json";
 import fs from "fs";
 
 const isDev = process.env["DFX_NETWORK"] === "local";
+const networkName = process.env["DFX_NETWORK"] || "local";
+console.log("DFX_NETWORK", process.env["DFX_NETWORK"]);
 
 type Network = "ic" | "development" | "testing" | "local";
 
@@ -30,7 +32,7 @@ try {
 const aliases = Object.entries(dfxJson.canisters || {}).reduce(
   (acc, [name, _value]) => {
     // Get the network name, or `local` by default.
-    const networkName = process.env["DFX_NETWORK"] || "local";
+    //const networkName = process.env["DFX_NETWORK"] || "local";
     /* const outputRoot = path.join(
       __dirname,
       ".dfx",
@@ -58,9 +60,10 @@ const aliases = Object.entries(dfxJson.canisters || {}).reduce(
 const canisterDefinitions = Object.entries(canisterIds).reduce(
   (acc, [key, val]) => ({
     ...acc,
-    [`process.env.${key.toUpperCase()}_CANISTER_ID`]: isDev
+    /* [`process.env.${key.toUpperCase()}_CANISTER_ID`]: isDev
       ? JSON.stringify(val.local)
-      : JSON.stringify(val.ic),
+      : JSON.stringify(val.ic), */
+    [`process.env.${key.toUpperCase()}_CANISTER_ID`]: JSON.stringify(val[networkName]),
   }),
   {},
 );
