@@ -41,15 +41,19 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
   var personalWebSpace_frontend_canister_id : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // update according to stage
   var personalWebSpace_backend_canister_id : Text = "vee64-zyaaa-aaaai-acpta-cai"; // update according to stage
+  var personalWebSpace_host : Text = ".ic0.app"; // update according to stage
 
   let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
   let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
+  let personalWebSpace_host_mainnet : Text = ".ic0.app"; // deployed on mainnet with first domain
 
   let personalWebSpace_frontend_canister_id_development : Text = "c5rfj-tqaaa-aaaan-qd5qq-cai"; // deployed on mainnet for development
   let personalWebSpace_backend_canister_id_development : Text = "5pd2u-2aaaa-aaaal-acv2a-cai"; // deployed on mainnet for development
+  let personalWebSpace_host_development : Text = ".icp0.io"; // deployed on mainnet for development with second domain
 
   let personalWebSpace_frontend_canister_id_testing : Text = "556gz-nyaaa-aaaak-qcjka-cai"; // deployed on mainnet for testing
   let personalWebSpace_backend_canister_id_testing : Text = "zmsq5-4yaaa-aaaap-qblra-cai"; // deployed on mainnet for testing
+  let personalWebSpace_host_testing : Text = ".icp0.io"; // deployed on mainnet for testing with second domain
 
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
@@ -308,51 +312,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
     let newId = Nat64.fromNat(List.size(nfts));
 
-    //__________Different Stages____________
-    let currentCanisterId : Text = Principal.toText(Principal.fromActor(Self));
-    if (currentCanisterId == personalWebSpace_backend_canister_id_mainnet) {
-      // Production (live on Mainnet)
-      protocol_canister_id := Protocol.CANISTER_ID;
-      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_mainnet;
-      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_mainnet;
-    } else if (currentCanisterId == personalWebSpace_backend_canister_id_development) {
-      // Development (live on Mainnet)
-      protocol_canister_id := Protocol.DEVELOPMENT_CANISTER_ID;
-      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_development;
-      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_development;
-    } else if (currentCanisterId == personalWebSpace_backend_canister_id_testing) {
-      // Testing (live on Mainnet)
-      protocol_canister_id := Protocol.TESTING_CANISTER_ID;
-      personalWebSpace_frontend_canister_id := personalWebSpace_frontend_canister_id_testing;
-      personalWebSpace_backend_canister_id := personalWebSpace_backend_canister_id_testing;
-    } else {
-      // Local (running on local replica)
-      protocol_canister_id := Protocol.LOCAL_CANISTER_ID;
-    };
-
-    // create space as Entity in Protocol
-    let entityInitiationObject : Protocol.EntityInitiationObject = {
-      settings : ?Protocol.EntitySettings = null;
-      entityType : Protocol.EntityType = #Resource(#Web);
-      name : ?Text = ?"Personal Web Space";
-      description : ?Text = ?"Flaming Hot Personal Web Space";
-      keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-      entitySpecificFields : ?Text = ?("https://" # personalWebSpace_frontend_canister_id # ".ic0.app/#/space/" # Nat64.toText(newId));
-    };
-    
-    // Protocol integration
-    var protocol  : Protocol.Interface  = actor(protocol_canister_id);
-    var protocolEntityId : Text = ""; // enough for local development
-    let spaceEntity : Protocol.EntityIdResult = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
-    switch (spaceEntity) {
-      case (#Ok(spaceEntityId)) {
-        protocolEntityId := spaceEntityId;
-      };
-      case (_) {
-        return #Err(#Other("Error creating space entity"));
-      };
-    };
-
     // create space for caller
     let textArrayContent : [Text] = [];
     let keyValData : [Types.MetadataKeyVal] = [
@@ -386,7 +345,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       },
       {
         key = "protocolEntityId";
-        val = #TextContent protocolEntityId;
+        val = #TextContent ""; // not initialized yet, needs to be updated by the frontend after creating the Entity
       }
     ];
     let nftData = Text.encodeUtf8(spaceHtml);
@@ -461,6 +420,116 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     } else {
       return #Err(#Other("No space available"));
+    };
+  };
+
+  // Update the Space's Entity id (should only be necessary after creating the Entity)
+  public shared({ caller }) func updateSpaceEntityId(spaceId : Types.TokenId, entityId : Text) : async Types.NftResult {
+    switch (List.get(nfts, Nat64.toNat(spaceId))) {
+      case (null) {
+        return #Err(#InvalidTokenId);
+      };
+      case (?token) {
+        // only owner may update
+        if (token.owner != caller) {
+          return #Err(#Unauthorized);
+        };
+        // assemble updated space data, then update nfts list
+          // create placeholder objects...
+        var aboutDescriptionObject = {
+          key = "aboutDescription";
+          val: Types.MetadataVal = #TextContent "This is my flaming hot Personal Web Space. Enjoy!";
+        };
+        var creatorObject = {
+          key = "creator";
+          val: Types.MetadataVal = #PrincipalContent caller;
+        };
+        var creationTimeObject = {
+          key = "creationTime";
+          val: Types.MetadataVal = #Nat64Content (Nat64.fromNat(0));
+        };
+        var protocolEntityIdObject = {
+          key = "protocolEntityId";
+          val: Types.MetadataVal = #TextContent entityId;
+        };
+        var ownerNameObject = {
+          key = "ownerName";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        var ownerContactInfoObject = {
+          key = "ownerContactInfo";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        var spaceDescriptionObject = {
+          key = "spaceDescription";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        var spaceNameObject = {
+          key = "spaceName";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        // ... and fill them with space's current data
+        for (i in token.metadata[0].key_val_data.keys()) {
+          if (token.metadata[0].key_val_data[i].key == "aboutDescription") {
+            aboutDescriptionObject := token.metadata[0].key_val_data[i]; // currently not used, thus remains unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "creator") {
+            creatorObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "creationTime") {
+            creationTimeObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "ownerName") {
+            ownerNameObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "ownerContactInfo") {
+            ownerContactInfoObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "spaceDescription") {
+            spaceDescriptionObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "spaceName") {
+            spaceNameObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          }; 
+        };
+
+        let updatedKeyValData: [Types.MetadataKeyVal] = [
+          ownerNameObject,
+          ownerContactInfoObject,
+          aboutDescriptionObject,
+          spaceDescriptionObject,
+          spaceNameObject,
+          creatorObject,
+          creationTimeObject,
+          protocolEntityIdObject
+        ];
+
+        let spaceData = token.metadata[0].data; // should remain unchanged
+
+        let updatedMetadataPart : Types.MetadataPart = {
+          purpose = #Rendered;
+          key_val_data = updatedKeyValData;
+          data = spaceData;
+        };
+        let updatedMetadata : Types.MetadataDesc = [updatedMetadataPart];
+        let updatedNft : Types.Nft = {
+          owner = token.owner;
+          id = token.id;
+          metadata = updatedMetadata;
+        };
+
+        // add updated space to list of NFTs
+        nfts := List.map(nfts, func (item : Types.Nft) : Types.Nft {
+          if (item.id == token.id) {
+            return updatedNft;
+          } else {
+            return item;
+          };
+        });
+        transactionId += 1;
+        switch (List.get(nfts, Nat64.toNat(spaceId))) {
+          case (null) {
+            return #Err(#InvalidTokenId);
+          };
+          case (?updatedSpace) {
+            return #Ok(updatedSpace);
+          }
+        };
+      };
     };
   };
 

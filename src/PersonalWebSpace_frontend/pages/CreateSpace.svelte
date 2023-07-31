@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { store } from "../store";
+  import { store, appDomain } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
   import Topnav from "../components/Topnav.svelte";
@@ -9,6 +9,8 @@
   import { getStringForSpaceFromModel } from "../helpers/space_helpers";
 
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
+  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
+  import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -25,32 +27,32 @@
   let spaceToCreate = "";
   let wasSpaceCreatedSuccessfully = false;
 
-  const setCreationInProgress = async (space) => {
+  const setCreationInProgress = (space) => {
     isSpaceCreationInProgress = true;
     spaceToCreate = space;
   };
 
-  const setSpaceWasCreated = async () => {
+  const setSpaceWasCreated = () => {
     isSpaceCreationInProgress = false;
     wasSpaceCreatedSuccessfully = true;
   };
 
   const createNewDefaultUserSpace = async (defaultSpace) => {
-    await setCreationInProgress(defaultSpace);
+    setCreationInProgress(defaultSpace);
     if (defaultSpace === "defaultspace/0") {
       const resp = await fetch("defaultRoom_Web3Cockpit.html"); // Fetches default space 0
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     } else if (defaultSpace === "defaultspace/1") {
       const resp = await fetch("defaultRoom_NatureRetreat.html"); // Fetches default space 1
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     } else if (defaultSpace === "defaultspace/2") {
       const resp = await fetch("defaultRoom_InternetIsland.html"); // Fetches default space 2
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     };
-    await setSpaceWasCreated();
+    setSpaceWasCreated();
   };
 
   let files;
@@ -132,11 +134,49 @@
     }
   };
 
+  const createSpace = async (spaceHtml) => {
+    try {
+      const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
+      console.log("Debug Space created:", spaceResponse);
+      if (spaceResponse && spaceResponse.Ok) {
+        console.log("Debug Space created ok:", spaceResponse.Ok);
+        console.log("Debug Space created id:", spaceResponse.Ok.id);
+        const spaceId = spaceResponse.Ok.id;
+        setSpaceWasCreated();
+        // Protocol integration: create Space as Entity in Protocol
+        const externalId = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
+        let entityInitiationObject : EntityInitiationObject = {
+          settings: [],
+          entityType: { 'Resource' : { 'Web' : null } },
+          name: ["Personal Web Space"],
+          description: ["Flaming Hot Personal Web Space"],
+          keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
+          entitySpecificFields: [externalId],
+        };
+        const spaceEntityIdResponse = await $store.protocolActor.create_entity(entityInitiationObject);
+        console.log("Debug Entity created:", spaceEntityIdResponse);
+        if (spaceEntityIdResponse && spaceEntityIdResponse.Ok) {
+          console.log("Debug Entity Ok:", spaceEntityIdResponse.Ok);
+          const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse.Ok);
+          if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
+            console.error("Update Space Error:", spaceEntityIdUpdateResponse);
+          };
+        } else {
+          console.error("Create Entity Error:", spaceEntityIdResponse);
+        };              
+      } else {
+        console.error("Create Space Error:", spaceResponse);
+      };
+    } catch (error) {
+      console.error("Create Space Error:", error);
+    };
+  };
+
   const createNewUserSpaceFromModel = async (modelType) => {
-    await setCreationInProgress(modelType);
+    setCreationInProgress(modelType);
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
-      const space = await $store.backendActor.createSpace(spaceHtml);
+      await createSpace(spaceHtml);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
     if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
@@ -153,19 +193,13 @@
       if (fileUploadResult.Ok) {
         const url = process.env.DFX_NETWORK === "local"
           ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
-          : `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+          : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
         const spaceHtml = getStringForSpaceFromModel(url);
-        try {
-          const space = await $store.backendActor.createSpace(spaceHtml);
-        } catch (error) {
-          console.error("Create Space Error:", error);
-        };
+        await createSpace(spaceHtml);
       } else {
         console.error("File Upload Error:", fileUploadResult);
       };
     };
-
-    await setSpaceWasCreated();
   };
 
 // Helper functions to check whether a valid URL was provided in the form

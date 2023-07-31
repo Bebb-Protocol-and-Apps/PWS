@@ -6,7 +6,7 @@
   import { Hamburger } from 'svelte-hamburgers';
   import type { Principal } from "@dfinity/principal";
 
-  import { store } from "../store";
+  import { store,appDomain } from "../store";
 
   import Login from "../components/LoginSpace.svelte";
   import NotFound from "./NotFound.svelte";
@@ -523,7 +523,7 @@
           if (fileUploadResult.Ok) {
             const fileURL = process.env.DFX_NETWORK === "local"
               ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
-              : `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+              : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
             try {
               let scene = document.querySelector('a-scene');
               var modelEntity = scene.ownerDocument.createElement('a-entity');
@@ -551,7 +551,7 @@
           if (fileUploadResult.Ok) {
             const fileURL = process.env.DFX_NETWORK === "local"
               ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
-              : `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+              : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
             try {
               let fileName = files[0].name; // get the name of the file
               let scene = document.querySelector('a-scene');

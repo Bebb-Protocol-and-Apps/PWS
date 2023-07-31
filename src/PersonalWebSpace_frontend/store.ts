@@ -23,10 +23,31 @@ import {
     ? "https://ic0.app" // Use in Production (on Mainnet)
     : "http://localhost:4943"; // to be used with http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom */
 
-export const HOST =
+export let HOST =
   process.env.NODE_ENV !== "development"
     ? "https://ic0.app"
     : "http://localhost:4943";
+
+export let appDomain = ".ic0.app";
+
+if (process.env.DFX_NETWORK === "ic") {
+  // production
+  HOST = "https://ic0.app";
+  appDomain = ".ic0.app";
+} else if (process.env.DFX_NETWORK === "local") {
+  // on localhost
+  HOST = "http://localhost:4943";
+} else if (process.env.DFX_NETWORK === "development") {
+  // development canisters on mainnet (for network development)
+  HOST = "https://icp0.io";
+  appDomain = ".icp0.io";
+} else if (process.env.DFX_NETWORK === "testing") {
+  // testing canisters on mainnet (for network testing)
+  HOST = "https://icp0.io";
+  appDomain = ".icp0.io";
+} else {
+  HOST = "https://ic0.app";
+};
 
 console.log("HOST", HOST);
 console.log("backendCanisterId", backendCanisterId);
