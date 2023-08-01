@@ -1003,7 +1003,7 @@
         let neighborEntity = document.createElement('a-entity');
         // Set properties on the new neighbor entity
         neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.id}`);
-        neighborEntity.setAttribute('web-portal', `url:${neighbor.id}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
+        neighborEntity.setAttribute('web-portal', `url:${neighbor.entitySpecificFields}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
         neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
         // Add the neighbor entity to the scene
         let scene = document.querySelector('a-scene');
