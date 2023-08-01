@@ -36,25 +36,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     return "Hello, " # name # "!";
   };
 
-// Different Stages
-  var protocol_canister_id : Text = Protocol.CANISTER_ID; // update according to stage
-
-  var personalWebSpace_frontend_canister_id : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // update according to stage
-  var personalWebSpace_backend_canister_id : Text = "vee64-zyaaa-aaaai-acpta-cai"; // update according to stage
-  var personalWebSpace_host : Text = ".ic0.app"; // update according to stage
-
-  let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
-  let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
-  let personalWebSpace_host_mainnet : Text = ".ic0.app"; // deployed on mainnet with first domain
-
-  let personalWebSpace_frontend_canister_id_development : Text = "c5rfj-tqaaa-aaaan-qd5qq-cai"; // deployed on mainnet for development
-  let personalWebSpace_backend_canister_id_development : Text = "5pd2u-2aaaa-aaaal-acv2a-cai"; // deployed on mainnet for development
-  let personalWebSpace_host_development : Text = ".icp0.io"; // deployed on mainnet for development with second domain
-
-  let personalWebSpace_frontend_canister_id_testing : Text = "556gz-nyaaa-aaaak-qcjka-cai"; // deployed on mainnet for testing
-  let personalWebSpace_backend_canister_id_testing : Text = "zmsq5-4yaaa-aaaap-qblra-cai"; // deployed on mainnet for testing
-  let personalWebSpace_host_testing : Text = ".icp0.io"; // deployed on mainnet for testing with second domain
-
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
   stable var nfts = List.nil<Types.Nft>();
