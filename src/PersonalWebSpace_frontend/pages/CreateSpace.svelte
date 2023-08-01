@@ -186,15 +186,20 @@
       const byteArray = Array.from(uint8Array);
       let fileUploadResult;
       try {
+        console.log("Debug File Upload:", files[0].name, byteArray);
         fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray);
+        console.log("Debug File Upload Result:", fileUploadResult);
       } catch (error) {
         console.error("File Upload Error:", error);
       };
+      console.log("Debug File Upload Result Ok:", fileUploadResult.Ok);
       if (fileUploadResult.Ok) {
         const url = process.env.DFX_NETWORK === "local"
           ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
           : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+        console.log("Debug File Upload Result Url:", url);
         const spaceHtml = getStringForSpaceFromModel(url);
+        console.log("Debug Space Html:", spaceHtml);
         await createSpace(spaceHtml);
       } else {
         console.error("File Upload Error:", fileUploadResult);

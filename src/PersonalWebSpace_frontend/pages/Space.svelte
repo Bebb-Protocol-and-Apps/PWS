@@ -959,8 +959,8 @@
     };
   };
 
-  const entityHasValidUrl = (entity) => {
-    return isValidUrl(entity.externalId);
+  const entityHasValidUrl = (entity: Entity) => {
+    return isValidUrl(entity.entitySpecificFields);
   };
 
   const isValidUrl = (url) => {
