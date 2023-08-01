@@ -20,7 +20,6 @@
     let spaceInfoUpdateInProgress = false;
 
     const submitUpdateSpaceInfoForm = async () => {
-        console.log("in submitUpdateSpaceInfoForm spaceMetadata", spaceMetadata);
         spaceInfoUpdateInProgress = true;
         // Write space's updated metadata to backend canister (HTML stays the same)
         let updateInput = {
@@ -31,7 +30,6 @@
             updatedSpaceDescription,
             updatedSpaceName,
         };
-        console.log("in submitUpdateSpaceInfoForm updateInput", updateInput);
         try {
             // @ts-ignore
             await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
@@ -39,7 +37,6 @@
             console.log("Error in updateUserSpace", error);                        
         }
         spaceInfoUpdateInProgress = false;
-        console.log("in submitUpdateSpaceInfoForm after");
     };
 </script>
 

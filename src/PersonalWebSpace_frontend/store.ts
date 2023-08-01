@@ -49,11 +49,6 @@ if (process.env.DFX_NETWORK === "ic") {
   HOST = "https://ic0.app";
 };
 
-console.log("HOST", HOST);
-console.log("backendCanisterId", backendCanisterId);
-console.log("protocolCanisterId", protocolCanisterId);
-console.log(process.env.DFX_NETWORK);
-
 let authClient : AuthClient;
 const APPLICATION_NAME = "DeVinci";
 const APPLICATION_LOGO_URL = "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/favicon.ico"; //TODO: change to faviconFutureWebInitiative (once deployed with OIM)
@@ -291,19 +286,15 @@ export const createStore = ({
   };
 
   const bitfinityConnect = async () => {
-    console.log("bitfinityConnect");
     // check if Bitfinity is installed in the browser
-    /* if (window.ic?.infinityWallet === undefined) {
+    if (window.ic?.infinityWallet === undefined) {
       window.open("https://wallet.bitfinity.network/", "_blank");
       return;
-    }; */
+    };
 
     // check if bitfinity is connected
-    console.log("window.ic.infinityWallet", window.ic.infinityWallet);
     const bitfinityConnected = await window.ic?.infinityWallet?.isConnected();
-    console.log("bitfinityConnected", bitfinityConnected);
     if (!bitfinityConnected) {
-      console.log("bitfinity not connected");
       try {
         console.log({
           whitelist,
@@ -313,7 +304,6 @@ export const createStore = ({
           whitelist,
           //host,
         });
-        console.log("bitfinity connected");
       } catch (e) {
         console.warn(e);
         return;
@@ -324,7 +314,6 @@ export const createStore = ({
   };
 
   const initBitfinity = async () => {
-    console.log("initBitfinity");
     // check whether agent is present
     // if not create it
     /* if (!window.ic?.infinityWallet?.agent) {

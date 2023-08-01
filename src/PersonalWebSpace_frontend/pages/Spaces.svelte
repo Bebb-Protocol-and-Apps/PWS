@@ -3,14 +3,8 @@
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
 
   const saveButtonOnClick = async () => {
-    console.log('in addScene saveButton onclick');
     // Get updated scene and write it to backend
-    //console.log('AFRAME', AFRAME);
-    //console.log('AFRAME.INSPECTOR.history.updates', AFRAME.INSPECTOR.history.updates);
-    //console.log('AFRAME.INSPECTOR.scene.toJSON', AFRAME.INSPECTOR.scene.toJSON());
-    //console.log('AFRAME.INSPECTOR.scene.object3D', AFRAME.INSPECTOR.scene.object3D);
     const updatedSceneHtml = getEntityClipboardRepresentation(AFRAME.scenes[0]);
-    console.log('updatedSceneHtml', updatedSceneHtml);
     const respUpper = await fetch("spacesUpperHtml.html");
     const upperHTML = await respUpper.text();
     const respLower = await fetch("spacesLowerHtml.html");
@@ -48,7 +42,6 @@
   };
 
   const loginButtonOnClick = async () => {
-    console.log('in loginButtonOnClick');
     /* await StoicIdentity.load().then(async identity => {
       console.log('in addScene identity');
       console.log(identity);

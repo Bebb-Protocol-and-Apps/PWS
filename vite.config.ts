@@ -6,7 +6,6 @@ import fs from "fs";
 
 const isDev = process.env["DFX_NETWORK"] === "local";
 const networkName = process.env["DFX_NETWORK"] || "local";
-console.log("DFX_NETWORK", process.env["DFX_NETWORK"]);
 
 type Network = "ic" | "development" | "testing" | "local";
 
@@ -67,8 +66,6 @@ const canisterDefinitions = Object.entries(canisterIds).reduce(
   }),
   {},
 );
-
-console.log(canisterDefinitions);
 
 // See guide on how to configure Vite at:
 // https://vitejs.dev/config/

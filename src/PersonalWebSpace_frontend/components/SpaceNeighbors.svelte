@@ -66,12 +66,9 @@
 
 // Owner submitted form to create a new space neighbor
     const submitAddNeighborForm = async () => {
-        console.log("debug submitAddNeighborForm");
         neighborCreationInProgress = true;
         const spaceEntityId = extractSpaceEntityId();
-        console.log("debug spaceEntityId", spaceEntityId);
         if (neighborUrlInputHandler(newNeighborUrl) && spaceEntityId) {
-            console.log("debug newNeighborUrl", newNeighborUrl);
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
             const externalId : [string] = [newNeighborUrl];
             const entityInitiationObject : EntityInitiationObject= {
@@ -95,18 +92,14 @@
             };
             try {
                 const createEntityResponse = await $store.protocolActor.create_entity(entityInitiationObject);
-                console.log("debug createEntityResponse", createEntityResponse);
                 // @ts-ignore
                 if (createEntityResponse && createEntityResponse.Ok) {
                     // @ts-ignore
                     const newNeighborEntityId = createEntityResponse.Ok;
-                    console.log("debug newNeighborEntityId", newNeighborEntityId);
                     bridgeEntityInitiationObject.toEntityId = newNeighborEntityId;
                     const createBridgeResponse = await $store.protocolActor.create_bridge(bridgeEntityInitiationObject);
-                    console.log("debug createBridgeResponse", createBridgeResponse);
                     // @ts-ignore
                     if (createBridgeResponse && createBridgeResponse.Ok) {
-                        console.log("debug createBridgeResponse.Ok", createBridgeResponse.Ok);
                         successfullyAddedNeighbor = true;
                     } else {
                         errorAddingNeighbor = true;
@@ -235,23 +228,19 @@
 
     const loadSpaceNeighbors = async () => {
         const spaceEntityId = extractSpaceEntityId();
-        console.log("debug spaceEntityId", spaceEntityId);
         let spaceNeighborsResponse : EntityAttachedBridgesResult;
         let retrievedNeighborEntities : Entity[] = [];
         try {
             try {
                 spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
-                console.log("debug spaceNeighborsResponse", spaceNeighborsResponse);
             } catch (error) {
                 console.log("Error Getting Bridges", error);
                 return null;                
             };
             // @ts-ignore
             if (spaceNeighborsResponse && spaceNeighborsResponse.Ok && spaceNeighborsResponse.Ok.length > 0) {
-                console.log("debug spaceNeighborsResponse.Ok", spaceNeighborsResponse.Ok);
                 // @ts-ignore
                 const bridgesRetrieved : EntityAttachedBridges = spaceNeighborsResponse.Ok;
-                console.log("debug bridgesRetrieved", bridgesRetrieved);
                 const bridgeIds = [];
                 let getBridgeRequestPromises = [];
                 for (var i = 0; i < bridgesRetrieved.length; i++) {
@@ -261,7 +250,6 @@
                     };
                 };
                 const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
-                console.log("debug getBridgeResponses", getBridgeResponses);
                 let getConnectedEntityRequestPromises = [];
                 for (var j = 0; j < getBridgeResponses.length; j++) {
                     if (getBridgeResponses[j].Err) {
@@ -272,7 +260,6 @@
                     };
                 };
                 const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
-                console.log("debug getConnectedEntityResponses", getConnectedEntityResponses);
                 for (var j = 0; j < getConnectedEntityResponses.length; j++) {
                     if (getConnectedEntityResponses[j].Err) {
                         console.log("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
@@ -282,16 +269,13 @@
                     };
                 };
             };
-            console.log("debug retrievedNeighborEntities", retrievedNeighborEntities);
         } catch(err) {
             console.log("Error getting SpaceNeighbors", err);
             neighborsLoadingError = true;
         };
         loadingInProgress = false;
         neighborEntities = retrievedNeighborEntities;
-        console.log("debug neighborEntities", neighborEntities);
         neighborsLoaded = !neighborsLoadingError;
-        console.log("debug neighborsLoaded", neighborsLoaded);
     };
 
     onMount(loadSpaceNeighbors);
