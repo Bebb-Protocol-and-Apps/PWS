@@ -4,7 +4,7 @@ Process to create another stage:
 Initial reference: https://medium.com/@Catalyze.One/working-with-environments-on-the-internet-computer-59ed3d2a5763
 Go to https://nns.ic0.app/ and log in
 From the burger menu, choose My Canisters
-Click on Create Canister and follow the creation flow (note that you need ICP to pay for the creation and charge the canister with cycles), you may start with 2-3T cycles (and can top up later)
+Click on Create Canister and follow the creation flow (note that you need ICP to pay for the creation and charge the canister with cycles), you may start with 3T cycles (and can top up later)
 Click on the new canister and then on Add Controller
 Go to your local CLI and run: dfx identity get-principal
 Copy the principal returned and paste it into the Add Controller field on the nns app, continue and confirm
