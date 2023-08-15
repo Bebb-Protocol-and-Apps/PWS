@@ -63,6 +63,24 @@ export const initiateCollapsibles = () => {
   };
 };
 
+export const getStringForSpaceWithEnvironment = (envToPreview) => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+      <script src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
+    </head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-entity environment="preset: ${envToPreview}"></a-entity>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
 export const getStringForSpaceFromModel = (modelUrl) => {
   return `<html>
     <head>
