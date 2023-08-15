@@ -152,6 +152,26 @@ export const getStringForSpaceFromVideoFile = (videoUrl) => {
   </html>`;
 };
 
+export const getStringForSpaceFrom360VideoFile = (videoUrl) => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <video id="360videoToPreview" autoplay loop="true" src="${videoUrl}"></video>
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-videosphere src="#360videoToPreview" rotation="0 -130 0"></a-videosphere>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
 export const getStringForSpaceFromImageFile = (imageUrl) => {
   return `<html>
     <head>
@@ -172,6 +192,26 @@ export const getStringForSpaceFromImageFile = (imageUrl) => {
         <a-sky color="#ECECEC"></a-sky>
 
         <a-image src="#imageToPreview" position="0 1.6 -3"></a-image>
+      </a-scene>
+    </body>
+  </html>`;
+};
+
+export const getStringForSpaceFrom360ImageFile = (imageUrl) => {
+  return `<html>
+    <head>
+      <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    </head>
+    <body>
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+        <a-assets>
+          <img crossorigin="anonymous" id="skyTexture" src="${imageUrl}">
+        </a-assets>
+
+        <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
+        <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
+
+        <a-sky src="#skyTexture" rotation="0 -130 0"></a-sky>
       </a-scene>
     </body>
   </html>`;

@@ -305,6 +305,7 @@
   // Upload model file
   let openUploadModelFilePopup = false;
   let files;
+  let is360Degree = false; // This will store the state of the checkbox
   let userUploadedFileURL;
   let fileSizeToUpload;
   let fileSizeUploadLimit = 2000000; // 2 MB
@@ -542,6 +543,8 @@
             console.error("File Upload Error:", fileUploadResult);
           };
         } else if (sourceType === "UserUploadedMediaContent") {
+          // Capture 360-degree toggle
+          const set360DegreeContent = is360Degree ? true : false;
           // Store file for user
           const arrayBuffer = await files[0].arrayBuffer();
           const uint8Array = new Uint8Array(arrayBuffer);
@@ -570,11 +573,25 @@
                 var assets = document.querySelector('a-assets');
                 assets.appendChild(newImageAsset);
                 function loaded() {
-                  contentEntity = scene.ownerDocument.createElement('a-image');
-                  contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('position', '0 3 -6');
-                  contentEntity.setAttribute('id', 'userUploadedImage_' + fileUploadResult.Ok.FileId);
-                  scene.appendChild(contentEntity);
+                  // Determine whether the image is 360 degree and set the appropriate attribute
+                  if (set360DegreeContent) {
+                    contentEntity = scene.ownerDocument.createElement('a-sky');
+                    contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('id', 'userUploaded360Image_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('rotation', '0 -130 0');
+                    const existingSky = scene.querySelector('a-sky');
+                    if (existingSky) {
+                      scene.replaceChild(contentEntity, existingSky);
+                    } else {
+                      scene.appendChild(contentEntity);
+                    };
+                  } else {
+                    contentEntity = scene.ownerDocument.createElement('a-image');
+                    contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('position', '0 3 -6');
+                    contentEntity.setAttribute('id', 'userUploadedImage_' + fileUploadResult.Ok.FileId);
+                    scene.appendChild(contentEntity);
+                  };
                 };
                 newImageAsset.addEventListener('load', loaded);
               } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
@@ -587,12 +604,26 @@
                 var assets = document.querySelector('a-assets');
                 assets.appendChild(newVideoAsset);
                 function loaded() {
-                  contentEntity = scene.ownerDocument.createElement('a-video');
-                  contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('position', '0 3 -6');
-                  contentEntity.setAttribute('id', 'userUploadedVideo_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
-                  scene.appendChild(contentEntity);
+                  // Determine whether the video is 360 degree and set the appropriate attribute
+                  if (set360DegreeContent) {
+                    contentEntity = scene.ownerDocument.createElement('a-videosphere');
+                    contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('id', 'userUploaded360Video_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('rotation', '0 -130 0');
+                    const existingVideosphere  = scene.querySelector('a-videosphere');
+                    if (existingVideosphere) {
+                      scene.replaceChild(contentEntity, existingVideosphere);
+                    } else {
+                      scene.appendChild(contentEntity);
+                    };
+                  } else {
+                    contentEntity = scene.ownerDocument.createElement('a-video');
+                    contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('position', '0 3 -6');
+                    contentEntity.setAttribute('id', 'userUploadedVideo_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
+                    scene.appendChild(contentEntity);
+                  };
                 };
                 newVideoAsset.addEventListener('loadeddata', loaded);
               } else {
@@ -1373,6 +1404,11 @@
             <!-- Edit Button may only be displayed if logged-in user is space's owner -->
             {#if isViewerSpaceOwner()}
               <h3 class="text-l font-semibold">Upload an Image or Video</h3>
+              <!-- 360-degree toggle -->
+              <div class="py-2">
+                <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
+                <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
+              </div>
               <form on:submit|preventDefault={() => createNewItemInSpace("UserUploadedMediaContent")}>
                 <label for="userUploadedFileInput" class="text-base">Select the file from your device:</label>
                 <input
@@ -1385,7 +1421,9 @@
                 {#if files}
                   {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
                     {#if userFileInputHandler(files)}
-                      <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files}/>
+                      {#key is360Degree} 
+                        <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
+                      {/key}
                       {#if isFileUploadInProgress}
                         <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
                         <p id='fileUploadSubtext'>{inProgressSubtext}</p>
