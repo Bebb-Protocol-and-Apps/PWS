@@ -20,6 +20,7 @@
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import type { Entity, EntityAttachedBridgesResult, Bridge } from "src/integrations/BebbProtocol/bebb.did";
@@ -345,7 +346,7 @@
         console.error(e);
         return false;
       }
-    } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.svg')) {
+    } else if (supportedImageExtensions.some(ext => fileName.endsWith(ext))) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
         fileSizeToUpload = userFile.size;
@@ -354,7 +355,7 @@
         console.error(e);
         return false;
       }
-    } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
+    } else if (supportedVideoExtensions.some(ext => fileName.endsWith(ext))) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
         fileSizeToUpload = userFile.size;
@@ -364,7 +365,7 @@
         return false;
       }
     } else {
-      console.log('The uploaded file is not a .glb file.');
+      console.log('The uploaded file is not a supported file.');
       return false;
     }
   };

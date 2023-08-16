@@ -6,11 +6,13 @@
   import Footer from "../components/Footer.svelte";
   import GlbModelPreview from "../components/GlbModelPreview.svelte";
 
-  import { getStringForSpaceFromModel } from "../helpers/space_helpers";
+  import { getStringForSpaceFromMediaFile, getStringForSpaceFromModel } from "../helpers/space_helpers";
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
 
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
+    import MediaContentPreview from "../components/MediaContentPreview.svelte";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -57,10 +59,14 @@
 
   let files;
   let userUploadedFileURL;
+  let fileType;
   let fileSizeToUpload;
   let fileSizeUploadLimit = 2000000; // 2 MB
+  
+  const supportedMediaExtensions = supportedVideoExtensions.concat(supportedImageExtensions);
+  let is360Degree = false;
 
-  const userFileInputHandler = function(userFiles = files) {
+  const userFileInputHandler = function(userFiles = files, preCreation=false) {
     if (!userFiles || userFiles.length === 0) {
       return false;
     };
@@ -68,16 +74,24 @@
     let fileName = userFile.name; // get the name of the file
     if (fileName.endsWith('.glb')) {
       try {
+        fileType = "glbModel";
         userUploadedFileURL = URL.createObjectURL(userFile);
         fileSizeToUpload = userFile.size;
-        addUserFileToScene(files);
+        if (!preCreation) {
+          addUserFileToScene(files);
+        };
         return true;
       } catch (e) {
         console.error(e);
         return false;
       }
+    } else if (supportedMediaExtensions.some(ext => fileName.endsWith(ext))) {
+      fileType = "mediaContent";
+      userUploadedFileURL = URL.createObjectURL(userFile);
+      fileSizeToUpload = userFile.size;
+      return true;
     } else {
-      console.log('The uploaded file is not a .glb file.');
+      console.log('The uploaded file is not a supported file.');
       return false;
     }
   };
@@ -137,7 +151,9 @@
   const createSpace = async (spaceHtml) => {
     try {
       const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
+      // @ts-ignore
       if (spaceResponse && spaceResponse.Ok) {
+        // @ts-ignore
         const spaceId = spaceResponse.Ok.id;
         setSpaceWasCreated();
         // Protocol integration: create Space as Entity in Protocol
@@ -151,8 +167,11 @@
           entitySpecificFields: [externalId],
         };
         const spaceEntityIdResponse = await $store.protocolActor.create_entity(entityInitiationObject);
+        // @ts-ignore
         if (spaceEntityIdResponse && spaceEntityIdResponse.Ok) {
+          // @ts-ignore
           const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse.Ok);
+          // @ts-ignore
           if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
             console.error("Update Space Error:", spaceEntityIdUpdateResponse);
           };
@@ -168,13 +187,13 @@
   };
 
   const createNewUserSpaceFromModel = async (modelType) => {
-    setCreationInProgress(modelType);
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
+      setCreationInProgress(modelType);
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
       await createSpace(spaceHtml);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
-    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
       // Store file for user
       const arrayBuffer = await files[0].arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
@@ -190,6 +209,35 @@
           ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
           : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
         const spaceHtml = getStringForSpaceFromModel(url);
+        await createSpace(spaceHtml);
+      } else {
+        console.error("File Upload Error:", fileUploadResult);
+      };
+    };
+  };
+
+  const createNewUserSpaceFromFile = async () => {
+    setCreationInProgress("UserUploadedFile");
+    if (fileType === "glbModel") {
+      await createNewUserSpaceFromModel("UserUploadedGlbModel")
+    };
+    // Upload the user's file to the backend canister and create a new space for the user including the uploaded file
+    if (fileType === "mediaContent" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+      // Store file for user
+      const arrayBuffer = await files[0].arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      let fileUploadResult;
+      try {
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray);
+      } catch (error) {
+        console.error("File Upload Error:", error);
+      };
+      if (fileUploadResult.Ok) {
+        const url = process.env.DFX_NETWORK === "local"
+          ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+        const spaceHtml = getStringForSpaceFromMediaFile(url, files[0].name, is360Degree);
         await createSpace(spaceHtml);
       } else {
         console.error("File Upload Error:", fileUploadResult);
@@ -304,12 +352,14 @@
       <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
     {/if}
   {/if}
-  <!-- From Model -->
-  <h3 class=" text-xl font-semibold">Create Your Space From an Existing Model:</h3>
-  <!-- User-Uploaded GLB Model File -->
-  <h3 class="text-l font-semibold">Upload a GLB Model File</h3>
-  <form on:submit|preventDefault={() => createNewUserSpaceFromModel("UserUploadedGlbModel")}>
-    <label for="userUploadedFileInput">Select a glb file from your device:</label>
+  <!-- From File -->
+  <h3 class=" text-xl font-semibold">Create Your Space With an Uploaded Item:</h3>
+  <!-- User-Uploaded File -->
+  <h3 class="text-l font-semibold">Upload a File</h3>
+  <p class="text-l">It can be a 3D model, image or video (incl. 360-degree).</p>
+  <p class="text-l">Supported File Types: .glb, .gltf, .mp4, .mov, .jpg, .jpeg, .png, .svg, .gif</p>
+  <form on:submit|preventDefault={() => createNewUserSpaceFromFile()}>
+    <label for="userUploadedFileInput">Select a file from your device:</label>
     <input
       bind:files
       id="userUploadedFileInput"
@@ -318,37 +368,50 @@
     />
     {#if files}
       {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-        <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
         {#if userFileInputHandler(files)}
+          {#if fileType === "glbModel"}
+            <!-- User-Uploaded GLB Model File -->
+            <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+          {:else if fileType === "mediaContent"}
+            <!-- User-Uploaded Image or Video File -->
+            <!-- 360-degree toggle -->
+            <div class="py-2">
+              <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
+              <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
+            </div>
+            {#key is360Degree}
+              <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
+            {/key}
+          {/if}
           {#if !$store.isAuthed}
             <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-            <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>
+            <p id='createSubtextUserUploadedFile'>{loginSubtext}</p>
           {:else}
             {#if isSpaceCreationInProgress}
               <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-              {#if spaceToCreate === "UserUploadedGlbModel"}
-                <p id='createSubtextUserUploadedGlbModel'>{inProgressSubtext}</p>
+              {#if spaceToCreate === "UserUploadedFile"}
+                <p id='createSubtextUserUploadedFile'>{inProgressSubtext}</p>
               {/if}
             {:else if wasSpaceCreatedSuccessfully}
               <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-              {#if spaceToCreate === "UserUploadedGlbModel"}
-                <p id='createSubtextUserUploadedGlbModel'>{createdSubtext}</p>
+              {#if spaceToCreate === "UserUploadedFile"}
+                <p id='createSubtextUserUploadedFile'>{createdSubtext}</p>
               {:else}
-                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
               {/if}
             {:else}
               {#if fileSizeToUpload <= fileSizeUploadLimit}
                 <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-                <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
+                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
               {:else}
                 <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-                <p id='createSubtextUserUploadedGlbModel'>{fileTooBigText}</p>
+                <p id='createSubtextUserUploadedFile'>{fileTooBigText}</p>
               {/if}
             {/if}  
           {/if}
         {:else}
           <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
+          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid File (with a supported file type).</h3>
         {/if}
       {/key}
     {/if}

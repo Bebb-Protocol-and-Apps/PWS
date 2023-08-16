@@ -1,4 +1,5 @@
 import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
+import { supportedImageExtensions, supportedVideoExtensions } from "./utils";
 
 export const formatUserSpaces = (userSpaces) => {
   // transform userSpaces list to string holding HTML ready to be displayed  
@@ -215,6 +216,24 @@ export const getStringForSpaceFrom360ImageFile = (imageUrl) => {
       </a-scene>
     </body>
   </html>`;
+};
+
+export const getStringForSpaceFromMediaFile = (mediaUrl, fileName, is360Degree) => {
+  if (supportedImageExtensions.some(ext => fileName.endsWith(ext))) {
+    if (is360Degree) {
+      return getStringForSpaceFrom360ImageFile(mediaUrl);
+    } else {
+      return getStringForSpaceFromImageFile(mediaUrl);
+    };
+  } else if (supportedVideoExtensions.some(ext => fileName.endsWith(ext))) {
+    if (is360Degree) {
+      return getStringForSpaceFrom360VideoFile(mediaUrl);
+    } else {
+      return getStringForSpaceFromVideoFile(mediaUrl);
+    };
+  } else {
+    return getStringForSpaceFromImageFile(mediaUrl);    
+  }
 };
 
 // Extract metadata fields from Space NFT
