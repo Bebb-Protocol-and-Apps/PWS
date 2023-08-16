@@ -282,30 +282,6 @@
   <!-- Default Spaces -->
   <h3 class="text-xl font-semibold">Spaces Ready For You:</h3>
   <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
-  <!-- Default Space 0 -->
-  <h3 class="text-l font-semibold">Your Web Space Station</h3>
-  <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault0'>{loginSubtext}</p>
-  {:else}
-    {#if isSpaceCreationInProgress}
-      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{inProgressSubtext}</p>
-      {/if}
-    {:else if wasSpaceCreatedSuccessfully}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{createdSubtext}</p>
-      {:else}
-        <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-      {/if}
-    {:else}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-    {/if}
-  {/if}
   <!-- Default Space 1 -->
   <h3 class="text-l font-semibold">Your Nature Retreat</h3>
   <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
@@ -352,6 +328,30 @@
     {:else}
       <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/2")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
       <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
+    {/if}
+  {/if}
+  <!-- Default Space 0 -->
+  <h3 class="text-l font-semibold">Your Web Space Station</h3>
+  <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  {#if !$store.isAuthed}
+    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+    <p id='createSubtextDefault0'>{loginSubtext}</p>
+  {:else}
+    {#if isSpaceCreationInProgress}
+      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/0"}
+        <p id='createSubtextDefault0'>{inProgressSubtext}</p>
+      {/if}
+    {:else if wasSpaceCreatedSuccessfully}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/0"}
+        <p id='createSubtextDefault0'>{createdSubtext}</p>
+      {:else}
+        <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
+      {/if}
+    {:else}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
     {/if}
   {/if}
   <!-- From File -->
