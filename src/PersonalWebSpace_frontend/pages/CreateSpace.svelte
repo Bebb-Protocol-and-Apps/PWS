@@ -115,6 +115,7 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
+            modelEntity.setAttribute('animation-mixer', true);
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
             } else {
@@ -126,6 +127,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
+              modelEntity.setAttribute('animation-mixer', true);
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
               } else {

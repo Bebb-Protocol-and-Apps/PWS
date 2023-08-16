@@ -295,6 +295,7 @@
         modelEntity.setAttribute('gltf-model', `url(${userSelectedLibraryItemURL})`);
         modelEntity.setAttribute('position', '0 3 -6');
         modelEntity.setAttribute('id', 'userAddedLibraryItem_' + Math.random().toString(36).substr(2, 9));
+        modelEntity.setAttribute('animation-mixer', true);
         scene.appendChild(modelEntity);
       } catch (error) {
         console.error("Adding Library Item to Space Error:", error);
@@ -455,6 +456,7 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
+            modelEntity.setAttribute('animation-mixer', true);
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
             } else {
@@ -466,6 +468,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
+              modelEntity.setAttribute('animation-mixer', true);
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
               } else {
@@ -536,6 +539,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
+              modelEntity.setAttribute('animation-mixer', true);
               scene.appendChild(modelEntity);
             } catch (error) {
               console.error("Adding Uploaded Model to Space Error:", error);
