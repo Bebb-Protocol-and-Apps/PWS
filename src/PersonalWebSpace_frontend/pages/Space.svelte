@@ -366,7 +366,7 @@
         return false;
       }
     } else {
-      console.log('The uploaded file is not a supported file.');
+      console.error('The uploaded file is not a supported file.');
       return false;
     }
   };
@@ -634,7 +634,7 @@
                 };
                 newVideoAsset.addEventListener('loadeddata', loaded);
               } else {
-                console.log('The uploaded file type is not supported.');
+                console.error('The uploaded file type is not supported.');
                 return false;
               };
             } catch (error) {
@@ -1111,7 +1111,7 @@
       try {
           spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
       } catch (error) {
-          console.log("Error Getting Bridges", error);
+          console.error("Error Getting Bridges", error);
           return null;                
       };
       // @ts-ignore
@@ -1130,7 +1130,7 @@
         let getConnectedEntityRequestPromises = [];
         for (var j = 0; j < getBridgeResponses.length; j++) {
             if (getBridgeResponses[j].Err) {
-                console.log("Error retrieving Bridge", getBridgeResponses[j].Err);
+                console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
             } else {
                 const bridge : Bridge = getBridgeResponses[j].Ok;
                 getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
@@ -1139,7 +1139,7 @@
         const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
         for (var j = 0; j < getConnectedEntityResponses.length; j++) {
             if (getConnectedEntityResponses[j].Err) {
-                console.log("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
+                console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
             } else {
                 const connectedEntity : Entity = getConnectedEntityResponses[j].Ok;
                 retrievedNeighborEntities.push(connectedEntity);
@@ -1147,7 +1147,7 @@
         };
       };
     } catch(err) {
-        console.log("Error getting SpaceNeighbors", err);
+        console.error("Error getting SpaceNeighbors", err);
     };
 
     // Only load Neighbors if they haven't been loaded yet or reload if new Neighbors have been added

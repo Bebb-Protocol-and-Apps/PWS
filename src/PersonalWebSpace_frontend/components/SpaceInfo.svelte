@@ -34,7 +34,7 @@
             // @ts-ignore
             await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
         } catch (error) {
-            console.log("Error in updateUserSpace", error);                        
+            console.error("Error in updateUserSpace", error);                        
         }
         spaceInfoUpdateInProgress = false;
     };

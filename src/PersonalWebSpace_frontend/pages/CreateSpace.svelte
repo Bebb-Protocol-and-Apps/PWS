@@ -91,7 +91,7 @@
       fileSizeToUpload = userFile.size;
       return true;
     } else {
-      console.log('The uploaded file is not a supported file.');
+      console.error('The uploaded file is not a supported file.');
       return false;
     }
   };
