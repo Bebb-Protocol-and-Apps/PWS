@@ -610,6 +610,8 @@
                     contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
                     contentEntity.setAttribute('id', 'userUploaded360Video_' + fileUploadResult.Ok.FileId);
                     contentEntity.setAttribute('rotation', '0 -130 0');
+                    contentEntity.setAttribute('autoplay', true);
+                    contentEntity.setAttribute('loop', true);
                     const existingVideosphere  = scene.querySelector('a-videosphere');
                     if (existingVideosphere) {
                       scene.replaceChild(contentEntity, existingVideosphere);
