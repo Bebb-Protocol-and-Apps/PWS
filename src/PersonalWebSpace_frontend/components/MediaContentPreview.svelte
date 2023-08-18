@@ -1,30 +1,39 @@
 <script>
-  import { getStringForSpaceFromImageFile, getStringForSpaceFromVideoFile } from "../helpers/space_helpers";
+  import {
+    getStringForSpaceFrom360ImageFile,
+    getStringForSpaceFrom360VideoFile,
+    getStringForSpaceFromImageFile,
+    getStringForSpaceFromVideoFile
+  } from "../helpers/space_helpers";
+
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
 
   export let contentUrl;
   export let contentFiles;
+  export let is360Degree = false;
   contentFiles = contentFiles;
 
 // Note: HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
-  let mediaContentPreviewString
-  if (contentFiles[0].name.endsWith('.jpg')) {
+  const imageExtensions = supportedImageExtensions;
+  const videoExtensions = supportedVideoExtensions;
+
+  const fileName = contentFiles[0].name;
+  const isImage = imageExtensions.some(ext => fileName.endsWith(ext));
+  const isVideo = videoExtensions.some(ext => fileName.endsWith(ext));
+  
+  let mediaContentPreviewString;
+  if (isImage && is360Degree) {
+    mediaContentPreviewString = getStringForSpaceFrom360ImageFile(contentUrl);
+  } else if (isImage) {
     mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
-  } else if (contentFiles[0].name.endsWith('.jpeg')) {
-    mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
-  } else if (contentFiles[0].name.endsWith('.png')) {
-    mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
-  } else if (contentFiles[0].name.endsWith('.gif')) {
-    mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
-  } else if (contentFiles[0].name.endsWith('.svg')) {
-    mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
-  } // Video file
-  else if (contentFiles[0].name.endsWith('.mp4')) {
-    mediaContentPreviewString = getStringForSpaceFromVideoFile(contentUrl);
-  } else if (contentFiles[0].name.endsWith('.mov')) {
+  } else if (isVideo && is360Degree) {
+    mediaContentPreviewString = getStringForSpaceFrom360VideoFile(contentUrl);
+  } else if (isVideo) {
     mediaContentPreviewString = getStringForSpaceFromVideoFile(contentUrl);
   } else {
-    mediaContentPreviewString = getStringForSpaceFromVideoFile(contentUrl);
+    mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
   };
+
 </script>
 <div class="media-content-space-preview space-y-1">
   <iframe srcdoc={mediaContentPreviewString} title="Preview of the File's Content" width="100%" height="auto" class="py-2"></iframe>

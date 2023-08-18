@@ -4,9 +4,10 @@ import path from "path";
 import dfxJson from "./dfx.json";
 import fs from "fs";
 
-const isDev = process.env["DFX_NETWORK"] !== "ic";
+const isDev = process.env["DFX_NETWORK"] === "local";
+const networkName = process.env["DFX_NETWORK"] || "local";
 
-type Network = "ic" | "local";
+type Network = "ic" | "development" | "testing" | "local";
 
 interface CanisterIds {
   [key: string]: { [key in Network]: string };
@@ -30,7 +31,7 @@ try {
 const aliases = Object.entries(dfxJson.canisters || {}).reduce(
   (acc, [name, _value]) => {
     // Get the network name, or `local` by default.
-    const networkName = process.env["DFX_NETWORK"] || "local";
+    //const networkName = process.env["DFX_NETWORK"] || "local";
     /* const outputRoot = path.join(
       __dirname,
       ".dfx",
@@ -58,14 +59,13 @@ const aliases = Object.entries(dfxJson.canisters || {}).reduce(
 const canisterDefinitions = Object.entries(canisterIds).reduce(
   (acc, [key, val]) => ({
     ...acc,
-    [`process.env.${key.toUpperCase()}_CANISTER_ID`]: isDev
+    /* [`process.env.${key.toUpperCase()}_CANISTER_ID`]: isDev
       ? JSON.stringify(val.local)
-      : JSON.stringify(val.ic),
+      : JSON.stringify(val.ic), */
+    [`process.env.${key.toUpperCase()}_CANISTER_ID`]: JSON.stringify(val[networkName]),
   }),
   {},
 );
-
-console.log(canisterDefinitions);
 
 // See guide on how to configure Vite at:
 // https://vitejs.dev/config/
@@ -104,9 +104,10 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(
       isDev ? "development" : "production",
     ),
-    "process.env.DFX_NETWORK": JSON.stringify(
+    /* "process.env.DFX_NETWORK": JSON.stringify(
       isDev ? "local" : "ic",
-    ),
+    ), */
+    "process.env.DFX_NETWORK": JSON.stringify(process.env["DFX_NETWORK"]),
     global: process.env.NODE_ENV === "development" ? "globalThis" : "global",
   },
 });

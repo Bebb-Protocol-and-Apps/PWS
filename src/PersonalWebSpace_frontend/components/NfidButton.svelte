@@ -2,26 +2,28 @@
   import { onMount } from "svelte";
   import { store } from "../store";
 
+  import { AuthClient } from "@dfinity/auth-client";
+
   import spinner from "../assets/loading.gif";
   import Button from "./Button.svelte";
 
   export let loading;
   export let toggleModal;
-
+  
   onMount(async () => {
-    const connected = await window.ic?.plug?.isConnected();
-    if (connected) {
-      console.log("plug connection detected");
-      store.plugConnect();
-    }
+    const authClient = await AuthClient.create();
+    if (await authClient.isAuthenticated()) {
+      console.log("NFID connection detected");
+      store.nfidConnect();
+    };
   });
 
   async function connect() {
-    loading = "plug";
-    await store.plugConnect();
+    loading = "nfid";
+    store.nfidConnect();
     loading = "";
     toggleModal();
-  }
+  };
 </script>
 
 <Button
@@ -29,9 +31,9 @@
   disabled={loading}
   style={"lg:h-16 2xl:h-20 lg:rounded-[55px]"}
 >
-  {#if loading === "plug"}
+  {#if loading === "nfid"}
     <img class="h-6 block" src={spinner} alt="loading animation" />
   {:else}
-    Plug
+    NFID (incl. Google, MetaMask, WalletConnect, passkey)
   {/if}
 </Button>

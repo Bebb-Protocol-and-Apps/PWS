@@ -116,6 +116,7 @@ export interface PersonalWebSpace {
     [Principal, Principal, TokenId],
     TxReceipt
   >,
+  'updateSpaceEntityId' : ActorMethod<[TokenId, string], NftResult>,
   'updateUserSpace' : ActorMethod<[UpdateMetadataValuesInput], NftResult>,
   'uploadUserFile' : ActorMethod<[string, File], FileResult>,
 }

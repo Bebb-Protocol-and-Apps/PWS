@@ -1,14 +1,18 @@
 <script lang="ts">
-  import { store } from "../store";
+  import { store, appDomain } from "../store";
   import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
   import GlbModelPreview from "../components/GlbModelPreview.svelte";
 
-  import { getStringForSpaceFromModel } from "../helpers/space_helpers";
+  import { getStringForSpaceFromMediaFile, getStringForSpaceFromModel } from "../helpers/space_helpers";
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
 
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
+  import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
+  import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
+    import MediaContentPreview from "../components/MediaContentPreview.svelte";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -18,44 +22,51 @@
   const clickFromModelSubtext = "Click and we'll generate this Space from the provided model for you. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!";
   const inProgressSubtext = "Creating your Personal Web Space, just a moment...";
   const createdSubtext = "Ohh yeah, you just got yourself a new Personal Web Space! You can see it on the My Spaces tab.";
+  const fileTooBigText = "Hmm, this file is too big. Please select a file smaller than 2 MB.";
 
 // Manage status of creation to show buttons and subtexts appropriately
   let isSpaceCreationInProgress = false;
   let spaceToCreate = "";
   let wasSpaceCreatedSuccessfully = false;
 
-  const setCreationInProgress = async (space) => {
+  const setCreationInProgress = (space) => {
     isSpaceCreationInProgress = true;
     spaceToCreate = space;
   };
 
-  const setSpaceWasCreated = async () => {
+  const setSpaceWasCreated = () => {
     isSpaceCreationInProgress = false;
     wasSpaceCreatedSuccessfully = true;
   };
 
   const createNewDefaultUserSpace = async (defaultSpace) => {
-    await setCreationInProgress(defaultSpace);
+    setCreationInProgress(defaultSpace);
     if (defaultSpace === "defaultspace/0") {
       const resp = await fetch("defaultRoom_Web3Cockpit.html"); // Fetches default space 0
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     } else if (defaultSpace === "defaultspace/1") {
       const resp = await fetch("defaultRoom_NatureRetreat.html"); // Fetches default space 1
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     } else if (defaultSpace === "defaultspace/2") {
       const resp = await fetch("defaultRoom_InternetIsland.html"); // Fetches default space 2
       const defaultSpaceHtml = await resp.text();
-      const space = await $store.backendActor.createSpace(defaultSpaceHtml);
+      await createSpace(defaultSpaceHtml);
     };
-    await setSpaceWasCreated();
+    setSpaceWasCreated();
   };
 
   let files;
   let userUploadedFileURL;
+  let fileType;
+  let fileSizeToUpload;
+  let fileSizeUploadLimit = 2000000; // 2 MB
+  
+  const supportedMediaExtensions = supportedVideoExtensions.concat(supportedImageExtensions);
+  let is360Degree = false;
 
-  const userFileInputHandler = function(userFiles = files) {
+  const userFileInputHandler = function(userFiles = files, preCreation=false) {
     if (!userFiles || userFiles.length === 0) {
       return false;
     };
@@ -63,15 +74,24 @@
     let fileName = userFile.name; // get the name of the file
     if (fileName.endsWith('.glb')) {
       try {
+        fileType = "glbModel";
         userUploadedFileURL = URL.createObjectURL(userFile);
-        addUserFileToScene(files);
+        fileSizeToUpload = userFile.size;
+        if (!preCreation) {
+          addUserFileToScene(files);
+        };
         return true;
       } catch (e) {
         console.error(e);
         return false;
       }
+    } else if (supportedMediaExtensions.some(ext => fileName.endsWith(ext))) {
+      fileType = "mediaContent";
+      userUploadedFileURL = URL.createObjectURL(userFile);
+      fileSizeToUpload = userFile.size;
+      return true;
     } else {
-      console.log('The uploaded file is not a .glb file.');
+      console.error('The uploaded file is not a supported file.');
       return false;
     }
   };
@@ -81,7 +101,6 @@
     if (userFile) {
       var fileURL = URL.createObjectURL(userFile);
       // create a new A-Frame entity for the GLB model
-      //var modelEntity = document.createElement('a-entity');
       // First, get the iframe element
       let iframe = document.querySelector('.glb-model-space-preview iframe');
       if (iframe) {
@@ -96,8 +115,11 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
+            modelEntity.setAttribute('animation-mixer', true);
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
+            } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
             }
           } else {
             aScene.addEventListener('loaded', function () {
@@ -105,9 +127,12 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
+              modelEntity.setAttribute('animation-mixer', true);
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
-              }
+              } else {
+              aScene.replaceChild(modelEntity, aScene.querySelector('#modelFromUserFile'));
+            }
             });
           }
         } else {
@@ -125,52 +150,101 @@
     }
   };
 
+  const createSpace = async (spaceHtml) => {
+    try {
+      const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
+      // @ts-ignore
+      if (spaceResponse && spaceResponse.Ok) {
+        // @ts-ignore
+        const spaceId = spaceResponse.Ok.id;
+        setSpaceWasCreated();
+        // Protocol integration: create Space as Entity in Protocol
+        const externalId = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
+        let entityInitiationObject : EntityInitiationObject = {
+          settings: [],
+          entityType: { 'Resource' : { 'Web' : null } },
+          name: ["Personal Web Space"],
+          description: ["Flaming Hot Personal Web Space"],
+          keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
+          entitySpecificFields: [externalId],
+        };
+        const spaceEntityIdResponse = await $store.protocolActor.create_entity(entityInitiationObject);
+        // @ts-ignore
+        if (spaceEntityIdResponse && spaceEntityIdResponse.Ok) {
+          // @ts-ignore
+          const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse.Ok);
+          // @ts-ignore
+          if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
+            console.error("Update Space Error:", spaceEntityIdUpdateResponse);
+          };
+        } else {
+          console.error("Create Entity Error:", spaceEntityIdResponse);
+        };              
+      } else {
+        console.error("Create Space Error:", spaceResponse);
+      };
+    } catch (error) {
+      console.error("Create Space Error:", error);
+    };
+  };
+
   const createNewUserSpaceFromModel = async (modelType) => {
-    await setCreationInProgress(modelType);
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
+      setCreationInProgress(modelType);
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
-      const space = await $store.backendActor.createSpace(spaceHtml);
+      await createSpace(spaceHtml);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
-    if (modelType === "UserUploadedGlbModel" && userFileInputHandler()) {
+    if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
       // Store file for user
-      console.log(`${files[0].name}: ${files[0].size} bytes`);
       const arrayBuffer = await files[0].arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       const byteArray = Array.from(uint8Array);
-      console.log(byteArray);
       let fileUploadResult;
       try {
-        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
-        console.log("fileUploadResult ", fileUploadResult);
-        console.log("fileUploadResult Ok", fileUploadResult.Ok);
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray);
       } catch (error) {
         console.error("File Upload Error:", error);
       };
       if (fileUploadResult.Ok) {
-        console.log("fileUploadResult Ok[0]", fileUploadResult.Ok.FileId);
-        //const blob = new Blob([uint8Array], { type: "application/octet-stream" });
-        
-        console.log(process.env.DFX_NETWORK);
-        console.log("backendCanisterId ", backendCanisterId);
-        console.log(process.env.DFX_NETWORK === "ic");
-        const url = process.env.DFX_NETWORK === "ic"
-          ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
-          : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
-        console.log("url ", url);
+        const url = process.env.DFX_NETWORK === "local"
+          ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
         const spaceHtml = getStringForSpaceFromModel(url);
-        try {
-          const space = await $store.backendActor.createSpace(spaceHtml);
-          console.log("space ", space);
-        } catch (error) {
-          console.error("Create Space Error:", error);
-        };
+        await createSpace(spaceHtml);
       } else {
         console.error("File Upload Error:", fileUploadResult);
       };
     };
+  };
 
-    await setSpaceWasCreated();
+  const createNewUserSpaceFromFile = async () => {
+    setCreationInProgress("UserUploadedFile");
+    if (fileType === "glbModel") {
+      await createNewUserSpaceFromModel("UserUploadedGlbModel")
+    };
+    // Upload the user's file to the backend canister and create a new space for the user including the uploaded file
+    if (fileType === "mediaContent" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
+      // Store file for user
+      const arrayBuffer = await files[0].arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(uint8Array);
+      let fileUploadResult;
+      try {
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray);
+      } catch (error) {
+        console.error("File Upload Error:", error);
+      };
+      if (fileUploadResult.Ok) {
+        const url = process.env.DFX_NETWORK === "local"
+          ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+        const spaceHtml = getStringForSpaceFromMediaFile(url, files[0].name, is360Degree);
+        await createSpace(spaceHtml);
+      } else {
+        console.error("File Upload Error:", fileUploadResult);
+      };
+    };
   };
 
 // Helper functions to check whether a valid URL was provided in the form
@@ -208,30 +282,6 @@
   <!-- Default Spaces -->
   <h3 class="text-xl font-semibold">Spaces Ready For You:</h3>
   <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
-  <!-- Default Space 0 -->
-  <h3 class="text-l font-semibold">Your Web Space Station</h3>
-  <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault0'>{loginSubtext}</p>
-  {:else}
-    {#if isSpaceCreationInProgress}
-      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{inProgressSubtext}</p>
-      {/if}
-    {:else if wasSpaceCreatedSuccessfully}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{createdSubtext}</p>
-      {:else}
-        <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-      {/if}
-    {:else}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-    {/if}
-  {/if}
   <!-- Default Space 1 -->
   <h3 class="text-l font-semibold">Your Nature Retreat</h3>
   <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
@@ -280,12 +330,38 @@
       <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
     {/if}
   {/if}
-  <!-- From Model -->
-  <h3 class=" text-xl font-semibold">Create Your Space From an Existing Model:</h3>
-  <!-- User-Uploaded GLB Model File -->
-  <h3 class="text-l font-semibold">Upload a GLB Model File</h3>
-  <form on:submit|preventDefault={() => createNewUserSpaceFromModel("UserUploadedGlbModel")}>
-    <label for="userUploadedFileInput">Select a glb file from your device:</label>
+  <!-- Default Space 0 -->
+  <h3 class="text-l font-semibold">Your Web Space Station</h3>
+  <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  {#if !$store.isAuthed}
+    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+    <p id='createSubtextDefault0'>{loginSubtext}</p>
+  {:else}
+    {#if isSpaceCreationInProgress}
+      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/0"}
+        <p id='createSubtextDefault0'>{inProgressSubtext}</p>
+      {/if}
+    {:else if wasSpaceCreatedSuccessfully}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      {#if spaceToCreate === "defaultspace/0"}
+        <p id='createSubtextDefault0'>{createdSubtext}</p>
+      {:else}
+        <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
+      {/if}
+    {:else}
+      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+      <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
+    {/if}
+  {/if}
+  <!-- From File -->
+  <h3 class=" text-xl font-semibold">Create Your Space With an Uploaded Item:</h3>
+  <!-- User-Uploaded File -->
+  <h3 class="text-l font-semibold">Upload a File</h3>
+  <p class="text-l">It can be a 3D model, image or video (incl. 360-degree).</p>
+  <p class="text-l">Supported File Types: .glb, .gltf, .mp4, .mov, .jpg, .jpeg, .png, .svg, .gif</p>
+  <form on:submit|preventDefault={() => createNewUserSpaceFromFile()}>
+    <label for="userUploadedFileInput">Select a file from your device:</label>
     <input
       bind:files
       id="userUploadedFileInput"
@@ -293,35 +369,53 @@
       class="urlInput text-black font-bold"
     />
     {#if files}
-      {#if userFileInputHandler(files)}
-        {#key userUploadedFileURL}  <!-- Element to rerender everything inside when userUploadedFileURL changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-          <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
-        {/key}
-        {#if !$store.isAuthed}
-          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <p id='createSubtextUserUploadedGlbModel'>{loginSubtext}</p>
-        {:else}
-          {#if isSpaceCreationInProgress}
+      {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+        {#if userFileInputHandler(files)}
+          {#if fileType === "glbModel"}
+            <!-- User-Uploaded GLB Model File -->
+            <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+          {:else if fileType === "mediaContent"}
+            <!-- User-Uploaded Image or Video File -->
+            <!-- 360-degree toggle -->
+            <div class="py-2">
+              <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
+              <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
+            </div>
+            {#key is360Degree}
+              <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
+            {/key}
+          {/if}
+          {#if !$store.isAuthed}
             <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-            {#if spaceToCreate === "UserUploadedGlbModel"}
-              <p id='createSubtextUserUploadedGlbModel'>{inProgressSubtext}</p>
-            {/if}
-          {:else if wasSpaceCreatedSuccessfully}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            {#if spaceToCreate === "UserUploadedGlbModel"}
-              <p id='createSubtextUserUploadedGlbModel'>{createdSubtext}</p>
-            {:else}
-              <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
-            {/if}
+            <p id='createSubtextUserUploadedFile'>{loginSubtext}</p>
           {:else}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            <p id='createSubtextUserUploadedGlbModel'>{clickFromModelSubtext}</p>
-          {/if}  
+            {#if isSpaceCreationInProgress}
+              <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedFile"}
+                <p id='createSubtextUserUploadedFile'>{inProgressSubtext}</p>
+              {/if}
+            {:else if wasSpaceCreatedSuccessfully}
+              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+              {#if spaceToCreate === "UserUploadedFile"}
+                <p id='createSubtextUserUploadedFile'>{createdSubtext}</p>
+              {:else}
+                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
+              {/if}
+            {:else}
+              {#if fileSizeToUpload <= fileSizeUploadLimit}
+                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
+              {:else}
+                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                <p id='createSubtextUserUploadedFile'>{fileTooBigText}</p>
+              {/if}
+            {/if}  
+          {/if}
+        {:else}
+          <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid File (with a supported file type).</h3>
         {/if}
-      {:else}
-        <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-        <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid GLB Model File.</h3>
-      {/if}
+      {/key}
     {/if}
   </form>
   <!-- Web-Hosted GLB Model -->
