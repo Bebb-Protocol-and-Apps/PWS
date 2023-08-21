@@ -126,22 +126,26 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)"
 
 # Additional Notes
 ## Get and delete Email Subscribers
+```bash
 dfx canister call PersonalWebSpace_backend getEmailSubscribers
 dfx canister call PersonalWebSpace_backend deleteEmailSubscriber 'j@g.com'
 
 dfx canister call PersonalWebSpace_backend getEmailSubscribers --network ic
 dfx canister call PersonalWebSpace_backend deleteEmailSubscriber 'j@g.com' --network ic
+```
 
 ## Cycles for Production Canisters
 Fund wallet with cycles (from ICP): https://medium.com/dfinity/internet-computer-basics-part-3-funding-a-cycles-wallet-a724efebd111
 
 Top up cycles:
+```bash
 dfx identity --network=ic get-wallet
 dfx wallet --network ic balance
 dfx canister --network ic status PersonalWebSpace_backend
 dfx canister --network ic status PersonalWebSpace_frontend
 dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 3000000000000 PersonalWebSpace_backend
 dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 300000000000 PersonalWebSpace_frontend
+```
 
 ## Web Space NFT format
 For details, see Types.mo in PersonalWebSpace_backend
