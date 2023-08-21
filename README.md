@@ -77,7 +77,7 @@ npm run vite
 Access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
 Hot reloads with every UI change
 
-For more detailed notes on running this locally, also see NotesOnLocalDev.md
+For more detailed notes on running this locally, also see [NotesOnLocalDev.md](./notes/NotesOnLocalDev.md)
 
 ## Deployment to the Internet Computer
 ```bash
