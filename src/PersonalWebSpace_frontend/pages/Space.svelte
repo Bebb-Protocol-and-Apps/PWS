@@ -14,7 +14,9 @@
   import SpaceInfo from "../components/SpaceInfo.svelte";
   import GlbModelPreview from "../components/GlbModelPreview.svelte";
   import ItemLibrary from "../components/ItemLibrary.svelte";
+  import EnvironmentLibrary from "../components/EnvironmentLibrary.svelte";
   import MediaContentPreview from "../components/MediaContentPreview.svelte";
+  import EnvironmentPreview from "../components/EnvironmentPreview.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
@@ -244,6 +246,8 @@
     // Close all option popups
     openUploadModelFilePopup = false;
     openItemsToAddLibraryPopup = false;
+    openAddMediaContentPopup = false;
+    openEnvironmentOptionPopup = false;
     // Toggle whether the Edit Mode popup is open
     openEditModelPopup = !openEditModelPopup;
     resetUploadVariables();
@@ -395,7 +399,7 @@
               aScene.appendChild(imageEntity);
             } else {
               aScene.replaceChild(imageEntity, aScene.querySelector('#imageFromUserFile'));
-            }
+            };
           } else {
             aScene.addEventListener('loaded', function () {
               // Create a new A-Frame entity for the image
@@ -609,6 +613,37 @@
     };
   };
 
+// Add environment option
+  let openEnvironmentOptionPopup = false;
+  let userSelectedEnvironmentOption = "default";
+  let isAddingEnvironmentInProgress = false;
+  let wasEnvironmentAddedSuccessfully = false;
+
+  const addEnvironmentToSpace = () => {
+    if (!isAddingEnvironmentInProgress) {
+      isAddingEnvironmentInProgress = true;
+      wasEnvironmentAddedSuccessfully = false;
+      try {
+        let scene = document.querySelector('a-scene');
+        var environmentEntity = scene.ownerDocument.createElement('a-entity');
+        environmentEntity.setAttribute('environment', `preset: ${userSelectedEnvironmentOption}`);
+        environmentEntity.setAttribute('id', 'presetEnvironmentSelectedByUser');
+        // Ensure that only one environment is added to the scene
+        var existingEnvironment = document.body.querySelector("#presetEnvironmentSelectedByUser");
+        if (existingEnvironment) {
+          scene.replaceChild(environmentEntity, existingEnvironment);
+        } else {
+          scene.appendChild(environmentEntity);
+        };
+      } catch (error) {
+        console.error("Adding Environment to Space Error:", error);
+      };
+      wasEnvironmentAddedSuccessfully = true;
+      isAddingEnvironmentInProgress = false;
+    };
+  };
+
+// Prepare dropdown menu
   const addDropdownMenuForNewElements = () => {
     var elements = document.body.getElementsByClassName("button fa fa-plus");
     var addEntityButton = elements.item(0);
@@ -699,6 +734,21 @@
         }, 1000);
       };
 
+      // Create "Environment" option
+      const addEnvironmentOption = document.createElement("a");
+      addEnvironmentOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      addEnvironmentOption.id = "addEnvironment";
+      addEnvironmentOption.classList.add("dropdownOption");
+      addEnvironmentOption.innerHTML = "Environment";
+      addEnvironmentOption.onclick = function() {
+        toggleOpenEditModePopup();
+        // Handle add environment action
+        openEnvironmentOptionPopup = true;
+        setTimeout(() => {
+          window.addEventListener("click", closePopupsOnClickOutside , false);
+        }, 1000);
+      };
+
       // Create "Add New Entity" option (from the + button ("Add Entity"), i.e. it keeps the onclick behavior of adding a new a-entity)
       const addNewEntityOption = addEntityButton;
       // @ts-ignore
@@ -714,6 +764,7 @@
       dropdownMenuContent.appendChild(libraryOption);
       dropdownMenuContent.appendChild(mediaContentOption);
       dropdownMenuContent.appendChild(uploadFileOption);
+      dropdownMenuContent.appendChild(addEnvironmentOption);
       dropdownMenuContent.appendChild(addNewEntityOption);
 
       // Add button and dropdown menu to div
@@ -1387,6 +1438,35 @@
                   {/key}
                 {/if}
               </form> -->
+            {:else}
+              <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
+                You need to be the space's owner to use this feature.
+              </p>
+            {/if}
+          </div>
+        <!-- Environment option -->
+        {:else if openEnvironmentOptionPopup}
+          <div class="editOptionPopup">
+            <!-- Edit Button may only be displayed if logged-in user is space's owner -->
+            {#if isViewerSpaceOwner()}
+              <h3 class="text-l font-semibold">Add an Environment to Your Space</h3>
+              <form on:submit|preventDefault={() => addEnvironmentToSpace()}>
+                <p class="text-base">Select an envrionment from the list:</p>
+                {#key userSelectedEnvironmentOption}  <!-- Element to rerender everything inside when the selection changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+                  <EnvironmentPreview bind:envToPreview={userSelectedEnvironmentOption}/>
+                  {#if isAddingEnvironmentInProgress}
+                    <button type='button' id='addEnvironmentButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Environment!</button>
+                    <p id='addEnvironmentSubtext'>{inProgressSubtext}</p>
+                  {:else if wasEnvironmentAddedSuccessfully}
+                    <button type=submit id='addEnvironmentButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Environment!</button>
+                    <p id='addEnvironmentSubtext'>{createdSubtext}</p>
+                  {:else}
+                    <button type=submit id='addEnvironmentButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Environment!</button>
+                    <p id='addEnvironmentSubtext'>{clickFileUploadSubtext}</p>
+                  {/if}
+                {/key}
+              </form>
+              <EnvironmentLibrary bind:envSelected={userSelectedEnvironmentOption}/>
             {:else}
               <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
                 You need to be the space's owner to use this feature.
