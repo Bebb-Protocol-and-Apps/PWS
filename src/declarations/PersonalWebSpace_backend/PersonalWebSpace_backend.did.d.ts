@@ -162,6 +162,7 @@ export interface UpdateMetadataValuesInput {
   'id' : TokenId,
   'updatedSpaceDescription' : string,
   'updatedOwnerName' : string,
+  'updatedAboutDescription' : string,
   'updatedOwnerContactInfo' : string,
   'updatedSpaceData' : [] | [string],
   'updatedSpaceName' : string,

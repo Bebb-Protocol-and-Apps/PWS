@@ -6,6 +6,7 @@ type UserRecord =
 type UpdateMetadataValuesInput = 
  record {
    id: TokenId;
+   updatedAboutDescription: text;
    updatedOwnerContactInfo: text;
    updatedOwnerName: text;
    updatedSpaceData: opt text;
