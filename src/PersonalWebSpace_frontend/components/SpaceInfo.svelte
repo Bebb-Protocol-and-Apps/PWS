@@ -92,11 +92,11 @@
     {:else}
       <p>Space Name: {updatedSpaceName}</p>
       <p>Space Description: {updatedSpaceDescription}</p>
-      <p>Space Creation Time: {spaceMetadata.creationTime}</p>
-      <p>Owner Principal: {spaceMetadata.spaceOwnerPrincipal}</p>
       <p>Owner Name: {updatedOwnerName}</p>
       <p>About Owner: {updatedAboutDescription}</p>
       <p>Owner Contact Info: {updatedOwnerContactInfo}</p>
+      <p>Space Creation Time: {spaceMetadata.creationTime}</p>
+      <!-- <p>Owner Principal: {spaceMetadata.spaceOwnerPrincipal}</p> -->
     {/if}
 </div>
 
