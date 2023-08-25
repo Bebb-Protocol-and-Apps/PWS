@@ -88,9 +88,9 @@ dfx start --background
 
 Deploy to Mainnet (live IC):
 Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
-```bash
 
 Development Canisters:
+```bash
 dfx deploy --network development --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
@@ -104,8 +104,9 @@ dfx deploy --network development --argument "(
   }
 )" PersonalWebSpace_backend
 dfx deploy --network development PersonalWebSpace_frontend
-
+```
 Testing Canisters:
+```bash
 dfx deploy --network testing --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
@@ -119,8 +120,9 @@ dfx deploy --network testing --argument "(
   }
 )" PersonalWebSpace_backend
 dfx deploy --network testing PersonalWebSpace_frontend
-
+```
 Production Canisters:
+```bash
 dfx deploy --network ic --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
