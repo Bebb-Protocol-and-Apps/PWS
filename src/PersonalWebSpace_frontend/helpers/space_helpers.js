@@ -123,9 +123,9 @@ export const extractSpaceMetadata = (spaceNft, targetObject, forUpdatingSpace = 
           targetObject.updatedOwnerName = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
         } else if (fieldKey === "ownerContactInfo") {
           targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-        } /* else if (fieldKey === "aboutDescription") {
-          targetObject.updatedOwnerContactInfo = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
-        } */;
+        } else if (fieldKey === "aboutDescription") {
+          targetObject.updatedAboutDescription = spaceNft.metadata[0].key_val_data[j].val.TextContent;      
+        };
       };
     } else {
       for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {

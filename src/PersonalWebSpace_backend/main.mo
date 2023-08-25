@@ -446,10 +446,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
         // assemble updated space data, then update nfts list
           // create placeholder objects...
-        var aboutDescriptionObject = {
-          key = "aboutDescription";
-          val: Types.MetadataVal = #TextContent "This is my flaming hot Personal Web Space. Enjoy!";
-        };
         var creatorObject = {
           key = "creator";
           val: Types.MetadataVal = #PrincipalContent caller;
@@ -464,9 +460,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
           // ... and fill them with space's current data
         for (i in token.metadata[0].key_val_data.keys()) {
-          if (token.metadata[0].key_val_data[i].key == "aboutDescription") {
-            aboutDescriptionObject := token.metadata[0].key_val_data[i]; // currently not used, thus remains unchanged
-          } else if (token.metadata[0].key_val_data[i].key == "creator") {
+          if (token.metadata[0].key_val_data[i].key == "creator") {
             creatorObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
           } else if (token.metadata[0].key_val_data[i].key == "creationTime") {
             creationTimeObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
@@ -484,7 +478,10 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
             key = "ownerContactInfo";
             val = #TextContent (updatedUserSpaceData.updatedOwnerContactInfo);
           },
-          aboutDescriptionObject,
+          {
+            key = "aboutDescription";
+            val = #TextContent (updatedUserSpaceData.updatedAboutDescription);
+          },
           {
             key = "spaceDescription";
             val = #TextContent (updatedUserSpaceData.updatedSpaceDescription);

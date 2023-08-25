@@ -107,6 +107,7 @@ module {
     updatedOwnerContactInfo: Text;
     updatedSpaceDescription: Text;
     updatedSpaceName: Text;
+    updatedAboutDescription : Text;
     updatedSpaceData: ?Text;
   };
 
