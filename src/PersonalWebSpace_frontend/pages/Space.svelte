@@ -6,7 +6,7 @@
   import { Hamburger } from 'svelte-hamburgers';
   import type { Principal } from "@dfinity/principal";
 
-  import { store } from "../store";
+  import { store,appDomain } from "../store";
 
   import Login from "../components/LoginSpace.svelte";
   import NotFound from "./NotFound.svelte";
@@ -20,7 +20,7 @@
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
-  import type { Entity } from "src/integrations/BebbProtocol/newwave.did";
+  import type { Entity, EntityAttachedBridgesResult, Bridge } from "src/integrations/BebbProtocol/bebb.did";
 
 // This is needed for URL params
   export let params;
@@ -521,9 +521,9 @@
             console.error("File Upload Error:", error);
           };
           if (fileUploadResult.Ok) {
-            const fileURL = process.env.DFX_NETWORK === "ic"
-              ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
-              : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+            const fileURL = process.env.DFX_NETWORK === "local"
+              ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+              : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
             try {
               let scene = document.querySelector('a-scene');
               var modelEntity = scene.ownerDocument.createElement('a-entity');
@@ -549,9 +549,9 @@
             console.error("File Upload Error:", error);
           };
           if (fileUploadResult.Ok) {
-            const fileURL = process.env.DFX_NETWORK === "ic"
-              ? `https://${backendCanisterId}.raw.ic0.app/file/fileId=${fileUploadResult.Ok.FileId}` // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
-              : `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}`; // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+            const fileURL = process.env.DFX_NETWORK === "local"
+              ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+              : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
             try {
               let fileName = files[0].name; // get the name of the file
               let scene = document.querySelector('a-scene');
@@ -959,8 +959,8 @@
     };
   };
 
-  const entityHasValidUrl = (entity) => {
-    return isValidUrl(entity.externalId);
+  const entityHasValidUrl = (entity: Entity) => {
+    return isValidUrl(entity.entitySpecificFields);
   };
 
   const isValidUrl = (url) => {
@@ -1002,8 +1002,8 @@
         // Create a new entity for the neighbor
         let neighborEntity = document.createElement('a-entity');
         // Set properties on the new neighbor entity
-        neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.internalId}`);
-        neighborEntity.setAttribute('web-portal', `url:${neighbor.externalId}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
+        neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.id}`);
+        neighborEntity.setAttribute('web-portal', `url:${neighbor.entitySpecificFields}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
         neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
         // Add the neighbor entity to the scene
         let scene = document.querySelector('a-scene');
@@ -1016,14 +1016,53 @@
   const loadSpaceNeighborsIn3D = async () => {
     // Load the Space's Neighbors from Bebb Protocol and display them in 3D in the scene
     const spaceEntityId = extractSpaceEntityId();
-    let spaceNeighborsResponse: Entity[] = [];
+    let spaceNeighborsResponse : EntityAttachedBridgesResult;
+    let retrievedNeighborEntities : Entity[] = [];
     try {
-        spaceNeighborsResponse = await $store.protocolActor.get_bridged_entities_by_entity_id(spaceEntityId, true, false, false);
+      try {
+          spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
+      } catch (error) {
+          console.log("Error Getting Bridges", error);
+          return null;                
+      };
+      // @ts-ignore
+      if (spaceNeighborsResponse && spaceNeighborsResponse.Ok && spaceNeighborsResponse.Ok.length > 0) {
+        // @ts-ignore
+        const bridgesRetrieved : EntityAttachedBridges = spaceNeighborsResponse.Ok;
+        const bridgeIds = [];
+        let getBridgeRequestPromises = [];
+        for (var i = 0; i < bridgesRetrieved.length; i++) {
+            if (bridgesRetrieved[i] && bridgesRetrieved[i].id && bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')) {
+                bridgeIds.push(bridgesRetrieved[i].id);
+                getBridgeRequestPromises.push($store.protocolActor.get_bridge(bridgesRetrieved[i].id)); // Send requests in parallel and then await all to speed up
+            };
+        };
+        const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
+        let getConnectedEntityRequestPromises = [];
+        for (var j = 0; j < getBridgeResponses.length; j++) {
+            if (getBridgeResponses[j].Err) {
+                console.log("Error retrieving Bridge", getBridgeResponses[j].Err);
+            } else {
+                const bridge : Bridge = getBridgeResponses[j].Ok;
+                getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
+            };
+        };
+        const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
+        for (var j = 0; j < getConnectedEntityResponses.length; j++) {
+            if (getConnectedEntityResponses[j].Err) {
+                console.log("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
+            } else {
+                const connectedEntity : Entity = getConnectedEntityResponses[j].Ok;
+                retrievedNeighborEntities.push(connectedEntity);
+            };
+        };
+      };
     } catch(err) {
         console.log("Error getting SpaceNeighbors", err);
     };
+
     // Only load Neighbors if they haven't been loaded yet or reload if new Neighbors have been added
-    if (spaceNeighborsResponse.length === 0) {
+    if (retrievedNeighborEntities.length === 0) {
       // Show message that this Space doesn't have Neighbors in scene
       // Create a new entity for the message
       let messageEntity = document.createElement('a-entity');
@@ -1044,15 +1083,15 @@
       // Load visualization for Neighbors in VR/fullscreen mode
       loadNeighborVisualizationImage();
       // Load Neighbors in 3D
-      loadNeighborsIn3D(spaceNeighborsResponse);
-      numberOfNeighbors = spaceNeighborsResponse.length;
+      loadNeighborsIn3D(retrievedNeighborEntities);
+      numberOfNeighbors = retrievedNeighborEntities.length;
       neighborsIn3DLoaded = true;
-    } else if (spaceNeighborsResponse.length > numberOfNeighbors) { // New Neighbors have been added
+    } else if (retrievedNeighborEntities.length > numberOfNeighbors) { // New Neighbors have been added
       // Remove all existing Neighbors from the scene
       remove3dNeighborsFromScene();
       // Load Neighbors in 3D
-      loadNeighborsIn3D(spaceNeighborsResponse);
-      numberOfNeighbors = spaceNeighborsResponse.length;
+      loadNeighborsIn3D(retrievedNeighborEntities);
+      numberOfNeighbors = retrievedNeighborEntities.length;
     };
   };
 

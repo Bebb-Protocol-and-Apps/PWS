@@ -190,6 +190,7 @@ export const idlFactory = ({ IDL }) => {
         [TxReceipt],
         [],
       ),
+    'updateSpaceEntityId' : IDL.Func([TokenId, IDL.Text], [NftResult], []),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
     'uploadUserFile' : IDL.Func([IDL.Text, File], [FileResult], []),
   });

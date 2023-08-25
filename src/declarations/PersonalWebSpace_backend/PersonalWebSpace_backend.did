@@ -92,6 +92,7 @@ type PersonalWebSpace =
    symbolDip721: () -> (text) query;
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
+   updateSpaceEntityId: (TokenId, text) -> (NftResult);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
    uploadUserFile: (text, File) -> (FileResult);
  };
