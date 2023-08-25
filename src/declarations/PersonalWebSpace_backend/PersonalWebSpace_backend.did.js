@@ -130,6 +130,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : TokenId,
     'updatedSpaceDescription' : IDL.Text,
     'updatedOwnerName' : IDL.Text,
+    'updatedAboutDescription' : IDL.Text,
     'updatedOwnerContactInfo' : IDL.Text,
     'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
