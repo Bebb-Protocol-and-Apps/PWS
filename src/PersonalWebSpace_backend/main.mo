@@ -736,9 +736,9 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 */
 // 1 MB is the max size for a single file
 let oneMB : Nat = 1048576; // 1 MB
-private let maxFileSize : Nat = oneMB; 
-private let maxTotalSize : Nat = 10 * oneMB;
-private let maxFiles : Nat = 10;
+private let maxFileSize : Nat = 2 * oneMB;
+private let maxTotalSize : Nat = 25 * oneMB;
+private let maxFiles : Nat = 15;
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122

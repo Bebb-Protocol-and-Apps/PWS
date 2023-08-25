@@ -20,6 +20,7 @@
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import type { Entity, EntityAttachedBridgesResult, Bridge } from "src/integrations/BebbProtocol/bebb.did";
@@ -294,6 +295,7 @@
         modelEntity.setAttribute('gltf-model', `url(${userSelectedLibraryItemURL})`);
         modelEntity.setAttribute('position', '0 3 -6');
         modelEntity.setAttribute('id', 'userAddedLibraryItem_' + Math.random().toString(36).substr(2, 9));
+        modelEntity.setAttribute('animation-mixer', true);
         scene.appendChild(modelEntity);
       } catch (error) {
         console.error("Adding Library Item to Space Error:", error);
@@ -305,6 +307,7 @@
   // Upload model file
   let openUploadModelFilePopup = false;
   let files;
+  let is360Degree = false; // This will store the state of the checkbox
   let userUploadedFileURL;
   let fileSizeToUpload;
   let fileSizeUploadLimit = 2000000; // 2 MB
@@ -344,7 +347,7 @@
         console.error(e);
         return false;
       }
-    } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.svg')) {
+    } else if (supportedImageExtensions.some(ext => fileName.endsWith(ext))) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
         fileSizeToUpload = userFile.size;
@@ -353,7 +356,7 @@
         console.error(e);
         return false;
       }
-    } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
+    } else if (supportedVideoExtensions.some(ext => fileName.endsWith(ext))) {
       try {
         userUploadedFileURL = URL.createObjectURL(userFile);
         fileSizeToUpload = userFile.size;
@@ -363,7 +366,7 @@
         return false;
       }
     } else {
-      console.log('The uploaded file is not a .glb file.');
+      console.error('The uploaded file is not a supported file.');
       return false;
     }
   };
@@ -453,6 +456,7 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
+            modelEntity.setAttribute('animation-mixer', true);
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
             } else {
@@ -464,6 +468,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
+              modelEntity.setAttribute('animation-mixer', true);
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
               } else {
@@ -534,6 +539,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
+              modelEntity.setAttribute('animation-mixer', true);
               scene.appendChild(modelEntity);
             } catch (error) {
               console.error("Adding Uploaded Model to Space Error:", error);
@@ -542,6 +548,8 @@
             console.error("File Upload Error:", fileUploadResult);
           };
         } else if (sourceType === "UserUploadedMediaContent") {
+          // Capture 360-degree toggle
+          const set360DegreeContent = is360Degree ? true : false;
           // Store file for user
           const arrayBuffer = await files[0].arrayBuffer();
           const uint8Array = new Uint8Array(arrayBuffer);
@@ -570,11 +578,25 @@
                 var assets = document.querySelector('a-assets');
                 assets.appendChild(newImageAsset);
                 function loaded() {
-                  contentEntity = scene.ownerDocument.createElement('a-image');
-                  contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('position', '0 3 -6');
-                  contentEntity.setAttribute('id', 'userUploadedImage_' + fileUploadResult.Ok.FileId);
-                  scene.appendChild(contentEntity);
+                  // Determine whether the image is 360 degree and set the appropriate attribute
+                  if (set360DegreeContent) {
+                    contentEntity = scene.ownerDocument.createElement('a-sky');
+                    contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('id', 'userUploaded360Image_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('rotation', '0 -130 0');
+                    const existingSky = scene.querySelector('a-sky');
+                    if (existingSky) {
+                      scene.replaceChild(contentEntity, existingSky);
+                    } else {
+                      scene.appendChild(contentEntity);
+                    };
+                  } else {
+                    contentEntity = scene.ownerDocument.createElement('a-image');
+                    contentEntity.setAttribute('src', '#userUploadedImageAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('position', '0 3 -6');
+                    contentEntity.setAttribute('id', 'userUploadedImage_' + fileUploadResult.Ok.FileId);
+                    scene.appendChild(contentEntity);
+                  };
                 };
                 newImageAsset.addEventListener('load', loaded);
               } else if (fileName.endsWith('.mp4') || fileName.endsWith('.mov')) {
@@ -587,16 +609,32 @@
                 var assets = document.querySelector('a-assets');
                 assets.appendChild(newVideoAsset);
                 function loaded() {
-                  contentEntity = scene.ownerDocument.createElement('a-video');
-                  contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('position', '0 3 -6');
-                  contentEntity.setAttribute('id', 'userUploadedVideo_' + fileUploadResult.Ok.FileId);
-                  contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
-                  scene.appendChild(contentEntity);
+                  // Determine whether the video is 360 degree and set the appropriate attribute
+                  if (set360DegreeContent) {
+                    contentEntity = scene.ownerDocument.createElement('a-videosphere');
+                    contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('id', 'userUploaded360Video_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('rotation', '0 -130 0');
+                    contentEntity.setAttribute('autoplay', true);
+                    contentEntity.setAttribute('loop', true);
+                    const existingVideosphere  = scene.querySelector('a-videosphere');
+                    if (existingVideosphere) {
+                      scene.replaceChild(contentEntity, existingVideosphere);
+                    } else {
+                      scene.appendChild(contentEntity);
+                    };
+                  } else {
+                    contentEntity = scene.ownerDocument.createElement('a-video');
+                    contentEntity.setAttribute('src', '#userUploadedVideoAsset_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('position', '0 3 -6');
+                    contentEntity.setAttribute('id', 'userUploadedVideo_' + fileUploadResult.Ok.FileId);
+                    contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
+                    scene.appendChild(contentEntity);
+                  };
                 };
                 newVideoAsset.addEventListener('loadeddata', loaded);
               } else {
-                console.log('The uploaded file type is not supported.');
+                console.error('The uploaded file type is not supported.');
                 return false;
               };
             } catch (error) {
@@ -1073,7 +1111,7 @@
       try {
           spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
       } catch (error) {
-          console.log("Error Getting Bridges", error);
+          console.error("Error Getting Bridges", error);
           return null;                
       };
       // @ts-ignore
@@ -1092,7 +1130,7 @@
         let getConnectedEntityRequestPromises = [];
         for (var j = 0; j < getBridgeResponses.length; j++) {
             if (getBridgeResponses[j].Err) {
-                console.log("Error retrieving Bridge", getBridgeResponses[j].Err);
+                console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
             } else {
                 const bridge : Bridge = getBridgeResponses[j].Ok;
                 getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
@@ -1101,7 +1139,7 @@
         const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
         for (var j = 0; j < getConnectedEntityResponses.length; j++) {
             if (getConnectedEntityResponses[j].Err) {
-                console.log("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
+                console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
             } else {
                 const connectedEntity : Entity = getConnectedEntityResponses[j].Ok;
                 retrievedNeighborEntities.push(connectedEntity);
@@ -1109,7 +1147,7 @@
         };
       };
     } catch(err) {
-        console.log("Error getting SpaceNeighbors", err);
+        console.error("Error getting SpaceNeighbors", err);
     };
 
     // Only load Neighbors if they haven't been loaded yet or reload if new Neighbors have been added
@@ -1373,6 +1411,11 @@
             <!-- Edit Button may only be displayed if logged-in user is space's owner -->
             {#if isViewerSpaceOwner()}
               <h3 class="text-l font-semibold">Upload an Image or Video</h3>
+              <!-- 360-degree toggle -->
+              <div class="py-2">
+                <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
+                <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
+              </div>
               <form on:submit|preventDefault={() => createNewItemInSpace("UserUploadedMediaContent")}>
                 <label for="userUploadedFileInput" class="text-base">Select the file from your device:</label>
                 <input
@@ -1385,7 +1428,9 @@
                 {#if files}
                   {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
                     {#if userFileInputHandler(files)}
-                      <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files}/>
+                      {#key is360Degree} 
+                        <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
+                      {/key}
                       {#if isFileUploadInProgress}
                         <button type='button' id='fileUploadButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
                         <p id='fileUploadSubtext'>{inProgressSubtext}</p>

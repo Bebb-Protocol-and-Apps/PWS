@@ -36,7 +36,7 @@
             errorDeletingLink = true;
           }
       } catch(err) {
-          console.log("Delete Link err", err);
+          console.error("Delete Link err", err);
           errorDeletingLink = true;
       };
     };
