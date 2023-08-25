@@ -146,7 +146,7 @@
       const byteArray = Array.from(uint8Array);
       let fileUploadResult;
       try {
-        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray)
+        fileUploadResult = await $store.backendActor.uploadUserFile(files[0].name, byteArray);
       } catch (error) {
         console.error("File Upload Error:", error);
       };
