@@ -15,12 +15,13 @@
     let updatedOwnerContactInfo : string = spaceMetadata.ownerContactInfo;
     let updatedSpaceDescription : string = spaceMetadata.spaceDescription;
     let updatedSpaceName : string = spaceMetadata.spaceName;
+    let updatedAboutDescription : string = spaceMetadata.aboutDescription;
 
 // User submitted form to update Space Info
     let spaceInfoUpdateInProgress = false;
 
     const submitUpdateSpaceInfoForm = async () => {
-        console.log("in submitUpdateSpaceInfoForm spaceMetadata", spaceMetadata);
+        console.log("Debug in submitUpdateSpaceInfoForm spaceMetadata", spaceMetadata);
         spaceInfoUpdateInProgress = true;
         // Write space's updated metadata to backend canister (HTML stays the same)
         let updateInput = {
@@ -30,16 +31,17 @@
             updatedOwnerContactInfo,
             updatedSpaceDescription,
             updatedSpaceName,
+            updatedAboutDescription,
         };
-        console.log("in submitUpdateSpaceInfoForm updateInput", updateInput);
+        console.log("Debug in submitUpdateSpaceInfoForm updateInput", updateInput);
         try {
             // @ts-ignore
             await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
         } catch (error) {
-            console.log("Error in updateUserSpace", error);                        
+            console.error("Error in updateUserSpace", error);                        
         }
         spaceInfoUpdateInProgress = false;
-        console.log("in submitUpdateSpaceInfoForm after");
+        console.log("Debug in submitUpdateSpaceInfoForm after");
     };
 </script>
 
@@ -62,6 +64,12 @@
         <input
             bind:value={updatedOwnerName}
             placeholder={updatedOwnerName}
+            class="spaceInfoInput text-black font-bold"
+        />
+        <p>About Owner:</p>
+        <input
+            bind:value={updatedAboutDescription}
+            placeholder={updatedAboutDescription}
             class="spaceInfoInput text-black font-bold"
         />
         <p>Owner Contact Info:</p>
@@ -87,8 +95,8 @@
       <p>Space Creation Time: {spaceMetadata.creationTime}</p>
       <p>Owner Principal: {spaceMetadata.spaceOwnerPrincipal}</p>
       <p>Owner Name: {updatedOwnerName}</p>
+      <p>About Owner: {updatedAboutDescription}</p>
       <p>Owner Contact Info: {updatedOwnerContactInfo}</p>
-      <!-- <p>About Owner: {spaceMetadata.aboutDescription}</p> -->
     {/if}
 </div>
 
