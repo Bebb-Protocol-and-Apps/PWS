@@ -782,7 +782,7 @@ private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
 };
 
 /*
- * Function retrives all the FileInfo (i.e files) associated with the user account
+ * Function retrieves all the FileInfo (i.e files) associated with the user account
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
@@ -800,9 +800,37 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
                 userFileInfo.add(checkedFileInfo);
             }
         };
-
       };      
       return userFileInfo;      
+      };
+  };
+};
+
+/*
+ * Function retrieves the id and name for each file associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the FileIdAndName structs for the user account which contain the file and other relevant information
+*/
+private func getUserFileIdsAndNames(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.FileIdAndName> {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return Buffer.Buffer<FileTypes.FileIdAndName>(0); };
+    case (?userRecord) { 
+      var userFileIdsAndNames = Buffer.Buffer<FileTypes.FileIdAndName>(userRecord.file_ids.size());
+      for (file_id in userRecord.file_ids.vals())
+      {
+        let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
+          switch (retrievedFileInfo) {
+            case(null) {};
+            case(?checkedFileInfo) {
+              let fileIdAndName = {
+                file_id = file_id;
+                file_name = checkedFileInfo.file_name;
+              };
+              userFileIdsAndNames.add(fileIdAndName);
+            }
+        };
+      };      
+      return userFileIdsAndNames;      
       };
   };
 };
@@ -940,7 +968,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileNames() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
   return #Ok(#FileNames(Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name)));
@@ -950,10 +978,19 @@ public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
  * Public Function which displays all the file ids that the user has uploaded to their account
  * @return An array of text that contain all the file ids uploaded to the current users account
 */
-public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileIds() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFileIds = getUserFileIds(user);
   return #Ok(#FileIds(userFileIds));
+};
+
+/*
+ * Public Function which returns the id and name for each file that the user has uploaded to their account
+ * @return An array of objects that contain the file id and name for each file that the user has uploaded to their account
+*/
+public shared query ({caller}) func listUserFileIdsAndNames() : async FileTypes.FileResult {
+  let userFileIdsAndNames = getUserFileIdsAndNames(caller);
+  return #Ok(#FileIdsAndNames(userFileIdsAndNames.toArray()));
 };
 
 /*

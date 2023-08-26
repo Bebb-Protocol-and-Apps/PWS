@@ -15,6 +15,7 @@ module {
         #FileId: Text;
         #FileNames: [Text];
         #FileIds: [Text];
+        #FileIdsAndNames: [FileIdAndName];
         #Other : Text;
     };
 
@@ -46,6 +47,16 @@ module {
         totalSize : Nat;
         // The file ids of the files the user owns. The file ids can be used to search in the file database
         file_ids : [Text];
+    };
+
+    /*
+     * Structure is used to return the id and name of a file.
+     */
+    public type FileIdAndName = {
+        // Stores the file id
+        file_id : Text;
+        // Stores the file name, useful for human readableness
+        file_name : Text;
     };
 
 };

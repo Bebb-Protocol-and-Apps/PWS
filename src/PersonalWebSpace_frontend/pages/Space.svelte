@@ -6,7 +6,7 @@
   import { Hamburger } from 'svelte-hamburgers';
   import type { Principal } from "@dfinity/principal";
 
-  import { store,appDomain } from "../store";
+  import { store, appDomain } from "../store";
 
   import Login from "../components/LoginSpace.svelte";
   import NotFound from "./NotFound.svelte";
@@ -17,13 +17,16 @@
   import EnvironmentLibrary from "../components/EnvironmentLibrary.svelte";
   import MediaContentPreview from "../components/MediaContentPreview.svelte";
   import EnvironmentPreview from "../components/EnvironmentPreview.svelte";
+  import FileSpacePreview from "../components/FileSpacePreview.svelte";
+  import MyFilesLibrary from "../components/MyFilesLibrary.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
-  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
+  import { supportedImageExtensions, supportedVideoExtensions, supported3dModelExtensions } from "../helpers/utils";
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import type { Entity, EntityAttachedBridgesResult, Bridge } from "src/integrations/BebbProtocol/bebb.did";
+  
 
 // This is needed for URL params
   export let params;
@@ -249,6 +252,7 @@
     openItemsToAddLibraryPopup = false;
     openAddMediaContentPopup = false;
     openEnvironmentOptionPopup = false;
+    openAddFromMyFilesPopup = false;
     // Toggle whether the Edit Mode popup is open
     openEditModelPopup = !openEditModelPopup;
     resetUploadVariables();
@@ -295,6 +299,7 @@
         modelEntity.setAttribute('gltf-model', `url(${userSelectedLibraryItemURL})`);
         modelEntity.setAttribute('position', '0 3 -6');
         modelEntity.setAttribute('id', 'userAddedLibraryItem_' + Math.random().toString(36).substr(2, 9));
+        // @ts-ignore
         modelEntity.setAttribute('animation-mixer', true);
         scene.appendChild(modelEntity);
       } catch (error) {
@@ -303,6 +308,140 @@
     };
     await setLibraryItemWasAdded();
   };
+
+  // My Files (Personal User Library with files uploaded by the user)
+  let openAddFromMyFilesPopup = false;
+  let userSelectedMyFile = {
+    file_id: "",
+    file_name: "",
+  };
+  let setMyFileAs360Degree = false;
+
+  let isAddingMyFileInProgress = false;
+  let wasMyFileAddedSuccessfully = false;
+  const setAddingMyFileInProgress = () => {
+    isAddingMyFileInProgress = true;
+  };
+  const setMyFileWasAdded = () => {
+    isAddingMyFileInProgress = false;
+    wasMyFileAddedSuccessfully = true;
+  };
+  const isValidMyFile = (myFile) => {
+    return myFile && myFile.file_id !== "" && myFile.file_name !== "";
+  };
+
+  const addMyFileToSpace = async () => {
+    setAddingMyFileInProgress();
+    // Include the file selected by the user as a new entity in the Space
+    if (isValidMyFile(userSelectedMyFile)) {
+      try {
+        const fileURL = process.env.DFX_NETWORK === "local"
+          ? `http://127.0.0.1:4943/file/fileId=${userSelectedMyFile.file_id}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
+          : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${userSelectedMyFile.file_id}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
+      
+        const imageExtensions = supportedImageExtensions;
+        const videoExtensions = supportedVideoExtensions;
+        const modelExtensions = supported3dModelExtensions;
+
+        const fileName = userSelectedMyFile.file_name;
+        const isImage = imageExtensions.some(ext => fileName.endsWith(ext));
+        const isVideo = videoExtensions.some(ext => fileName.endsWith(ext));
+        const isModel = modelExtensions.some(ext => fileName.endsWith(ext));
+        
+        let scene = document.querySelector('a-scene');
+        const set360DegreeContent = setMyFileAs360Degree ? true : false;
+        let contentEntity;
+        if (isModel) {
+          var modelEntity = scene.ownerDocument.createElement('a-entity');
+          modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
+          modelEntity.setAttribute('position', '0 3 -6');
+          modelEntity.setAttribute('id', 'modelFromUserFile_' + userSelectedMyFile.file_id);
+          // @ts-ignore
+          modelEntity.setAttribute('animation-mixer', true);
+          scene.appendChild(modelEntity);
+        } else if (isImage) {
+          function loaded() {
+            // Determine whether the image is 360 degree and set the appropriate attribute
+            if (set360DegreeContent) {
+              contentEntity = scene.ownerDocument.createElement('a-sky');
+              contentEntity.setAttribute('src', '#imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('rotation', '0 -130 0');
+              const existingSky = scene.querySelector('a-sky');
+              if (existingSky) {
+                scene.replaceChild(contentEntity, existingSky);
+              } else {
+                scene.appendChild(contentEntity);
+              };
+            } else {
+              contentEntity = scene.ownerDocument.createElement('a-image');
+              contentEntity.setAttribute('src', '#imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('position', '0 3 -6');
+              scene.appendChild(contentEntity);
+            };
+          };
+          const existingImageAsset = scene.querySelector('#imageFromUserFile_' + userSelectedMyFile.file_id);
+          if (existingImageAsset) {
+            loaded();
+          } else {
+            // Create a new img element
+            var newImageAsset = document.createElement('img');
+            newImageAsset.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+            newImageAsset.setAttribute('crossorigin', 'anonymous');
+            newImageAsset.setAttribute('src', fileURL);
+            // Append the new a-asset to the a-assets element
+            var assets = document.querySelector('a-assets');
+            assets.appendChild(newImageAsset);
+            newImageAsset.addEventListener('load', loaded);
+          };
+        } else if (isVideo) {
+          function loaded() {
+            // Determine whether the video is 360 degree and set the appropriate attribute
+            if (set360DegreeContent) {
+              contentEntity = scene.ownerDocument.createElement('a-videosphere');
+              contentEntity.setAttribute('src', '#videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('rotation', '0 -130 0');
+              contentEntity.setAttribute('autoplay', true);
+              contentEntity.setAttribute('loop', true);
+              const existingVideosphere  = scene.querySelector('a-videosphere');
+              if (existingVideosphere) {
+                scene.replaceChild(contentEntity, existingVideosphere);
+              } else {
+                scene.appendChild(contentEntity);
+              };
+            } else {
+              contentEntity = scene.ownerDocument.createElement('a-video');
+              contentEntity.setAttribute('src', '#videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('position', '0 3 -6');
+              contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
+              scene.appendChild(contentEntity);
+            };
+          };
+          const existingVideoAsset = scene.querySelector('#videoFromUserFile_' + userSelectedMyFile.file_id);
+          if (existingVideoAsset) {
+            loaded();
+          } else {
+            // Create a new video element
+            var newVideoAsset = document.createElement('video');
+            newVideoAsset.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+            newVideoAsset.setAttribute('crossorigin', 'anonymous');
+            newVideoAsset.setAttribute('src', fileURL);
+            // Append the new a-asset to the a-assets element
+            var assets = document.querySelector('a-assets');
+            assets.appendChild(newVideoAsset);
+            newVideoAsset.addEventListener('loadeddata', loaded);
+          };
+        };
+      } catch (error) {
+        console.error("Adding My File to Space Error:", error);
+      };
+    };
+    setMyFileWasAdded();
+  };
+
 
   // Upload model file
   let openUploadModelFilePopup = false;
@@ -539,6 +678,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
+              // @ts-ignore
               modelEntity.setAttribute('animation-mixer', true);
               scene.appendChild(modelEntity);
             } catch (error) {
@@ -757,6 +897,21 @@
         }, 1000);
       };
 
+      // Create "My Files" option
+      const myFilesOption = document.createElement("a");
+      myFilesOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
+      myFilesOption.id = "addFromMyFiles";
+      myFilesOption.classList.add("dropdownOption");
+      myFilesOption.innerHTML = "My Files";
+      myFilesOption.onclick = function() {
+        toggleOpenEditModePopup();
+        // Handle my files action
+        openAddFromMyFilesPopup = true;
+        setTimeout(() => {
+          window.addEventListener("click", closePopupsOnClickOutside , false);
+        }, 1000);
+      };
+
       // Create "Upload Object" option
       const uploadFileOption = document.createElement("a");
       uploadFileOption.href = "javascript:;"; // "empty" behavior, i.e. shouldn't do anything
@@ -800,6 +955,7 @@
 
       // Add options to dropdown menu
       dropdownMenuContent.appendChild(libraryOption);
+      dropdownMenuContent.appendChild(myFilesOption);
       dropdownMenuContent.appendChild(mediaContentOption);
       dropdownMenuContent.appendChild(uploadFileOption);
       dropdownMenuContent.appendChild(addEnvironmentOption);
@@ -1399,6 +1555,37 @@
                 {/key}
               </form>
               <ItemLibrary bind:modelUrl={userSelectedLibraryItemURL}/>
+            {:else}
+              <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
+                You need to be the space's owner to use this feature.
+              </p>
+            {/if}
+          </div>
+        <!-- My Files option -->
+        {:else if openAddFromMyFilesPopup}
+          <div class="editOptionPopup">
+            <!-- Edit Button may only be displayed if logged-in user is space's owner -->
+            {#if isViewerSpaceOwner()}
+              <h3 class="text-l font-semibold">Add an Item to Your Space</h3>
+              <form on:submit|preventDefault={() => addMyFileToSpace()}>
+                <p class="text-base">Select from your previously uploaded files:</p>
+                {#key userSelectedMyFile}
+                  {#if isValidMyFile(userSelectedMyFile)}
+                    <FileSpacePreview fileToPreview={userSelectedMyFile} bind:is360Degree={setMyFileAs360Degree}/>
+                    {#if isAddingMyFileInProgress}
+                      <button type='button' id='addMyFileButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Add This Item!</button>
+                      <p id='addMyFileSubtext'>{inProgressSubtext}</p>
+                    {:else if wasMyFileAddedSuccessfully}
+                      <button type=submit id='addMyFileButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                      <p id='addMyFileSubtext'>{createdSubtext}</p>
+                    {:else}
+                      <button type=submit id='addMyFileButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Add This Item!</button>
+                      <p id='addMyFileSubtext'>{clickFileUploadSubtext}</p>
+                    {/if}
+                  {/if}
+                {/key}
+              </form>
+              <MyFilesLibrary bind:selectedFile={userSelectedMyFile}/>
             {:else}
               <p class="spaceMenuItem" transition:fly={{ y: -15, delay: 50 * 1 }}>
                 You need to be the space's owner to use this feature.
