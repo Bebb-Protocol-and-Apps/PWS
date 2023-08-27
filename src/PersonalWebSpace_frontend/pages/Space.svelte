@@ -264,6 +264,15 @@
 
     isFileUploadInProgress = false;
     wasFileUploadedSuccessfully = false;
+
+    isAddingItemInProgress = false;
+    wasItemAddedSuccessfully = false;
+
+    isAddingEnvironmentInProgress = false;
+    wasEnvironmentAddedSuccessfully = false;
+
+    isAddingMyFileInProgress = false;
+    wasMyFileAddedSuccessfully = false;
   };
 
   // Media Content
@@ -300,7 +309,7 @@
         modelEntity.setAttribute('position', '0 3 -6');
         modelEntity.setAttribute('id', 'userAddedLibraryItem_' + Math.random().toString(36).substr(2, 9));
         // @ts-ignore
-        modelEntity.setAttribute('animation-mixer', true);
+        modelEntity.setAttribute('animation-mixer');
         scene.appendChild(modelEntity);
       } catch (error) {
         console.error("Adding Library Item to Space Error:", error);
@@ -352,20 +361,23 @@
         const set360DegreeContent = setMyFileAs360Degree ? true : false;
         let contentEntity;
         if (isModel) {
-          var modelEntity = scene.ownerDocument.createElement('a-entity');
-          modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
-          modelEntity.setAttribute('position', '0 3 -6');
-          modelEntity.setAttribute('id', 'modelFromUserFile_' + userSelectedMyFile.file_id);
+          const modelEntityId = 'modelFromUserFile_' + userSelectedMyFile.file_id;
+          contentEntity = scene.ownerDocument.createElement('a-entity');
+          contentEntity.setAttribute('gltf-model', `url(${fileURL})`);
+          contentEntity.setAttribute('position', '0 3 -6');
+          contentEntity.setAttribute('id', modelEntityId);
           // @ts-ignore
-          modelEntity.setAttribute('animation-mixer', true);
-          scene.appendChild(modelEntity);
+          contentEntity.setAttribute('animation-mixer');
+          scene.appendChild(contentEntity);
         } else if (isImage) {
+          const imageEntityId = 'imageFromUserFile_' + userSelectedMyFile.file_id;
+          const assetImageEntityId = 'asset_' + imageEntityId;
           function loaded() {
             // Determine whether the image is 360 degree and set the appropriate attribute
             if (set360DegreeContent) {
               contentEntity = scene.ownerDocument.createElement('a-sky');
-              contentEntity.setAttribute('src', '#imageFromUserFile_' + userSelectedMyFile.file_id);
-              contentEntity.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('src', `#${assetImageEntityId}`);
+              contentEntity.setAttribute('id', imageEntityId);
               contentEntity.setAttribute('rotation', '0 -130 0');
               const existingSky = scene.querySelector('a-sky');
               if (existingSky) {
@@ -375,19 +387,19 @@
               };
             } else {
               contentEntity = scene.ownerDocument.createElement('a-image');
-              contentEntity.setAttribute('src', '#imageFromUserFile_' + userSelectedMyFile.file_id);
-              contentEntity.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('src', `#${assetImageEntityId}`);
+              contentEntity.setAttribute('id', imageEntityId);
               contentEntity.setAttribute('position', '0 3 -6');
               scene.appendChild(contentEntity);
             };
           };
-          const existingImageAsset = scene.querySelector('#imageFromUserFile_' + userSelectedMyFile.file_id);
+          const existingImageAsset = scene.querySelector(`#${assetImageEntityId}`);
           if (existingImageAsset) {
             loaded();
           } else {
             // Create a new img element
             var newImageAsset = document.createElement('img');
-            newImageAsset.setAttribute('id', 'imageFromUserFile_' + userSelectedMyFile.file_id);
+            newImageAsset.setAttribute('id', assetImageEntityId);
             newImageAsset.setAttribute('crossorigin', 'anonymous');
             newImageAsset.setAttribute('src', fileURL);
             // Append the new a-asset to the a-assets element
@@ -396,12 +408,14 @@
             newImageAsset.addEventListener('load', loaded);
           };
         } else if (isVideo) {
+          const videoEntityId = 'videoFromUserFile_' + userSelectedMyFile.file_id;
+          const assetVideoEntityId = 'asset_' + videoEntityId;
           function loaded() {
             // Determine whether the video is 360 degree and set the appropriate attribute
             if (set360DegreeContent) {
               contentEntity = scene.ownerDocument.createElement('a-videosphere');
-              contentEntity.setAttribute('src', '#videoFromUserFile_' + userSelectedMyFile.file_id);
-              contentEntity.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('src', `#${assetVideoEntityId}`);
+              contentEntity.setAttribute('id', videoEntityId);
               contentEntity.setAttribute('rotation', '0 -130 0');
               contentEntity.setAttribute('autoplay', true);
               contentEntity.setAttribute('loop', true);
@@ -413,20 +427,20 @@
               };
             } else {
               contentEntity = scene.ownerDocument.createElement('a-video');
-              contentEntity.setAttribute('src', '#videoFromUserFile_' + userSelectedMyFile.file_id);
-              contentEntity.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+              contentEntity.setAttribute('src', `#${assetVideoEntityId}`);
+              contentEntity.setAttribute('id', videoEntityId);
               contentEntity.setAttribute('position', '0 3 -6');
               contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
               scene.appendChild(contentEntity);
             };
           };
-          const existingVideoAsset = scene.querySelector('#videoFromUserFile_' + userSelectedMyFile.file_id);
+          const existingVideoAsset = scene.querySelector(`#${assetVideoEntityId}`);
           if (existingVideoAsset) {
             loaded();
           } else {
             // Create a new video element
             var newVideoAsset = document.createElement('video');
-            newVideoAsset.setAttribute('id', 'videoFromUserFile_' + userSelectedMyFile.file_id);
+            newVideoAsset.setAttribute('id', assetVideoEntityId);
             newVideoAsset.setAttribute('crossorigin', 'anonymous');
             newVideoAsset.setAttribute('src', fileURL);
             // Append the new a-asset to the a-assets element
@@ -595,7 +609,7 @@
             modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
             modelEntity.setAttribute('position', '0 3 -6');
             modelEntity.setAttribute('id', 'modelFromUserFile');
-            modelEntity.setAttribute('animation-mixer', true);
+            modelEntity.setAttribute('animation-mixer');
             if (!aScene.querySelector('#modelFromUserFile')) {
               aScene.appendChild(modelEntity);
             } else {
@@ -607,7 +621,7 @@
               modelEntity.setAttribute('gltf-model', `url(${fileURL})`);
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'modelFromUserFile');
-              modelEntity.setAttribute('animation-mixer', true);
+              modelEntity.setAttribute('animation-mixer');
               if (!aScene.querySelector('#modelFromUserFile')) {
                 aScene.appendChild(modelEntity);
               } else {
@@ -679,7 +693,7 @@
               modelEntity.setAttribute('position', '0 3 -6');
               modelEntity.setAttribute('id', 'userUploadedModel_' + fileUploadResult.Ok.FileId);
               // @ts-ignore
-              modelEntity.setAttribute('animation-mixer', true);
+              modelEntity.setAttribute('animation-mixer');
               scene.appendChild(modelEntity);
             } catch (error) {
               console.error("Adding Uploaded Model to Space Error:", error);

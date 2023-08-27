@@ -10,10 +10,7 @@
   export let fileToPreview;
   export let is360Degree;
 
-  console.log("Debug fileToPreview", fileToPreview);
-
   is360Degree = is360Degree;
-  console.log("Debug is360Degree", is360Degree);
 
   let isImage = false;
   let isVideo = false;
@@ -27,15 +24,12 @@
       ? `http://127.0.0.1:4943/file/fileId=${fileToPreview.file_id}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
       : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileToPreview.file_id}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
 
-    console.log("Debug fileToPreviewURL", fileToPreviewURL);
     const fileToPreviewObject = {
       id: fileToPreview.file_id,
       name: fileToPreview.file_name,
       url: fileToPreviewURL,
     };
-    console.log("Debug fileToPreviewObject", fileToPreviewObject);
     files = [fileToPreviewObject];
-    console.log("Debug files", files);
 
   // Note: HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
     const imageExtensions = supportedImageExtensions;
@@ -43,13 +37,9 @@
     const modelExtensions = supported3dModelExtensions;
 
     const fileName = fileToPreview.file_name;
-    console.log("Debug fileName", fileName);
     isImage = imageExtensions.some(ext => fileName.endsWith(ext));
     isVideo = videoExtensions.some(ext => fileName.endsWith(ext));
     isModel = modelExtensions.some(ext => fileName.endsWith(ext));
-
-    console.log("Debug isImage", isImage);
-    console.log("Debug isVideo", isVideo);
   };
 </script>
 <div class="my-file-space-preview space-y-1">

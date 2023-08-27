@@ -17,10 +17,9 @@
   onMount(async () => {
     retrievingFilesInProgress = true;
     let fileRetrievalResponse = await $store.backendActor.listUserFileIdsAndNames();
-    console.log("Debug fileRetrievalResponse", fileRetrievalResponse);
+    // @ts-ignore
     if (fileRetrievalResponse.Ok && fileRetrievalResponse.Ok.FileIdsAndNames) {
-      console.log("Debug fileRetrievalResponse.Ok", fileRetrievalResponse.Ok);
-      console.log("Debug fileRetrievalResponse.Ok.FileIdsAndNames", fileRetrievalResponse.Ok.FileIdsAndNames);
+      // @ts-ignore
       userFiles = fileRetrievalResponse.Ok.FileIdsAndNames;
     };
     retrievingFilesInProgress = false;    
