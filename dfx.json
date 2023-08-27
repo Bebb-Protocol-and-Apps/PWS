@@ -14,8 +14,7 @@
           "ic": "pzrof-pyaaa-aaaai-acnha-cai",
           "local": "br5f7-7uaaa-aaaaa-qaaca-cai",
           "development": "tsmol-tqaaa-aaaag-abt2a-cai",
-          "testing": "t6nyb-faaaa-aaaal-qcbaa-cai",
-	        "alexStaging": "yqn2i-hyaaa-aaaap-qbmiq-cai"
+          "testing": "t6nyb-faaaa-aaaal-qcbaa-cai"
         }
       }
     },
@@ -50,12 +49,6 @@
         "https://icp0.io"
       ],
       "type": "persistent"
-    },
-    "alexStaging": {
-	"providers": [
-	"https://icp0.io"
-	],
-	"type": "persistent"
     }
   },
   "version": 1
