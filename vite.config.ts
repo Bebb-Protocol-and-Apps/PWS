@@ -7,7 +7,7 @@ import fs from "fs";
 const isDev = process.env["DFX_NETWORK"] === "local";
 const networkName = process.env["DFX_NETWORK"] || "local";
 
-type Network = "ic" | "development" | "testing" | "local";
+type Network = "ic" | "development" | "testing" | "local" | "alexStaging";
 
 interface CanisterIds {
   [key: string]: { [key in Network]: string };

@@ -45,6 +45,10 @@ if (process.env.DFX_NETWORK === "ic") {
   // testing canisters on mainnet (for network testing)
   HOST = "https://icp0.io";
   appDomain = ".icp0.io";
+} else if (process.env.DFX_NETWORK === "alexStaging") {
+  // testing canisters on mainnet (for network testing for Alex)
+  HOST = "https://icp0.io";
+  appDomain = ".icp0.io";
 } else {
   HOST = "https://ic0.app";
 };
