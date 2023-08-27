@@ -64,7 +64,7 @@
             errorCreatingLink = true;
           };
       } catch(err) {
-          console.log("Link Space err", err);
+          console.error("Link Space err", err);
           errorCreatingLink = true;
       };
     };

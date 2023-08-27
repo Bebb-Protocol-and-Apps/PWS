@@ -45,13 +45,17 @@ if (process.env.DFX_NETWORK === "ic") {
   // testing canisters on mainnet (for network testing)
   HOST = "https://icp0.io";
   appDomain = ".icp0.io";
+} else if (process.env.DFX_NETWORK === "alexStaging") {
+  // testing canisters on mainnet (for network testing for Alex)
+  HOST = "https://icp0.io";
+  appDomain = ".icp0.io";
 } else {
   HOST = "https://ic0.app";
 };
 
 let authClient : AuthClient;
-const APPLICATION_NAME = "DeVinci";
-const APPLICATION_LOGO_URL = "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/favicon.ico"; //TODO: change to faviconFutureWebInitiative (once deployed with OIM)
+const APPLICATION_NAME = "Open Internet Metaverse";
+const APPLICATION_LOGO_URL = "https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/faviconFutureWebInitiative.ico";
 //"https%3A%2F%2Fx6occ%2Dbiaaa%2Daaaai%2Dacqzq%2Dcai.icp0.io%2Ffavicon.ico"
 //"https%3A%2F%2Fx6occ-biaaa-aaaai-acqzq-cai.icp0.io%2FFutureWebInitiative%5Fimg.png";
 const AUTH_PATH = "/authenticate/?applicationName="+APPLICATION_NAME+"&applicationLogo="+APPLICATION_LOGO_URL+"#authorize";

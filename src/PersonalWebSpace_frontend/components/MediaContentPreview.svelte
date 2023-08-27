@@ -1,21 +1,33 @@
 <script>
-  import { getStringForSpaceFromImageFile, getStringForSpaceFromVideoFile } from "../helpers/space_helpers";
+  import {
+    getStringForSpaceFrom360ImageFile,
+    getStringForSpaceFrom360VideoFile,
+    getStringForSpaceFromImageFile,
+    getStringForSpaceFromVideoFile
+  } from "../helpers/space_helpers";
+
+  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
 
   export let contentUrl;
   export let contentFiles;
+  export let is360Degree = false;
   contentFiles = contentFiles;
 
 // Note: HTML as string in Svelte needs the ending script tag to be escaped (see https://github.com/sveltejs/svelte/issues/5810)
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
-  const videoExtensions = ['.mp4', '.mov'];
+  const imageExtensions = supportedImageExtensions;
+  const videoExtensions = supportedVideoExtensions;
 
   const fileName = contentFiles[0].name;
   const isImage = imageExtensions.some(ext => fileName.endsWith(ext));
   const isVideo = videoExtensions.some(ext => fileName.endsWith(ext));
   
   let mediaContentPreviewString;
-  if (isImage) {
+  if (isImage && is360Degree) {
+    mediaContentPreviewString = getStringForSpaceFrom360ImageFile(contentUrl);
+  } else if (isImage) {
     mediaContentPreviewString = getStringForSpaceFromImageFile(contentUrl);
+  } else if (isVideo && is360Degree) {
+    mediaContentPreviewString = getStringForSpaceFrom360VideoFile(contentUrl);
   } else if (isVideo) {
     mediaContentPreviewString = getStringForSpaceFromVideoFile(contentUrl);
   } else {

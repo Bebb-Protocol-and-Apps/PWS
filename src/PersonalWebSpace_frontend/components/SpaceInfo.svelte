@@ -15,6 +15,7 @@
     let updatedOwnerContactInfo : string = spaceMetadata.ownerContactInfo;
     let updatedSpaceDescription : string = spaceMetadata.spaceDescription;
     let updatedSpaceName : string = spaceMetadata.spaceName;
+    let updatedAboutDescription : string = spaceMetadata.aboutDescription;
 
 // User submitted form to update Space Info
     let spaceInfoUpdateInProgress = false;
@@ -29,12 +30,13 @@
             updatedOwnerContactInfo,
             updatedSpaceDescription,
             updatedSpaceName,
+            updatedAboutDescription,
         };
         try {
             // @ts-ignore
             await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
         } catch (error) {
-            console.log("Error in updateUserSpace", error);                        
+            console.error("Error in updateUserSpace", error);                        
         }
         spaceInfoUpdateInProgress = false;
     };
@@ -61,6 +63,12 @@
             placeholder={updatedOwnerName}
             class="spaceInfoInput text-black font-bold"
         />
+        <p>About Owner:</p>
+        <input
+            bind:value={updatedAboutDescription}
+            placeholder={updatedAboutDescription}
+            class="spaceInfoInput text-black font-bold"
+        />
         <p>Owner Contact Info:</p>
         <input
             bind:value={updatedOwnerContactInfo}
@@ -81,11 +89,11 @@
     {:else}
       <p>Space Name: {updatedSpaceName}</p>
       <p>Space Description: {updatedSpaceDescription}</p>
-      <p>Space Creation Time: {spaceMetadata.creationTime}</p>
-      <p>Owner Principal: {spaceMetadata.spaceOwnerPrincipal}</p>
       <p>Owner Name: {updatedOwnerName}</p>
+      <p>About Owner: {updatedAboutDescription}</p>
       <p>Owner Contact Info: {updatedOwnerContactInfo}</p>
-      <!-- <p>About Owner: {spaceMetadata.aboutDescription}</p> -->
+      <p>Space Creation Time: {spaceMetadata.creationTime}</p>
+      <!-- <p>Owner Principal: {spaceMetadata.spaceOwnerPrincipal}</p> -->
     {/if}
 </div>
 

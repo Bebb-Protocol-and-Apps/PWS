@@ -89,7 +89,7 @@
     // const loginButton = document.querySelector('#login-button');
     if(!loginButton) {
       setTimeout(() => {
-        console.log("Login button - Delayed for 1 second.");
+        //console.log("Login button - Delayed for 1 second.");
         loadLoginButton();
       }, 1000);
     } else {
@@ -103,7 +103,7 @@
     );
     if(!editButton) {
       setTimeout(() => {
-        console.log("Edit button - Delayed for 1 second.");
+        //console.log("Edit button - Delayed for 1 second.");
         loadEditButton();
       }, 1000);
     } else {
