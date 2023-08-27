@@ -45,6 +45,10 @@ export const idlFactory = ({ IDL }) => {
     'Other' : IDL.Text,
   });
   const NftResult = IDL.Variant({ 'Ok' : Nft, 'Err' : ApiError });
+  const FileIdAndName = IDL.Record({
+    'file_name' : IDL.Text,
+    'file_id' : IDL.Text,
+  });
   const FileInfo = IDL.Record({
     'file_name' : IDL.Text,
     'file_content' : IDL.Vec(IDL.Nat8),
@@ -55,6 +59,7 @@ export const idlFactory = ({ IDL }) => {
     'file_ids' : IDL.Vec(IDL.Text),
   });
   const FileResultSuccessOptions = IDL.Variant({
+    'FileIdsAndNames' : IDL.Vec(FileIdAndName),
     'File' : FileInfo,
     'FileNames' : IDL.Vec(IDL.Text),
     'Success' : IDL.Null,
@@ -130,6 +135,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : TokenId,
     'updatedSpaceDescription' : IDL.Text,
     'updatedOwnerName' : IDL.Text,
+    'updatedAboutDescription' : IDL.Text,
     'updatedOwnerContactInfo' : IDL.Text,
     'updatedSpaceData' : IDL.Opt(IDL.Text),
     'updatedSpaceName' : IDL.Text,
@@ -165,8 +171,9 @@ export const idlFactory = ({ IDL }) => {
     'getUserRecord' : IDL.Func([], [FileResult], []),
     'greet' : IDL.Func([IDL.Text], [IDL.Text], []),
     'http_request' : IDL.Func([Request], [Response], ['query']),
-    'listUserFileIds' : IDL.Func([], [FileResult], []),
-    'listUserFileNames' : IDL.Func([], [FileResult], []),
+    'listUserFileIds' : IDL.Func([], [FileResult], ['query']),
+    'listUserFileIdsAndNames' : IDL.Func([], [FileResult], ['query']),
+    'listUserFileNames' : IDL.Func([], [FileResult], ['query']),
     'logoDip721' : IDL.Func([], [LogoResult], ['query']),
     'mintDip721' : IDL.Func([IDL.Principal, MetadataDesc], [MintReceipt], []),
     'nameDip721' : IDL.Func([], [IDL.Text], ['query']),
@@ -189,6 +196,7 @@ export const idlFactory = ({ IDL }) => {
         [TxReceipt],
         [],
       ),
+    'updateSpaceEntityId' : IDL.Func([TokenId, IDL.Text], [NftResult], []),
     'updateUserSpace' : IDL.Func([UpdateMetadataValuesInput], [NftResult], []),
     'uploadUserFile' : IDL.Func([IDL.Text, File], [FileResult], []),
   });

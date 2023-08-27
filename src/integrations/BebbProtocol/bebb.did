@@ -1,0 +1,186 @@
+type Time = int;
+type EntityUpdateObject = 
+ record {
+   description: opt text;
+   id: text;
+   keywords: opt vec text;
+   name: opt text;
+   previews: opt vec EntityPreview;
+   settings: opt EntitySettings;
+ };
+type EntityTypeResourceTypes = 
+ variant {
+   Content;
+   DigitalAsset;
+   Web;
+ };
+type EntityType = 
+ variant {
+   Other: text;
+   Resource: EntityTypeResourceTypes;
+ };
+type EntitySettings = record {};
+type EntityResult = 
+ variant {
+   Err: EntityErrors;
+   Ok: Entity;
+ };
+type EntityPreviewSupportedTypes = 
+ variant {
+   Glb;
+   Gltf;
+   Jpg;
+   Other: text;
+   Png;
+ };
+type EntityPreview = 
+ record {
+   previewData: blob;
+   previewType: EntityPreviewSupportedTypes;
+ };
+type EntityInitiationObject = 
+ record {
+   description: opt text;
+   entitySpecificFields: opt text;
+   entityType: EntityType;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt EntitySettings;
+ };
+type EntityIdResult = 
+ variant {
+   Err: EntityIdErrors;
+   Ok: text;
+ };
+type EntityIdErrors = 
+ variant {
+   EntityNotFound;
+   Error;
+   PreviewTooLarge: int;
+   TooManyPreviews;
+   Unauthorized;
+ };
+type EntityErrors = 
+ variant {
+   EntityNotFound;
+   Error;
+   Unauthorized: text;
+ };
+type EntityAttachedBridgesResult = 
+ variant {
+   Err: EntityAttachedBridgesErrors;
+   Ok: EntityAttachedBridges;
+ };
+type EntityAttachedBridgesErrors = 
+ variant {
+   EntityNotFound;
+   Error;
+ };
+type EntityAttachedBridges = vec EntityAttachedBridge;
+type EntityAttachedBridge = 
+ record {
+   bridgeType: BridgeType;
+   creationTime: Time;
+   id: text;
+   linkStatus: BridgeLinkStatus;
+ };
+type Entity = 
+ record {
+   creationTimestamp: nat64;
+   creator: principal;
+   description: text;
+   entitySpecificFields: text;
+   entityType: EntityType;
+   fromIds: EntityAttachedBridges;
+   id: text;
+   keywords: vec text;
+   listOfEntitySpecificFieldKeys: vec text;
+   name: text;
+   owner: principal;
+   previews: vec EntityPreview;
+   settings: EntitySettings;
+   toIds: EntityAttachedBridges;
+ };
+type BridgeUpdateObject = 
+ record {
+   description: opt text;
+   id: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt BridgeSettings;
+ };
+type BridgeType = 
+ variant {
+   IsAttachedto;
+   IsPartOf;
+   IsRelatedto;
+ };
+type BridgeSettings = record {};
+type BridgeResult = 
+ variant {
+   Err: BridgeErrors;
+   Ok: Bridge;
+ };
+type BridgeLinkStatus = 
+ variant {
+   CreatedOther;
+   CreatedOwner;
+ };
+type BridgeInitiationObject = 
+ record {
+   bridgeType: BridgeType;
+   description: opt text;
+   entitySpecificFields: opt text;
+   fromEntityId: text;
+   keywords: opt vec text;
+   name: opt text;
+   settings: opt BridgeSettings;
+   toEntityId: text;
+ };
+type BridgeIdResult = 
+ variant {
+   Err: BridgeIdErrors;
+   Ok: text;
+ };
+type BridgeIdErrors = 
+ variant {
+   BridgeNotFound;
+   Error;
+   Unauthorized;
+ };
+type BridgeErrors = 
+ variant {
+   BridgeNotFound;
+   Error;
+   Unauthorized: text;
+ };
+type Bridge = 
+ record {
+   bridgeType: BridgeType;
+   creationTimestamp: nat64;
+   creator: principal;
+   description: text;
+   entitySpecificFields: text;
+   fromEntityId: text;
+   id: text;
+   keywords: vec text;
+   listOfEntitySpecificFieldKeys: vec text;
+   name: text;
+   owner: principal;
+   settings: BridgeSettings;
+   toEntityId: text;
+ };
+service : {
+  create_bridge: (BridgeInitiationObject) -> (BridgeIdResult);
+  create_entity: (EntityInitiationObject) -> (EntityIdResult);
+  delete_bridge: (text) -> (BridgeIdResult);
+  delete_entity: (text) -> (EntityIdResult);
+  get_bridge: (text) -> (BridgeResult) query;
+  get_entity: (text) -> (EntityResult) query;
+  get_from_bridge_ids_by_entity_id: (text) ->
+   (EntityAttachedBridgesResult) query;
+  get_to_bridge_ids_by_entity_id: (text) ->
+   (EntityAttachedBridgesResult) query;
+  update_bridge: (BridgeUpdateObject) -> (BridgeIdResult);
+  update_entity: (EntityUpdateObject) -> (EntityIdResult);
+}

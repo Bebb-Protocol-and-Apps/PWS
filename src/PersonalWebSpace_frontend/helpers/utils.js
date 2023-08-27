@@ -9,6 +9,10 @@ export async function submitEmailSignUpForm(emailAddress, pageSubmittedFrom) {
   return result;
 }
 
+export const supportedImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
+export const supportedVideoExtensions = ['.mp4', '.mov'];
+export const supported3dModelExtensions = ['.glb', '.gltf'];
+
 export function getNumber(value) {
   return parseFloat(value.toFixed(3));
 }

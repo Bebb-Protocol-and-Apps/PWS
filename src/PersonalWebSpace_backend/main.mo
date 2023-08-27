@@ -36,9 +36,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     return "Hello, " # name # "!";
   };
 
-  let personalWebSpace_frontend_canister_id_mainnet : Text = "vdfyi-uaaaa-aaaai-acptq-cai"; // deployed on mainnet
-  let personalWebSpace_backend_canister_id_mainnet : Text = "vee64-zyaaa-aaaai-acpta-cai"; // deployed on mainnet
-
   // DIP721 standard: https://github.com/dfinity/examples/blob/master/motoko/dip-721-nft-container/src/Main.mo
   stable var transactionId: Types.TransactionId = 0;
   stable var nfts = List.nil<Types.Nft>();
@@ -296,32 +293,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 
     let newId = Nat64.fromNat(List.size(nfts));
 
-    // create space as Entity in Protocol
-    let entityInitiationObject : Protocol.EntityInitiationObject = {
-        _internalId : ?Text = null;
-        _creator : ?Principal = ?caller;
-        _owner : ?Principal = ?caller;
-        _settings : ?Protocol.EntitySettings = null;
-        _entityType : Protocol.EntityType = #Webasset;
-        _name : ?Text = ?"Personal Web Space";
-        _description : ?Text = ?"Flaming Hot Personal Web Space";
-        _keywords : ?[Text] = ?["NFT", "Space", "heeyah"];
-        _externalId : ?Text = ?("https://" # personalWebSpace_frontend_canister_id_mainnet # ".ic0.app/#/space/" # Nat64.toText(newId));
-        _entitySpecificFields : ?Text = null;
-    };
-    //__________Local vs Mainnet Development____________
-    var protocolEntityId : Text = ""; // enough for local development
-    if (Principal.fromActor(Self) == Principal.fromText(personalWebSpace_backend_canister_id_mainnet)) {
-      // Live on Mainnet
-      let spaceEntity : Protocol.Entity = await protocol.create_entity(entityInitiationObject); // Bebb Protocol call
-      protocolEntityId := spaceEntity.internalId;
-    } else {
-      // Local
-      let localProtocol  : Protocol.Interface  = actor(Protocol.LOCAL_CANISTER_ID);
-      let spaceEntity : Protocol.Entity = await localProtocol.create_entity(entityInitiationObject);
-      protocolEntityId := spaceEntity.internalId;
-    };    
-
     // create space for caller
     let textArrayContent : [Text] = [];
     let keyValData : [Types.MetadataKeyVal] = [
@@ -355,7 +326,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       },
       {
         key = "protocolEntityId";
-        val = #TextContent protocolEntityId;
+        val = #TextContent ""; // not initialized yet, needs to be updated by the frontend after creating the Entity
       }
     ];
     let nftData = Text.encodeUtf8(spaceHtml);
@@ -433,9 +404,9 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     };
   };
 
-  // Update a Space's metadata fields including the Space's data which is displayed (if updatedSpaceData is provided)
-  public shared({ caller }) func updateUserSpace(updatedUserSpaceData: Types.UpdateMetadataValuesInput) : async Types.NftResult {
-    switch (List.get(nfts, Nat64.toNat(updatedUserSpaceData.id))) {
+  // Update the Space's Entity id (should only be necessary after creating the Entity)
+  public shared({ caller }) func updateSpaceEntityId(spaceId : Types.TokenId, entityId : Text) : async Types.NftResult {
+    switch (List.get(nfts, Nat64.toNat(spaceId))) {
       case (null) {
         return #Err(#InvalidTokenId);
       };
@@ -460,13 +431,117 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
         var protocolEntityIdObject = {
           key = "protocolEntityId";
+          val: Types.MetadataVal = #TextContent entityId;
+        };
+        var ownerNameObject = {
+          key = "ownerName";
           val: Types.MetadataVal = #TextContent "";
         };
-          // ... and fill them with space's current data
+        var ownerContactInfoObject = {
+          key = "ownerContactInfo";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        var spaceDescriptionObject = {
+          key = "spaceDescription";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        var spaceNameObject = {
+          key = "spaceName";
+          val: Types.MetadataVal = #TextContent "";
+        };
+        // ... and fill them with space's current data
         for (i in token.metadata[0].key_val_data.keys()) {
           if (token.metadata[0].key_val_data[i].key == "aboutDescription") {
             aboutDescriptionObject := token.metadata[0].key_val_data[i]; // currently not used, thus remains unchanged
           } else if (token.metadata[0].key_val_data[i].key == "creator") {
+            creatorObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "creationTime") {
+            creationTimeObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "ownerName") {
+            ownerNameObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "ownerContactInfo") {
+            ownerContactInfoObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "spaceDescription") {
+            spaceDescriptionObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          } else if (token.metadata[0].key_val_data[i].key == "spaceName") {
+            spaceNameObject := token.metadata[0].key_val_data[i]; // should remain unchanged
+          }; 
+        };
+
+        let updatedKeyValData: [Types.MetadataKeyVal] = [
+          ownerNameObject,
+          ownerContactInfoObject,
+          aboutDescriptionObject,
+          spaceDescriptionObject,
+          spaceNameObject,
+          creatorObject,
+          creationTimeObject,
+          protocolEntityIdObject
+        ];
+
+        let spaceData = token.metadata[0].data; // should remain unchanged
+
+        let updatedMetadataPart : Types.MetadataPart = {
+          purpose = #Rendered;
+          key_val_data = updatedKeyValData;
+          data = spaceData;
+        };
+        let updatedMetadata : Types.MetadataDesc = [updatedMetadataPart];
+        let updatedNft : Types.Nft = {
+          owner = token.owner;
+          id = token.id;
+          metadata = updatedMetadata;
+        };
+
+        // add updated space to list of NFTs
+        nfts := List.map(nfts, func (item : Types.Nft) : Types.Nft {
+          if (item.id == token.id) {
+            return updatedNft;
+          } else {
+            return item;
+          };
+        });
+        transactionId += 1;
+        switch (List.get(nfts, Nat64.toNat(spaceId))) {
+          case (null) {
+            return #Err(#InvalidTokenId);
+          };
+          case (?updatedSpace) {
+            return #Ok(updatedSpace);
+          }
+        };
+      };
+    };
+  };
+
+  // Update a Space's metadata fields including the Space's data which is displayed (if updatedSpaceData is provided)
+  public shared({ caller }) func updateUserSpace(updatedUserSpaceData: Types.UpdateMetadataValuesInput) : async Types.NftResult {
+    switch (List.get(nfts, Nat64.toNat(updatedUserSpaceData.id))) {
+      case (null) {
+        return #Err(#InvalidTokenId);
+      };
+      case (?token) {
+        // only owner may update
+        if (token.owner != caller) {
+          return #Err(#Unauthorized);
+        };
+        // assemble updated space data, then update nfts list
+          // create placeholder objects...
+        var creatorObject = {
+          key = "creator";
+          val: Types.MetadataVal = #PrincipalContent caller;
+        };
+        var creationTimeObject = {
+          key = "creationTime";
+          val: Types.MetadataVal = #Nat64Content (Nat64.fromNat(0));
+        };
+        var protocolEntityIdObject = {
+          key = "protocolEntityId";
+          val: Types.MetadataVal = #TextContent "";
+        };
+          // ... and fill them with space's current data
+        for (i in token.metadata[0].key_val_data.keys()) {
+          if (token.metadata[0].key_val_data[i].key == "creator") {
             creatorObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
           } else if (token.metadata[0].key_val_data[i].key == "creationTime") {
             creationTimeObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
@@ -484,7 +559,10 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
             key = "ownerContactInfo";
             val = #TextContent (updatedUserSpaceData.updatedOwnerContactInfo);
           },
-          aboutDescriptionObject,
+          {
+            key = "aboutDescription";
+            val = #TextContent (updatedUserSpaceData.updatedAboutDescription);
+          },
           {
             key = "spaceDescription";
             val = #TextContent (updatedUserSpaceData.updatedSpaceDescription);
@@ -535,10 +613,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     };
   };
-
-// Protocol integration
-  private let protocol  : Protocol.Interface  = actor(Protocol.CANISTER_ID);
-
 
 // HTTP interface
   public query func http_request(request : HTTP.Request) : async HTTP.Response {
@@ -662,9 +736,9 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
 */
 // 1 MB is the max size for a single file
 let oneMB : Nat = 1048576; // 1 MB
-private let maxFileSize : Nat = oneMB; 
-private let maxTotalSize : Nat = 10 * oneMB;
-private let maxFiles : Nat = 10;
+private let maxFileSize : Nat = 2 * oneMB;
+private let maxTotalSize : Nat = 25 * oneMB;
+private let maxFiles : Nat = 15;
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
@@ -708,7 +782,7 @@ private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
 };
 
 /*
- * Function retrives all the FileInfo (i.e files) associated with the user account
+ * Function retrieves all the FileInfo (i.e files) associated with the user account
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
@@ -726,9 +800,37 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
                 userFileInfo.add(checkedFileInfo);
             }
         };
-
       };      
       return userFileInfo;      
+      };
+  };
+};
+
+/*
+ * Function retrieves the id and name for each file associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the FileIdAndName structs for the user account which contain the file and other relevant information
+*/
+private func getUserFileIdsAndNames(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.FileIdAndName> {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return Buffer.Buffer<FileTypes.FileIdAndName>(0); };
+    case (?userRecord) { 
+      var userFileIdsAndNames = Buffer.Buffer<FileTypes.FileIdAndName>(userRecord.file_ids.size());
+      for (file_id in userRecord.file_ids.vals())
+      {
+        let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
+          switch (retrievedFileInfo) {
+            case(null) {};
+            case(?checkedFileInfo) {
+              let fileIdAndName = {
+                file_id = file_id;
+                file_name = checkedFileInfo.file_name;
+              };
+              userFileIdsAndNames.add(fileIdAndName);
+            }
+        };
+      };      
+      return userFileIdsAndNames;      
       };
   };
 };
@@ -744,13 +846,14 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
  *          it claims to be.
 */
 private func isValidFileExtension(fileName : Text) : Bool {
-  let validExtensions : [Text] = ["glb", "gltf" ];
+  let validExtensions : [Text] = ["glb", "gltf", "jpg", "jpeg", "png", "gif", "svg", "mp4", "mov"];
   var extensionMatched : Bool = false;
   for (extension in validExtensions.vals())
   {
     if (Text.endsWith(fileName, #text extension))
     {
       extensionMatched := true;
+      return extensionMatched;
     };
   };
 
@@ -865,7 +968,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileNames() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
   return #Ok(#FileNames(Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name)));
@@ -875,10 +978,19 @@ public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
  * Public Function which displays all the file ids that the user has uploaded to their account
  * @return An array of text that contain all the file ids uploaded to the current users account
 */
-public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileIds() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFileIds = getUserFileIds(user);
   return #Ok(#FileIds(userFileIds));
+};
+
+/*
+ * Public Function which returns the id and name for each file that the user has uploaded to their account
+ * @return An array of objects that contain the file id and name for each file that the user has uploaded to their account
+*/
+public shared query ({caller}) func listUserFileIdsAndNames() : async FileTypes.FileResult {
+  let userFileIdsAndNames = getUserFileIdsAndNames(caller);
+  return #Ok(#FileIdsAndNames(userFileIdsAndNames.toArray()));
 };
 
 /*

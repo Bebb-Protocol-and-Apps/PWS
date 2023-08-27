@@ -34,6 +34,6 @@
     {#if loading === "stoic"}
         <img class="h-6 block h-" src={spinner} alt="loading animation" />
     {:else}
-        stoic
+        Stoic
     {/if}
 </Button>

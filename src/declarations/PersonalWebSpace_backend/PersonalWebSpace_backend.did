@@ -6,6 +6,7 @@ type UserRecord =
 type UpdateMetadataValuesInput = 
  record {
    id: TokenId;
+   updatedAboutDescription: text;
    updatedOwnerContactInfo: text;
    updatedOwnerName: text;
    updatedSpaceData: opt text;
@@ -79,8 +80,9 @@ type PersonalWebSpace =
    getUserRecord: () -> (FileResult);
    greet: (text) -> (text);
    http_request: (Request) -> (Response) query;
-   listUserFileIds: () -> (FileResult);
-   listUserFileNames: () -> (FileResult);
+   listUserFileIds: () -> (FileResult) query;
+   listUserFileIdsAndNames: () -> (FileResult) query;
+   listUserFileNames: () -> (FileResult) query;
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -91,6 +93,7 @@ type PersonalWebSpace =
    symbolDip721: () -> (text) query;
    totalSupplyDip721: () -> (nat64) query;
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
+   updateSpaceEntityId: (TokenId, text) -> (NftResult);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
    uploadUserFile: (text, File) -> (FileResult);
  };
@@ -186,6 +189,7 @@ type FileResultSuccessOptions =
    File: FileInfo;
    FileId: text;
    FileIds: vec text;
+   FileIdsAndNames: vec FileIdAndName;
    FileNames: vec text;
    Other: text;
    Success;
@@ -201,6 +205,11 @@ type FileInfo =
    file_content: blob;
    file_name: text;
    owner_principal: text;
+ };
+type FileIdAndName = 
+ record {
+   file_id: text;
+   file_name: text;
  };
 type File = blob;
 type ExtendedMetadataResult = 
