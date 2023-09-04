@@ -243,6 +243,53 @@
     };
   };
 
+  const addLinkButtonToToolbar = (toolbar) => {
+    // Create a new anchor element
+    const newButton = document.createElement("a");
+    // Add required properties to the anchor element
+    newButton.title = "link";
+    newButton.className = "button fa fa-external-link";
+    // Add click event listener to the new button
+    newButton.addEventListener("click", function() {
+      // Remove 'active' class from other toolbar buttons
+      const toolbarButtons = toolbar.querySelectorAll(".button");
+      toolbarButtons.forEach(button => button.classList.remove("active"));
+      // Add 'active' class to this button
+      newButton.classList.add("active");
+      // @ts-ignore
+      if (AFRAME.INSPECTOR.selectedEntity) {
+        // Show a popup for URL input
+        const url = prompt("Enter the URL to link the selected item. The link will be displayed when the item is clicked.");
+        if (isValidUrl(url)) {
+          // Here you can handle the URL, for example, attach it to the selected item
+          // @ts-ignore
+          AFRAME.INSPECTOR.selectedEntity.setAttribute('new-tab-link', { href: url });
+        } else {
+          alert("The URL you entered is not valid. Please try again.");
+        };
+      } else {
+        alert("Please select an item in the scene to add a link to.");
+      };
+      newButton.classList.remove("active");
+    });
+    // Add the new button to the toolbar (as first child)
+    toolbar.prepend(newButton);
+  };
+
+  const customizeCentralToolbar = () => {
+    // Get the toolbar element by its ID
+    const toolbar = document.getElementById("transformToolbar");
+    if(toolbar) {
+      // Add a new button for adding a URL link to an item to the toolbar
+      addLinkButtonToToolbar(toolbar);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        customizeCentralToolbar();
+      }, 500);
+    };
+  };
+
   // Edit mode options
   //  Function to toggle whether any Edit Mode option's popup is open
   let openEditModelPopup = false;
@@ -1073,6 +1120,8 @@
     customizeLeftPanel();
     // Customize features on the Right Panel
     customizeRightPanel();
+    // Customize the toolbar (top center)
+    customizeCentralToolbar();
   };
 
   const editButtonOnClick = async () => {
