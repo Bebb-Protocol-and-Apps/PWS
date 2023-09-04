@@ -8,6 +8,7 @@
 
   export let space;
   export let entityIdToLinkTo: string = ""; // If Entity Id is provided, Space should include a Link button to that Entity
+  export let spaceIframeHeight: string = "auto";
 
   const spaceURL =
     process.env.NODE_ENV !== "development"
@@ -101,10 +102,8 @@
 </script>
 
 <div class="responsive">
-  <div class="space space-y-1"> 
-    <a target="_blank" rel="noreferrer" href={spaceURL} >
-      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-    </a>
+  <div class="space space-y-1">
+    <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height={spaceIframeHeight} referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
     {#if isViewerSpaceOwner() && entityIdToLinkTo !== ""}
       {#if linkCreationInProgress}
         <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Linking...</button>
