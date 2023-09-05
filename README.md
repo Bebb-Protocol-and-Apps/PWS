@@ -121,6 +121,25 @@ dfx deploy --network testing --argument "(
 )" PersonalWebSpace_backend
 dfx deploy --network testing PersonalWebSpace_frontend
 ```
+
+Alex Staging Canisters:
+```bash
+dfx deploy --network alexStaging --argument "(
+  principal\"$(dfx identity get-principal)\",
+  record {
+    logo = record {
+      logo_type = \"image/png\";
+      data = \"\";
+    };
+    name = \"PersonalWebSpace\";
+    symbol = \"PWS\";
+    maxLimit = 65535;
+  }
+)" PersonalWebSpace_backend
+
+dfx deploy --network ic
+```
+
 Production Canisters:
 ```bash
 dfx deploy --network ic --argument "(
