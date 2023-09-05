@@ -135,11 +135,22 @@ export const createStore = ({
       return;
     };
 
+    const protocolActor = createProtocolCanisterActor(protocolCanisterId, {
+      agentOptions: {
+        identity,
+        host: HOST,
+      },
+    });
+    if (!protocolActor) {
+      console.warn("couldn't create protocol actor");
+    };
+
     //let accounts = JSON.parse(await identity.accounts());
 
     update((state) => ({
       ...state,
       backendActor,
+      protocolActor,
       principal: identity.getPrincipal(),
       //accountId: accounts[0].address, // we take the default account associated with the identity
       accountId: null,

@@ -167,8 +167,8 @@
     };
 
 // Owner clicked to delete a Neighbor
-    const deleteSpaceNeighbor = async (neighborProtocolEntityId) => {
     // neighborProtocolEntityId: internal id in Bebb Protocol of the Neighbor to be deleted
+    const deleteSpaceNeighbor = async (neighborProtocolEntityId) => {
         const spaceEntityId = extractSpaceEntityId();
         if (neighborProtocolEntityId && spaceEntityId && isViewerSpaceOwner()) {
             // Find id of Bridge between Space's and Neighbor's Entities in Bebb Protocol (note: there might be multiple)
