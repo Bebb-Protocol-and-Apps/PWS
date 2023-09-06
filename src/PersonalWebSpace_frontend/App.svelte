@@ -1,9 +1,9 @@
 <script lang="ts">
   import Router from "svelte-spa-router";
 
-  import Login from "./components/Login.svelte";
   import Intro from "./pages/Intro.svelte";
   import CreateSpace from "./pages/CreateSpace.svelte";
+  import MySpaces from "./pages/MySpaces.svelte";
   import Space from "./pages/Space.svelte";
   import ExploreSpaces from "./pages/ExploreSpaces.svelte";
   import DefaultRoom0 from "./pages/DefaultRoom0.svelte";
@@ -20,6 +20,7 @@
   const routes = {
     // Exact path (with /# in front of route)
     "/": Intro,
+    "/myspaces": MySpaces,
     "/create": CreateSpace,
     "/space/:spaceId": Space,
     "/explore": ExploreSpaces,
