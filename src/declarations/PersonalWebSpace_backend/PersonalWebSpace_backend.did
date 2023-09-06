@@ -65,6 +65,7 @@ type PersonalWebSpace =
    createSpace: (text) -> (NftResult);
    deleteEmailSubscriber: (text) -> (bool);
    deleteFile: (text) -> (FileResult);
+   deleteUserSpace: (TokenId) -> (NftResult);
    getCallerSpaces: () -> (vec Nft) query;
    getEmailSubscribers: () -> (vec record {
                                      text;

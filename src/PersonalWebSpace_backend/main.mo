@@ -614,6 +614,26 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     };
   };
 
+  // Delete a Space (owner only)
+  public shared({ caller }) func deleteUserSpace(idOfSpaceToDelete : Types.TokenId) : async Types.NftResult {
+    switch (List.get(nfts, Nat64.toNat(idOfSpaceToDelete))) {
+      case (null) {
+        return #Err(#InvalidTokenId);
+      };
+      case (?token) {
+        // only owner may delete
+        if (token.owner != caller) {
+          return #Err(#Unauthorized);
+        } else {
+          let remainingNfts = List.filter(nfts, func(token: Types.Nft) : Bool { token.id != idOfSpaceToDelete });
+          nfts := remainingNfts;
+          transactionId += 1;
+          return #Ok(token);
+        };
+      };
+    };
+  };
+
 // HTTP interface
   public query func http_request(request : HTTP.Request) : async HTTP.Response {
     //Debug.print(debug_show("http_request test"));
