@@ -24,7 +24,7 @@
   >login</button
 >
 
-<p>You need to be logged in to create and update spaces. If you want to see others' spaces first, click on the Explore tab.</p>
+<p>You need to be logged in to create, view and update your Spaces. If you want to see others' Spaces first, click on the Explore tab.</p>
 
 <div class={openModal ? "" : "hidden"}>
   <LoginModal {toggleModal} />
