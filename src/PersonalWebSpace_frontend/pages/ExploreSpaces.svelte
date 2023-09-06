@@ -14,13 +14,22 @@
   let loading = true;
   let loadedRandomSpaces = [];
   let currentIndex = 0;
+  let loadingNewSpaces = false;
 
   const nextSpace = async () => {
+    if (loadingNewSpaces) {
+      return;
+    };
     if (currentIndex < loadedRandomSpaces.length - 2) {
       currentIndex++;
     } else {
-      currentIndex++;
-      await loadUserSpaces();
+      if (currentIndex + 1 < loadedRandomSpaces.length) {
+        currentIndex++;
+        await loadUserSpaces();
+      } else {
+        await loadUserSpaces();
+        currentIndex++;
+      };
     }
   };
 
@@ -31,6 +40,7 @@
   };
 
   const loadUserSpaces = async () => {
+    loadingNewSpaces = true;
     let requestPromises = [];
     for (var i = 0; i < numberOfRandomSpacesToLoad; i++) {
       requestPromises.push($store.backendActor.getRandomSpace()); // Send requests in parallel and then await all to speed up
@@ -46,6 +56,7 @@
     };
     loadedRandomSpaces = [...loadedRandomSpaces, ...randomSpaces];
     loading = false;
+    loadingNewSpaces = false;
   };
 
   onMount(loadUserSpaces);
@@ -66,9 +77,14 @@
       {:else}
         <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Previous</button>
       {/if}
-      <button on:click={nextSpace} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Next</button>
+      {#if loadingNewSpaces}
+        <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Next</button>
+        <img class="h-12 mx-auto" src={spinner} alt="loading animation" />
+      {:else}
+        <button on:click={nextSpace} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Next</button>
+      {/if}
       {#key currentIndex}
-        <UserSpace space={loadedRandomSpaces[currentIndex]} spaceIframeHeight={"500px"}/>
+        <UserSpace space={loadedRandomSpaces[currentIndex] ? loadedRandomSpaces[currentIndex] : loadedRandomSpaces[currentIndex--]} spaceIframeHeight={"500px"}/>
       {/key}
     </div>
   {/if}
