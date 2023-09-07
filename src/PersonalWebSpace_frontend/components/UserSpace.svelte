@@ -72,6 +72,31 @@
     linkCreationInProgress = false;
   };
 
+// Delete user space (owner only with confirmation as non-reversible)
+  const deleteUserSpace = async () => {
+    if (!isViewerSpaceOwner()) {
+      alert("You are not the owner of this Space!");
+      return;
+    } else {
+      if (confirm("Are you sure you want to delete this Space? This is not reversible!")) {
+        try {
+          const deleteSpaceResponse = await $store.backendActor.deleteUserSpace(space.id);
+          // @ts-ignore
+          if (deleteSpaceResponse && deleteSpaceResponse.Ok) {
+            alert("Space deleted successfully!");
+            window.location.reload();
+          } else {
+            console.error("Delete Space deleteSpaceResponse.Err", deleteSpaceResponse.Err);
+            alert("Space deletion failed! Please try again.");
+          };
+        } catch(err) {
+          console.error("Delete Space err", err);
+          alert("Space deletion failed!");
+        };
+      };
+    };
+  };
+
 // Extract metadata fields from Space NFT
   let spaceName = "";
   let spaceDescription = "";
@@ -119,6 +144,9 @@
       {/if}
     {/if}
     <button on:click={() => window.open(spaceURL,"_blank")} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button>
+    {#if isViewerSpaceOwner()}
+      <button on:click={() => deleteUserSpace()} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Delete</button>
+    {/if}
     <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
     <div class="space-details-content">
       <p>Owner: {space.owner}</p>

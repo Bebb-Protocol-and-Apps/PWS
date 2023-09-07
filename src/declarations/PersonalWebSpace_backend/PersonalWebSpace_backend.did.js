@@ -147,6 +147,7 @@ export const idlFactory = ({ IDL }) => {
     'createSpace' : IDL.Func([IDL.Text], [NftResult], []),
     'deleteEmailSubscriber' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteFile' : IDL.Func([IDL.Text], [FileResult], []),
+    'deleteUserSpace' : IDL.Func([TokenId], [NftResult], []),
     'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
     'getEmailSubscribers' : IDL.Func(
         [],

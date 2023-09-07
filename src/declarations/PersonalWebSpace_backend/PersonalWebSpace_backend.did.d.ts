@@ -87,6 +87,7 @@ export interface PersonalWebSpace {
   'createSpace' : ActorMethod<[string], NftResult>,
   'deleteEmailSubscriber' : ActorMethod<[string], boolean>,
   'deleteFile' : ActorMethod<[string], FileResult>,
+  'deleteUserSpace' : ActorMethod<[TokenId], NftResult>,
   'getCallerSpaces' : ActorMethod<[], Array<Nft>>,
   'getEmailSubscribers' : ActorMethod<[], Array<[string, EmailSubscriber]>>,
   'getFile' : ActorMethod<[string], FileResult>,
