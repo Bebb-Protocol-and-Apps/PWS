@@ -27,6 +27,7 @@ import Stoic "./EXT/Stoic";
 import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
 import Blob "mo:base/Blob";
+import Hash "mo:base/Hash";
 
 
 
@@ -353,11 +354,30 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
   };
 
   public shared query ({caller}) func getCallerSpaces() : async [Types.Nft] {
-    let spaces = List.filter(nfts, func(token: Types.Nft) : Bool { token.owner == caller });
+    let spaces = List.filter(nfts, func(token: Types.Nft) : Bool { 
+      switch (token.owner == caller) {
+        case (true) {
+          if (hasSpaceBeenDeleted(token.id)) {
+            // Space has already been deleted
+            return false;
+          } else {
+            return true;
+          };
+        };
+        case (false) {
+          // caller is not owner
+          return false;
+        };
+      }
+    });
     return List.toArray(spaces); 
   };
 
   public shared query ({caller}) func getSpace(spaceId : Types.TokenId) : async Types.NftResult {
+    if (hasSpaceBeenDeleted(spaceId)) {
+      // Space has already been deleted
+      return #Err(#InvalidTokenId);
+    };
     let item = List.get(nfts, Nat64.toNat(spaceId));
     switch (item) {
       case (null) {
@@ -387,7 +407,17 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           return #Err(#Other("Error retrieving a random space"));
         };
         case (?randomNumber) {
-          let spaceId = randomNumber % numberOfSpaces;
+          var spaceId = randomNumber % numberOfSpaces;
+          // ensure Space has not been deleted
+          let idsRange = Iter.range(0, 3);
+          label l {
+            for (i in idsRange) {
+              switch(hasSpaceBeenDeleted(Nat64.fromNat(spaceId + i))) {
+                case (true) { };
+                case (false) { spaceId := spaceId + i; break l() };
+              };
+            };
+          };
           let item = List.get(nfts, spaceId);
           switch (item) {
             case (null) {
@@ -615,21 +645,52 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
   };
 
   // Delete a Space (owner only)
-  public shared({ caller }) func deleteUserSpace(idOfSpaceToDelete : Types.TokenId) : async Types.NftResult {
-    switch (List.get(nfts, Nat64.toNat(idOfSpaceToDelete))) {
+  // Spaces are NFTs and thus not deleted, they are hidden such that they may not be retrieved anymore
+  // To keep track of "deleted", i.e. hidden, Spaces we use a HashMap
+  private var deletedSpaces : HashMap.HashMap<Nat, Types.DeletedNftRecord> = HashMap.HashMap(0, Nat.equal, Hash.hash);
+  // Stable version of the deleted Spaces HashMap for cansiter upgrades
+  stable var deletedSpacesStable : [(Nat, Types.DeletedNftRecord)] = [];
+
+  private func hasSpaceBeenDeleted(spaceId : Types.TokenId) : Bool {
+    switch (deletedSpaces.get(Nat64.toNat(spaceId))) {
       case (null) {
-        return #Err(#InvalidTokenId);
+        return false;
       };
-      case (?token) {
-        // only owner may delete
-        if (token.owner != caller) {
-          return #Err(#Unauthorized);
-        } else {
-          let remainingNfts = List.filter(nfts, func(token: Types.Nft) : Bool { token.id != idOfSpaceToDelete });
-          nfts := remainingNfts;
-          transactionId += 1;
-          return #Ok(token);
+      case (?record) {
+        return true;
+      };
+    };
+  };
+
+  public shared({ caller }) func deleteUserSpace(idOfSpaceToDelete : Types.TokenId) : async Types.NftResult {
+    let spaceId = Nat64.toNat(idOfSpaceToDelete);
+    switch (hasSpaceBeenDeleted(idOfSpaceToDelete)) {
+      case (false) {
+        switch (List.get(nfts, spaceId)) {
+          case (null) {
+            // Space doesn't exist
+            return #Err(#InvalidTokenId);
+          };
+          case (?token) {
+            // only owner may delete
+            if (token.owner != caller) {
+              return #Err(#Unauthorized);
+            } else {
+              // add deleted Space to HashMap and thus hide
+              deletedSpaces.put(spaceId, {
+                id = token.id;
+                deleted_by = caller;
+                deletion_time = Nat64.fromNat(Int.abs(Time.now()));
+              });              
+              transactionId += 1;
+              return #Ok(token);
+            };
+          };
         };
+      };
+      case (true) {
+        // Space has already been deleted
+        return #Err(#InvalidTokenId);
       };
     };
   };
@@ -667,6 +728,17 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     } else if (Text.contains(request.url, #text("spaceId"))) {
       let spaceId = Iter.toArray(Text.tokens(request.url, #text("spaceId=")))[1];
+      if (hasSpaceBeenDeleted(Nat64.fromNat(textToNat(spaceId)))) {
+        // Space has already been deleted
+        let response = {
+          body = Text.encodeUtf8("Invalid spaceId");
+          headers = [];
+          status_code = 404 : Nat16;
+          streaming_strategy = null;
+          upgrade = false;
+        };
+        return(response);
+      };
       let item = List.get(nfts, textToNat(spaceId));
       switch (item) {
         case (null) {
@@ -1157,6 +1229,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     fileDatabaseStable := Iter.toArray(fileDatabase.entries());
     userFileRecordsStable := Iter.toArray(userFileRecords.entries());
     emailSubscribersStorageStable := Iter.toArray(emailSubscribersStorage.entries());
+    deletedSpacesStable := Iter.toArray(deletedSpaces.entries());
   };
 
   system func postupgrade() {
@@ -1166,5 +1239,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     userFileRecordsStable := [];
     emailSubscribersStorage := HashMap.fromIter(Iter.fromArray(emailSubscribersStorageStable), emailSubscribersStorageStable.size(), Text.equal, Text.hash);
     emailSubscribersStorageStable := [];
+    deletedSpaces := HashMap.fromIter(Iter.fromArray(deletedSpacesStable), deletedSpacesStable.size(), Nat.equal, Hash.hash);
+    deletedSpacesStable := [];
   };
 };

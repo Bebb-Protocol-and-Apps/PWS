@@ -94,6 +94,12 @@ module {
     #TextToTextAssocListContent: AssocList.AssocList<Text, Text>; // added
   };
 
+  public type DeletedNftRecord = {
+    id: TokenId;
+    deleted_by: Principal;
+    deletion_time: Nat64;
+  };
+
   public type MintReceipt = Result<MintReceiptPart, ApiError>;
 
   public type MintReceiptPart = {
