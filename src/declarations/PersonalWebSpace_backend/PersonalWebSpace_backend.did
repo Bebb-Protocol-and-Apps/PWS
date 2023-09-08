@@ -65,7 +65,6 @@ type PersonalWebSpace =
    createSpace: (text) -> (NftResult);
    deleteEmailSubscriber: (text) -> (bool);
    deleteFile: (text) -> (FileResult);
-   deleteUserSpace: (TokenId) -> (NftResult);
    getCallerSpaces: () -> (vec Nft) query;
    getEmailSubscribers: () -> (vec record {
                                      text;
@@ -80,6 +79,7 @@ type PersonalWebSpace =
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
    getUserRecord: () -> (FileResult);
    greet: (text) -> (text);
+   hideUserSpace: (TokenId) -> (NftResult);
    http_request: (Request) -> (Response) query;
    listUserFileIds: () -> (FileResult) query;
    listUserFileIdsAndNames: () -> (FileResult) query;
