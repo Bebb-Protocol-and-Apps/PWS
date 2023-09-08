@@ -1499,6 +1499,7 @@
       {#if open}
         {showNeighborsView=false}
         {showSpaceInfoView = false}
+        {remove3dNeighborsFromScene()}
         <div class="spaceMenu">
           <!-- Edit Button may only be displayed if logged-in user is space's owner -->
           {#if isViewerSpaceOwner()}

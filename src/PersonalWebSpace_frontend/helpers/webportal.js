@@ -56,7 +56,7 @@ AFRAME.registerComponent('web-portal', {
 
     // Transition to the portal's URL on click
     if (data.enableOnClickTransition == true) {
-      el.setAttribute('link', { href: data.url });
+      el.setAttribute('new-tab-link', { href: data.url });
     };
 
     const title = document.createElement('a-text');
