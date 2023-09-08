@@ -137,7 +137,7 @@ dfx deploy --network alexStaging --argument "(
   }
 )" PersonalWebSpace_backend
 
-dfx deploy --network ic
+dfx deploy --network alexStaging
 ```
 
 Production Canisters:
