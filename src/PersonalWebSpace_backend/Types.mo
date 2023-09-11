@@ -94,6 +94,12 @@ module {
     #TextToTextAssocListContent: AssocList.AssocList<Text, Text>; // added
   };
 
+  public type HiddenNftRecord = {
+    id: TokenId;
+    deleted_by: Principal;
+    deletion_time: Nat64;
+  };
+
   public type MintReceipt = Result<MintReceiptPart, ApiError>;
 
   public type MintReceiptPart = {
@@ -107,6 +113,7 @@ module {
     updatedOwnerContactInfo: Text;
     updatedSpaceDescription: Text;
     updatedSpaceName: Text;
+    updatedAboutDescription : Text;
     updatedSpaceData: ?Text;
   };
 

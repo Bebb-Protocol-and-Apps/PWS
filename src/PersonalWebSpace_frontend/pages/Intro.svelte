@@ -1,91 +1,74 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import { store } from "../store";
-  import Login from "../components/Login.svelte";
   import Button from "../components/Button.svelte";
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
-  import UserSpaces from "../components/UserSpaces.svelte";
-
-  let hasLoadedSpaces = false;
-  let loadedUserSpaces = [];
-
-  const createNewUserSpace = async (element) => {
-    element.setAttribute("disabled", true);
-    document.getElementById("createSubtext").innerText = "Creating your Personal Web Space, just a moment...";
-    
-    const resp = await fetch("defaultRoom.html"); // Fetches default space each user gets initially
-    const defaultSpaceHtml = await resp.text();
-    const space = await $store.backendActor.createSpace(defaultSpaceHtml);
-    document.getElementById("createSubtext").innerText = "Ohh yeah, you just got yourself a new Personal Web Space!";
-    
-    // Reload user's spaces
-    loadUserSpaces();
-
-    element.removeAttribute("disabled");
-  };
-
-  const loadUserSpaces = async () => {
-    const userSpaces = await $store.backendActor.getCallerSpaces();
-    const numberOfSpacesUserOwns = userSpaces.length;
-    if (numberOfSpacesUserOwns < 1) {
-      document.getElementById("spacesSubtext").innerText = "You don't own any spaces yet. Get your Personal Web Space now by clicking on the Create tab!";
-    } else {
-      document.getElementById("spacesSubtext").innerText = numberOfSpacesUserOwns === 1 
-        ? `Big success, you own ${numberOfSpacesUserOwns} space! Let's take a look:`
-        : `Big success, you own ${numberOfSpacesUserOwns} spaces! Let's take a look:`;
-
-      loadedUserSpaces = userSpaces;
-      hasLoadedSpaces = true;
-    }
-  };
 </script>
 
 <Topnav />
 
-<div class="py-7 items-center leading-8 text-center text-xl font-semibold">
-  <h3>Want to have your own Virtual Home?</h3>
-  <h3>Want to become part of the Open Metaverse Neighborhood?</h3>
-  <h3>Want to have your Personal Web Space as a 3D webpage?</h3>
+<!-- Main Hero Section -->
+<div class="intro-hero-section">
+  <img src="./FutureWebInitiative_OpenInternetMetaverse_banner.png" alt="Open Internet Metaverse banner" class="intro-hero-background-image">
+  <div class="intro-hero-overlay">
+    <h1>Discover Your Space in the Open Internet Metaverse</h1>
+    <p class="intro-lead-text">Experience an open, decentralized, 3D internet where you own your virtual home.</p>
+  </div>
 </div>
 
-<section id="login" class="py-7 space-y-6 items-center text-center bg-slate-100">
-  {#if !$store.isAuthed}
-    <Login />
-  {:else}
-    <h3 class="font-bold">You're Logged In</h3>
-    <div>Principal: {$store.principal}</div>
-    <div>AccountId: {$store.accountId}</div>
-    <Button on:click={() => store.disconnect()}>disconnect</Button>
-  {/if}
+<!-- Create Space Section -->
+<section id="create" class="intro-section-container">
+  <h3 class="intro-section-header">Craft Your Personal Universe</h3>
+  <p class="intro-section-text">
+    Create a fully customizable virtual 3D room where you can express yourself. Plus, each space you generate is an NFT sent directly to your wallet.
+  </p>
+  <button
+    on:click={() => push("#/create")}
+    class="flex items-center justify-center disabled:shadow-none hover:shadow shadow-black dark:shadow-white text-xl lg:text-base 2xl:text-xl bg-blue-300 hover:bg-blue-500 dark:bg-black border-2 border-black dark:border-white dark:text-white h-12 lg:h-10 w-full rounded-3xl font-mono -mb-0.5"
+  >Create Your Space</button>
 </section>
 
-<section id="create" class="py-7 space-y-6 items-center text-center">
-  <h3 class="font-bold">Create a new Personal Web Space</h3>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create Space</button>
-    <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-  {:else}
-    <button type='button' id='createButton' on:click={() => push("#/create")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create Space</button>
-    <p id='createSubtext'>Click and we'll generate a 3D room for you (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-  {/if}
+<!-- View Spaces Section -->
+<section id="spaces" class="intro-section-container intro-bg-alternate">
+  <h3 class="intro-section-header">Explore Your Metaverse</h3>
+  <p class="intro-section-text">
+    View the 3D rooms you've already created and journey through your personalized metaverse.
+  </p>
+  <button
+    on:click={() => push("#/myspaces")}
+    class="flex items-center justify-center disabled:shadow-none hover:shadow shadow-black dark:shadow-white text-xl lg:text-base 2xl:text-xl bg-blue-300 hover:bg-blue-500 dark:bg-black border-2 border-black dark:border-white dark:text-white h-12 lg:h-10 w-full rounded-3xl font-mono -mb-0.5"
+  >View My Spaces</button>
 </section>
 
-<section id="spaces" class="py-7 space-y-6 items-center text-center bg-slate-100">
-  <h3 class="font-bold">My Personal Web Spaces</h3>
-  {#if !$store.isAuthed}
-    <p id='spacesSubtext'>Log in to see which Spaces you own.</p>
-  {:else}
-    <p id='spacesSubtext'>Let's see which Spaces you own...</p>
-    {#if !hasLoadedSpaces}
-      <p hidden>{loadUserSpaces()}</p>
-    {:else}
-      <UserSpaces spaces={loadedUserSpaces} />
-    {/if}
-  {/if}
+<!-- Explore OIM Section -->
+<section id="explore" class="intro-section-container">
+  <h3 class="intro-section-header">Discover the Unknown</h3>
+  <p class="intro-section-text">
+    Embark on a journey through the Open Internet Metaverse and experience random spaces, one at a time.
+  </p>
+  <button
+    on:click={() => push("#/explore")}
+    class="flex items-center justify-center disabled:shadow-none hover:shadow shadow-black dark:shadow-white text-xl lg:text-base 2xl:text-xl bg-blue-300 hover:bg-blue-500 dark:bg-black border-2 border-black dark:border-white dark:text-white h-12 lg:h-10 w-full rounded-3xl font-mono -mb-0.5"
+  >Experience OIM Now</button>
 </section>
 
-<div class='clearfix'></div>
+<!-- Detailed Information about Open Internet Metaverse -->
+<section id="oim-detail" class="intro-section-container intro-bg-alternate">
+  <h3 class="intro-section-header">The Vision of the Open Internet Metaverse</h3>
+  <img src="./FutureWebInitiative_OpenInternetMetaverse_img.png" alt="The Vision of the Open Internet Metaverse" class="intro-detail-image">
+  
+  <p class="intro-section-text">
+    The Open Internet Metaverse is not just an alternate reality; it's an extension of the existing Internet. Our aim is to enhance digital interactions, providing users with the power to create their own 3D spaces as easily as creating a Webpage.
+  </p>
+
+  <p class="intro-section-text">
+    We leverage the Internet Computer (ICP) to provide a decentralized space where ownership, transparency, and interoperability are guaranteed. Through this, you benefit from true ownership and control.
+  </p>
+
+  <p class="intro-section-text">
+    Our mission is to reshape the way people interact online, by merging physical and virtual realities into a unified, interconnected ecosystem. Within the Open Internet Metaverse, you're not just a visitor; you're a creator, an explorer, and a stakeholder in this new digital frontier.
+  </p>
+</section>
 
 <Footer />
 
@@ -142,5 +125,82 @@
   .space-details-content {
     display: none;
     overflow: hidden;
+  }
+
+  .intro-hero-section {
+    position: relative; /* Added to make it a parent for absolute positioning */
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 0;
+    text-align: center;
+  }
+  .intro-hero-section h1 {
+    font-size: 3.5rem;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+  }
+  .intro-lead-text {
+    font-size: 1.7rem;
+    color: #ddd;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+  }
+  .intro-hero-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Set z-index to -1 to make it below the text content */
+    object-fit: cover; /* Cover the entire div without distortion */
+  }
+  .intro-hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    z-index: 0; /* Layer it above the image but below the text */
+  }
+  .intro-hero-overlay {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+  }
+  .intro-section-container {
+    padding: 4rem 0;
+    text-align: center;
+  }
+  .intro-section-header {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+  .intro-section-text {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  .intro-bg-alternate {
+    background-color: #eaf1f7;
+  }
+  .intro-detail-image {
+    display: block;
+    max-width: 400px;
+    height: auto;
+    margin: auto;
+    margin-bottom: 1rem;
   }
 </style>

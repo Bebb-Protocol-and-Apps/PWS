@@ -45,6 +45,10 @@ if (process.env.DFX_NETWORK === "ic") {
   // testing canisters on mainnet (for network testing)
   HOST = "https://icp0.io";
   appDomain = ".icp0.io";
+} else if (process.env.DFX_NETWORK === "alexStaging") {
+  // testing canisters on mainnet (for network testing for Alex)
+  HOST = "https://icp0.io";
+  appDomain = ".icp0.io";
 } else {
   HOST = "https://ic0.app";
 };
@@ -131,11 +135,22 @@ export const createStore = ({
       return;
     };
 
+    const protocolActor = createProtocolCanisterActor(protocolCanisterId, {
+      agentOptions: {
+        identity,
+        host: HOST,
+      },
+    });
+    if (!protocolActor) {
+      console.warn("couldn't create protocol actor");
+    };
+
     //let accounts = JSON.parse(await identity.accounts());
 
     update((state) => ({
       ...state,
       backendActor,
+      protocolActor,
       principal: identity.getPrincipal(),
       //accountId: accounts[0].address, // we take the default account associated with the identity
       accountId: null,

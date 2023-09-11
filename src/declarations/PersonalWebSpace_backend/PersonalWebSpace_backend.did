@@ -6,6 +6,7 @@ type UserRecord =
 type UpdateMetadataValuesInput = 
  record {
    id: TokenId;
+   updatedAboutDescription: text;
    updatedOwnerContactInfo: text;
    updatedOwnerName: text;
    updatedSpaceData: opt text;
@@ -78,9 +79,11 @@ type PersonalWebSpace =
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
    getUserRecord: () -> (FileResult);
    greet: (text) -> (text);
+   hideUserSpace: (TokenId) -> (NftResult);
    http_request: (Request) -> (Response) query;
-   listUserFileIds: () -> (FileResult);
-   listUserFileNames: () -> (FileResult);
+   listUserFileIds: () -> (FileResult) query;
+   listUserFileIdsAndNames: () -> (FileResult) query;
+   listUserFileNames: () -> (FileResult) query;
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -187,6 +190,7 @@ type FileResultSuccessOptions =
    File: FileInfo;
    FileId: text;
    FileIds: vec text;
+   FileIdsAndNames: vec FileIdAndName;
    FileNames: vec text;
    Other: text;
    Success;
@@ -202,6 +206,11 @@ type FileInfo =
    file_content: blob;
    file_name: text;
    owner_principal: text;
+ };
+type FileIdAndName = 
+ record {
+   file_id: text;
+   file_name: text;
  };
 type File = blob;
 type ExtendedMetadataResult = 

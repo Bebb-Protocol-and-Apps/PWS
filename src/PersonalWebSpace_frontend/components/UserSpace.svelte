@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Principal } from "@dfinity/principal";
   import type { BridgeInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import { onMount } from "svelte";
@@ -8,6 +7,7 @@
 
   export let space;
   export let entityIdToLinkTo: string = ""; // If Entity Id is provided, Space should include a Link button to that Entity
+  export let spaceIframeHeight: string = "auto";
 
   const spaceURL =
     process.env.NODE_ENV !== "development"
@@ -26,12 +26,12 @@
 // Extract Space's Entity Id in Bebb Protocol from Space NFT
   const extractSpaceEntityId = () => {
     if (space && space.metadata && space.metadata.length > 0) {
-        for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
-            let fieldKey = space.metadata[0].key_val_data[j].key;
-            if (fieldKey === "protocolEntityId") {
-                return space.metadata[0].key_val_data[j].val.TextContent;
-            };
+      for (var j = 0; j < space.metadata[0].key_val_data.length; j++) {
+        let fieldKey = space.metadata[0].key_val_data[j].key;
+        if (fieldKey === "protocolEntityId") {
+          return space.metadata[0].key_val_data[j].val.TextContent;
         };
+      };
     };
   };
 
@@ -46,14 +46,14 @@
     if (entityIdToLinkTo !== "" && spaceEntityId) {
       // Create link as Bridge from Space in Bebb Protocol
       const bridgeEntityInitiationObject : BridgeInitiationObject = {
-          settings: [],
-          name: [],
-          description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
-          keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-          entitySpecificFields: [],
-          bridgeType: { 'IsRelatedto' : null },
-          fromEntityId: spaceEntityId,
-          toEntityId: entityIdToLinkTo,
+        settings: [],
+        name: [],
+        description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
+        keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
+        entitySpecificFields: [],
+        bridgeType: { 'IsRelatedto' : null },
+        fromEntityId: spaceEntityId,
+        toEntityId: entityIdToLinkTo,
       };
       try {
           const createBridgeResponse = await $store.protocolActor.create_bridge(bridgeEntityInitiationObject);
@@ -64,11 +64,38 @@
             errorCreatingLink = true;
           };
       } catch(err) {
-          console.error("Link Space err", err);
-          errorCreatingLink = true;
+        console.error("Link Space err", err);
+        errorCreatingLink = true;
       };
     };
     linkCreationInProgress = false;
+  };
+
+// Delete user space (owner only with confirmation as non-reversible)
+  let spaceWasDeleted = false;
+  const deleteUserSpace = async () => {
+    if (!isViewerSpaceOwner()) {
+      alert("You are not the owner of this Space!");
+      return;
+    } else {
+      if (confirm("Are you sure you want to delete this Space? This is not reversible!")) {
+        try {
+          const deleteSpaceResponse = await $store.backendActor.hideUserSpace(space.id);
+          // @ts-ignore
+          if (deleteSpaceResponse && deleteSpaceResponse.Ok) {
+            spaceWasDeleted = true;
+            alert("Space deleted successfully!");
+          } else {
+            // @ts-ignore
+            console.error("Delete Space deleteSpaceResponse.Err", deleteSpaceResponse.Err);
+            alert("Space deletion failed! Please try again.");
+          };
+        } catch(err) {
+          console.error("Delete Space err", err);
+          alert("Space deletion failed!");
+        };
+      };
+    };
   };
 
 // Extract metadata fields from Space NFT
@@ -101,10 +128,8 @@
 </script>
 
 <div class="responsive">
-  <div class="space space-y-1"> 
-    <a target="_blank" rel="noreferrer" href={spaceURL} >
-      <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-    </a>
+  <div class="space space-y-1">
+    <iframe src={spaceURL} title="Your flaming hot Personal Web Space" width="100%" height={spaceIframeHeight} referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
     {#if isViewerSpaceOwner() && entityIdToLinkTo !== ""}
       {#if linkCreationInProgress}
         <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Linking...</button>
@@ -120,6 +145,13 @@
       {/if}
     {/if}
     <button on:click={() => window.open(spaceURL,"_blank")} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">View</button>
+    {#if isViewerSpaceOwner()}
+      {#if spaceWasDeleted}
+        <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-semibold opacity-50 cursor-not-allowed">Deleted</button>
+      {:else}
+        <button on:click={() => deleteUserSpace()} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Delete</button>
+      {/if}
+    {/if}
     <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
     <div class="space-details-content">
       <p>Owner: {space.owner}</p>

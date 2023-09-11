@@ -27,6 +27,7 @@ import Stoic "./EXT/Stoic";
 import Protocol "./Protocol";
 import Testable "mo:matchers/Testable";
 import Blob "mo:base/Blob";
+import Hash "mo:base/Hash";
 
 
 
@@ -353,11 +354,22 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
   };
 
   public shared query ({caller}) func getCallerSpaces() : async [Types.Nft] {
-    let spaces = List.filter(nfts, func(token: Types.Nft) : Bool { token.owner == caller });
+    let spaces = List.filter(nfts, func(token: Types.Nft) : Bool {
+      if (token.owner == caller and not hasSpaceBeenHidden(token.id)) {
+        return true;
+      } else {
+        // Caller is not owner or space has already been hidden
+        return false;
+      };
+    });
     return List.toArray(spaces); 
   };
 
   public shared query ({caller}) func getSpace(spaceId : Types.TokenId) : async Types.NftResult {
+    if (hasSpaceBeenHidden(spaceId)) {
+      // Space has already been hidden
+      return #Err(#InvalidTokenId);
+    };
     let item = List.get(nfts, Nat64.toNat(spaceId));
     switch (item) {
       case (null) {
@@ -387,7 +399,17 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
           return #Err(#Other("Error retrieving a random space"));
         };
         case (?randomNumber) {
-          let spaceId = randomNumber % numberOfSpaces;
+          var spaceId = randomNumber % numberOfSpaces;
+          // ensure Space has not been deleted
+          let idsRange = Iter.range(0, 3);
+          label l {
+            for (i in idsRange) {
+              switch(hasSpaceBeenHidden(Nat64.fromNat(spaceId + i))) {
+                case (true) { };
+                case (false) { spaceId := spaceId + i; break l() };
+              };
+            };
+          };
           let item = List.get(nfts, spaceId);
           switch (item) {
             case (null) {
@@ -527,10 +549,6 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
         // assemble updated space data, then update nfts list
           // create placeholder objects...
-        var aboutDescriptionObject = {
-          key = "aboutDescription";
-          val: Types.MetadataVal = #TextContent "This is my flaming hot Personal Web Space. Enjoy!";
-        };
         var creatorObject = {
           key = "creator";
           val: Types.MetadataVal = #PrincipalContent caller;
@@ -545,9 +563,7 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
         };
           // ... and fill them with space's current data
         for (i in token.metadata[0].key_val_data.keys()) {
-          if (token.metadata[0].key_val_data[i].key == "aboutDescription") {
-            aboutDescriptionObject := token.metadata[0].key_val_data[i]; // currently not used, thus remains unchanged
-          } else if (token.metadata[0].key_val_data[i].key == "creator") {
+          if (token.metadata[0].key_val_data[i].key == "creator") {
             creatorObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
           } else if (token.metadata[0].key_val_data[i].key == "creationTime") {
             creationTimeObject := token.metadata[0].key_val_data[i]; // should always remain unchanged
@@ -565,7 +581,10 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
             key = "ownerContactInfo";
             val = #TextContent (updatedUserSpaceData.updatedOwnerContactInfo);
           },
-          aboutDescriptionObject,
+          {
+            key = "aboutDescription";
+            val = #TextContent (updatedUserSpaceData.updatedAboutDescription);
+          },
           {
             key = "spaceDescription";
             val = #TextContent (updatedUserSpaceData.updatedSpaceDescription);
@@ -617,6 +636,57 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
     };
   };
 
+  // Hide a Space (owner only)
+  // Spaces are NFTs and thus not deleted, they are hidden such that they may not be retrieved anymore
+  // To keep track of "deleted", i.e. hidden, Spaces we use a HashMap
+  private var hiddenSpaces : HashMap.HashMap<Nat, Types.HiddenNftRecord> = HashMap.HashMap(0, Nat.equal, Hash.hash);
+  // Stable version of the deleted Spaces HashMap for cansiter upgrades
+  stable var hiddenSpacesStable : [(Nat, Types.HiddenNftRecord)] = [];
+
+  private func hasSpaceBeenHidden(spaceId : Types.TokenId) : Bool {
+    switch (hiddenSpaces.get(Nat64.toNat(spaceId))) {
+      case (null) {
+        return false;
+      };
+      case (?record) {
+        return true;
+      };
+    };
+  };
+
+  public shared({ caller }) func hideUserSpace(idOfSpaceToHide : Types.TokenId) : async Types.NftResult {
+    let spaceId = Nat64.toNat(idOfSpaceToHide);
+    switch (hasSpaceBeenHidden(idOfSpaceToHide)) {
+      case (false) {
+        switch (List.get(nfts, spaceId)) {
+          case (null) {
+            // Space doesn't exist
+            return #Err(#InvalidTokenId);
+          };
+          case (?token) {
+            // only owner may hide
+            if (token.owner != caller) {
+              return #Err(#Unauthorized);
+            } else {
+              // add "deleted" Space to HashMap and thus hide
+              hiddenSpaces.put(spaceId, {
+                id = token.id;
+                deleted_by = caller;
+                deletion_time = Nat64.fromNat(Int.abs(Time.now()));
+              });              
+              transactionId += 1;
+              return #Ok(token);
+            };
+          };
+        };
+      };
+      case (true) {
+        // Space has already been hidden
+        return #Err(#InvalidTokenId);
+      };
+    };
+  };
+
 // HTTP interface
   public query func http_request(request : HTTP.Request) : async HTTP.Response {
     //Debug.print(debug_show("http_request test"));
@@ -650,6 +720,17 @@ shared actor class PersonalWebSpace(custodian: Principal, init : Types.Dip721Non
       };
     } else if (Text.contains(request.url, #text("spaceId"))) {
       let spaceId = Iter.toArray(Text.tokens(request.url, #text("spaceId=")))[1];
+      if (hasSpaceBeenHidden(Nat64.fromNat(textToNat(spaceId)))) {
+        // Space has already been hidden
+        let response = {
+          body = Text.encodeUtf8("Invalid spaceId");
+          headers = [];
+          status_code = 404 : Nat16;
+          streaming_strategy = null;
+          upgrade = false;
+        };
+        return(response);
+      };
       let item = List.get(nfts, textToNat(spaceId));
       switch (item) {
         case (null) {
@@ -785,7 +866,7 @@ private func getUserFileIds(user: FileTypes.FileUserId) : [Text] {
 };
 
 /*
- * Function retrives all the FileInfo (i.e files) associated with the user account
+ * Function retrieves all the FileInfo (i.e files) associated with the user account
  * @params user: The user id associated with the account, i.e a text representation of the principal
  * @return All the FileInfo structs for the user account which contain the file and other relevant information
 */
@@ -803,9 +884,37 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
                 userFileInfo.add(checkedFileInfo);
             }
         };
-
       };      
       return userFileInfo;      
+      };
+  };
+};
+
+/*
+ * Function retrieves the id and name for each file associated with the user account
+ * @params user: The user id associated with the account, i.e a text representation of the principal
+ * @return All the FileIdAndName structs for the user account which contain the file and other relevant information
+*/
+private func getUserFileIdsAndNames(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.FileIdAndName> {
+  switch (userFileRecords.get(Principal.toText(user))) {
+    case (null) { return Buffer.Buffer<FileTypes.FileIdAndName>(0); };
+    case (?userRecord) { 
+      var userFileIdsAndNames = Buffer.Buffer<FileTypes.FileIdAndName>(userRecord.file_ids.size());
+      for (file_id in userRecord.file_ids.vals())
+      {
+        let retrievedFileInfo : ?FileTypes.FileInfo = fileDatabase.get(file_id);
+          switch (retrievedFileInfo) {
+            case(null) {};
+            case(?checkedFileInfo) {
+              let fileIdAndName = {
+                file_id = file_id;
+                file_name = checkedFileInfo.file_name;
+              };
+              userFileIdsAndNames.add(fileIdAndName);
+            }
+        };
+      };      
+      return userFileIdsAndNames;      
       };
   };
 };
@@ -943,7 +1052,7 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
  * Public Function which displays all the file names that the user has uploaded to their account
  * @return An array of text that contain all the file names uploaded to the current users account
 */
-public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileNames() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFiles = getUserFiles(user);
   return #Ok(#FileNames(Array.map<FileTypes.FileInfo, Text>(userFiles.toArray(), func fileInfo = fileInfo.file_name)));
@@ -953,10 +1062,19 @@ public shared(msg) func listUserFileNames() : async FileTypes.FileResult {
  * Public Function which displays all the file ids that the user has uploaded to their account
  * @return An array of text that contain all the file ids uploaded to the current users account
 */
-public shared(msg) func listUserFileIds() : async FileTypes.FileResult {
+public shared query (msg) func listUserFileIds() : async FileTypes.FileResult {
   let user = msg.caller;
   let userFileIds = getUserFileIds(user);
   return #Ok(#FileIds(userFileIds));
+};
+
+/*
+ * Public Function which returns the id and name for each file that the user has uploaded to their account
+ * @return An array of objects that contain the file id and name for each file that the user has uploaded to their account
+*/
+public shared query ({caller}) func listUserFileIdsAndNames() : async FileTypes.FileResult {
+  let userFileIdsAndNames = getUserFileIdsAndNames(caller);
+  return #Ok(#FileIdsAndNames(userFileIdsAndNames.toArray()));
 };
 
 /*
@@ -1103,6 +1221,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     fileDatabaseStable := Iter.toArray(fileDatabase.entries());
     userFileRecordsStable := Iter.toArray(userFileRecords.entries());
     emailSubscribersStorageStable := Iter.toArray(emailSubscribersStorage.entries());
+    hiddenSpacesStable := Iter.toArray(hiddenSpaces.entries());
   };
 
   system func postupgrade() {
@@ -1112,5 +1231,7 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
     userFileRecordsStable := [];
     emailSubscribersStorage := HashMap.fromIter(Iter.fromArray(emailSubscribersStorageStable), emailSubscribersStorageStable.size(), Text.equal, Text.hash);
     emailSubscribersStorageStable := [];
+    hiddenSpaces := HashMap.fromIter(Iter.fromArray(hiddenSpacesStable), hiddenSpacesStable.size(), Nat.equal, Hash.hash);
+    hiddenSpacesStable := [];
   };
 };

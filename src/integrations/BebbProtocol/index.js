@@ -28,6 +28,9 @@ if (process.env.DFX_NETWORK === "ic") {
 } else if (process.env.DFX_NETWORK === "testing") {
   // testing canister on mainnet (for network testing)
   canisterId = "t6nyb-faaaa-aaaal-qcbaa-cai";
+} else if (process.env.DFX_NETWORK === "alexStaging") {
+  // testing canister on mainnet (for network testing for Alex)
+  canisterId = "yqn2i-hyaaa-aaaap-qbmiq-cai";
 } else {
   canisterId = "pzrof-pyaaa-aaaai-acnha-cai";
 };

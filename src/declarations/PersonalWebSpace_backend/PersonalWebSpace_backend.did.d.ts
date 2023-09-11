@@ -22,6 +22,7 @@ export type ExtendedMetadataResult = {
   } |
   { 'Err' : ApiError };
 export type File = Uint8Array | number[];
+export interface FileIdAndName { 'file_name' : string, 'file_id' : string }
 export interface FileInfo {
   'file_name' : string,
   'file_content' : Uint8Array | number[],
@@ -29,7 +30,10 @@ export interface FileInfo {
 }
 export type FileResult = { 'Ok' : FileResultSuccessOptions } |
   { 'Err' : ApiError };
-export type FileResultSuccessOptions = { 'File' : FileInfo } |
+export type FileResultSuccessOptions = {
+    'FileIdsAndNames' : Array<FileIdAndName>
+  } |
+  { 'File' : FileInfo } |
   { 'FileNames' : Array<string> } |
   { 'Success' : null } |
   { 'FileId' : string } |
@@ -97,8 +101,10 @@ export interface PersonalWebSpace {
   >,
   'getUserRecord' : ActorMethod<[], FileResult>,
   'greet' : ActorMethod<[string], string>,
+  'hideUserSpace' : ActorMethod<[TokenId], NftResult>,
   'http_request' : ActorMethod<[Request], Response>,
   'listUserFileIds' : ActorMethod<[], FileResult>,
+  'listUserFileIdsAndNames' : ActorMethod<[], FileResult>,
   'listUserFileNames' : ActorMethod<[], FileResult>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
@@ -163,6 +169,7 @@ export interface UpdateMetadataValuesInput {
   'id' : TokenId,
   'updatedSpaceDescription' : string,
   'updatedOwnerName' : string,
+  'updatedAboutDescription' : string,
   'updatedOwnerContactInfo' : string,
   'updatedSpaceData' : [] | [string],
   'updatedSpaceName' : string,
