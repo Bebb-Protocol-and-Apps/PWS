@@ -9,8 +9,11 @@
 
 <!-- Main Hero Section -->
 <div class="intro-hero-section">
-  <h1>Discover Your Space in the Open Internet Metaverse</h1>
-  <p class="intro-lead-text">Experience an open, decentralized, 3D internet where you own your virtual home.</p>
+  <img src="./FutureWebInitiative_OpenInternetMetaverse_banner.png" alt="Open Internet Metaverse banner" class="intro-hero-background-image">
+  <div class="intro-hero-overlay">
+    <h1>Discover Your Space in the Open Internet Metaverse</h1>
+    <p class="intro-lead-text">Experience an open, decentralized, 3D internet where you own your virtual home.</p>
+  </div>
 </div>
 
 <!-- Create Space Section -->
@@ -125,6 +128,7 @@
   }
 
   .intro-hero-section {
+    position: relative; /* Added to make it a parent for absolute positioning */
     height: 100vh;
     width: 100%;
     display: flex;
@@ -133,8 +137,6 @@
     justify-content: center;
     padding: 5rem 0;
     text-align: center;
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('./FutureWebInitiative_OpenInternetMetaverse_banner.png') no-repeat center center fixed;
-    background-size: cover;
   }
   .intro-hero-section h1 {
     font-size: 3.5rem;
@@ -147,6 +149,37 @@
     color: #ddd;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
     font-weight: bold;
+  }
+  .intro-hero-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Set z-index to -1 to make it below the text content */
+    object-fit: cover; /* Cover the entire div without distortion */
+  }
+  .intro-hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    z-index: 0; /* Layer it above the image but below the text */
+  }
+  .intro-hero-overlay {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
   }
   .intro-section-container {
     padding: 4rem 0;
