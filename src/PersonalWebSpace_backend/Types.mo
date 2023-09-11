@@ -94,7 +94,7 @@ module {
     #TextToTextAssocListContent: AssocList.AssocList<Text, Text>; // added
   };
 
-  public type DeletedNftRecord = {
+  public type HiddenNftRecord = {
     id: TokenId;
     deleted_by: Principal;
     deletion_time: Nat64;
