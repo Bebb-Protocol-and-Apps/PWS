@@ -9,12 +9,20 @@
 
 <Topnav />
 
-<div class="py-7 items-center leading-8 text-center text-xl font-semibold">
-  <h3>Want to have your own Virtual Home?</h3>
-  <h3>Want to become part of the Open Metaverse Neighborhood?</h3>
-  <h3>Want to have your Personal Web Space as a 3D webpage?</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+  <div style="background-color: #fff3e9">
+    <img class="w-full p-32" src="/images/intro.svg" alt="Protocol intro graphic" />
+  </div>
+  <!-- ... -->
+  <div class="p-12 flex flex-col justify-center">
+    <h3 class="text-4xl text-gray-600 mb-8">
+      Do you want to have your own Virtual Home, become part of the Open Metaverse Neighborhood and have your Personal Web Space as a 3D webpage?
+    </h3>
+    <button on:click={toggleModal} type="button" class="w-48 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+  </div>
 </div>
 
+<!--
 <section id="login" class="py-7 space-y-6 items-center text-center bg-slate-100">
   {#if !$store.isAuthed}
     <Login />
@@ -24,26 +32,38 @@
     <Button on:click={() => store.disconnect()}>disconnect</Button>
   {/if}
 </section>
+-->
 
-<section id="create" class="py-7 space-y-6 items-center text-center">
-  <h3 class="font-bold">Create a new Personal Web Space</h3>
-  <button type='button' id='createButton' on:click={() => push("#/create")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create Space</button>
-  {#if !$store.isAuthed}
-    <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-  {:else}
-    <p id='createSubtext'>Generate a 3D room for yourself (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-  {/if}
-</section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+  <div class="p-12 flex flex-col justify-center">
+    {#if !$store.isAuthed}
+      <h3 id='createSubtext' class="text-4xl text-gray-600 mb-8">Log in to generate a 3D room which you can edit afterwards. The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</h3>
+    {:else}
+      <h3 id='createSubtext' class="text-4xl text-gray-600 mb-8">Generate a 3D room for yourself (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</h3>
+    {/if}
+    <button id='createButton' on:click={() => push("#/create")} type="button" class="w-48 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create space</button>
+  </div>
 
-<section id="spaces" class="py-7 space-y-6 items-center text-center bg-slate-100">
-  <h3 class="font-bold">See My Personal Web Spaces</h3>
-  <button type='button' id='viewMySpacesButton' on:click={() => push("#/myspaces")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">View My Spaces</button>
-  {#if !$store.isAuthed}
-    <p id='spacesSubtext'>Log in to see which Spaces you own in the Open Internet Metaverse.</p>
-  {:else}
-    <p id='spacesSubtext'>See which Spaces you own in the Open Internet Metaverse.</p>
-  {/if}
-</section>
+  <div style="background-color: #007bc2">
+    <img class="w-full p-32" src="/images/create-space.svg" alt="Protocol intro graphic" />
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+  <div style="background-color: #ffce47">
+    <img class="w-full p-32" src="/images/my-space.svg" alt="Protocol intro graphic" />
+  </div>
+  <!-- ... -->
+  <div class="p-12 flex flex-col justify-center">
+    {#if !$store.isAuthed}
+      <p class="text-4xl text-gray-600 mb-8" >Log in to see which Spaces you own in the Open Internet Metaverse.</p>
+      <button type='button' id='viewMySpacesButton'  class="w-48 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+    {:else}
+      <p class="text-4xl text-gray-600 mb-8" id='spacesSubtext'>See which Spaces you own in the Open Internet Metaverse.</p>
+      <button type='button' id='viewMySpacesButton' on:click={() => push("#/myspaces")} class="w-48 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">My spaces</button>
+    {/if}
+  </div>
+</div>
 
 <div class='clearfix'></div>
 
