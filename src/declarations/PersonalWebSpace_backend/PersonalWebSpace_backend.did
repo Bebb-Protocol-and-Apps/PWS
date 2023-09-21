@@ -79,6 +79,7 @@ type PersonalWebSpace =
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
    getUserRecord: () -> (FileResult);
    greet: (text) -> (text);
+   hideUserSpace: (TokenId) -> (NftResult);
    http_request: (Request) -> (Response) query;
    listUserFileIds: () -> (FileResult) query;
    listUserFileIdsAndNames: () -> (FileResult) query;

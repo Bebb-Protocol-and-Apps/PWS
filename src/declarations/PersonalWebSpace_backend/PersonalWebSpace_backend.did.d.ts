@@ -101,6 +101,7 @@ export interface PersonalWebSpace {
   >,
   'getUserRecord' : ActorMethod<[], FileResult>,
   'greet' : ActorMethod<[string], string>,
+  'hideUserSpace' : ActorMethod<[TokenId], NftResult>,
   'http_request' : ActorMethod<[Request], Response>,
   'listUserFileIds' : ActorMethod<[], FileResult>,
   'listUserFileIdsAndNames' : ActorMethod<[], FileResult>,
