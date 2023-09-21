@@ -34,10 +34,13 @@
           <a href="#/create" class="text-gray-300 dark:text-white hover:underline" aria-current="page">Create</a>
         </li>
         <li>
-          <a href="#/myspaces" class="text-gray-100 dark:text-white hover:underline">My spaces</a>
+          <a href="#/myspaces" class="text-gray-100 dark:text-white hover:underline">My Spaces</a>
         </li>
         <li>
           <a href="#/explore" class="text-gray-200 dark:text-white hover:underline">Explore</a>
+        </li>
+        <li>
+          <a href="#/about" class="text-gray-200 dark:text-white hover:underline">About</a>
         </li>
       </ul>
     </div>
