@@ -170,6 +170,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getUserRecord' : IDL.Func([], [FileResult], []),
     'greet' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'hideUserSpace' : IDL.Func([TokenId], [NftResult], []),
     'http_request' : IDL.Func([Request], [Response], ['query']),
     'listUserFileIds' : IDL.Func([], [FileResult], ['query']),
     'listUserFileIdsAndNames' : IDL.Func([], [FileResult], ['query']),
