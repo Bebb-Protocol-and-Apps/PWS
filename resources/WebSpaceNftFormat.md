@@ -1,12 +1,13 @@
 # Web Space NFT format
 
 Space NFT looks like:
-
+```bash
   {
     owner: Principal;
     id: TokenId;
     metadata: MetadataDesc;
   }
+```
 
 Types.MetadataDesc for this project looks like:
 ```bash
