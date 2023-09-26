@@ -9,7 +9,7 @@ Space NFT looks like:
   }
 
 Types.MetadataDesc for this project looks like:
-```json
+```bash
     [
       {
         purpose: #Rendered ;
