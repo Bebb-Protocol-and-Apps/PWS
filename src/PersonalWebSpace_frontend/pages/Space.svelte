@@ -282,6 +282,27 @@
     if(toolbar) {
       // Add a new button for adding a URL link to an item to the toolbar
       addLinkButtonToToolbar(toolbar);
+      
+      // DEBUG
+      console.log("AFRAME.INSPECTOR", AFRAME.INSPECTOR);
+      console.log("AFRAME.INSPECTOR.cameras ", AFRAME.INSPECTOR.cameras);
+      console.log("AFRAME.INSPECTOR.cameras.original ", AFRAME.INSPECTOR.cameras.original);
+      console.log("AFRAME.INSPECTOR.cameras.original.getObject3D ", AFRAME.INSPECTOR.cameras.original.getObject3D('camera'));
+      console.log("AFRAME.INSPECTOR.cameras.original.getObject3D .position ", AFRAME.INSPECTOR.cameras.original.getObject3D('camera').position);
+      console.log("AFRAME.INSPECTOR.cameras.original.object3D.position ", AFRAME.INSPECTOR.cameras.original.object3D.position);
+      console.log("AFRAME.INSPECTOR.camera ", AFRAME.INSPECTOR.camera);
+      console.log("AFRAME.INSPECTOR.camera.position ", AFRAME.INSPECTOR.camera.position);
+      console.log("AFRAME.INSPECTOR.camera.position.x ", AFRAME.INSPECTOR.camera.position.x);
+      console.log("AFRAME.INSPECTOR.camera.position.y ", AFRAME.INSPECTOR.camera.position.y);
+      console.log("AFRAME.INSPECTOR.camera.position.z ", AFRAME.INSPECTOR.camera.position.z);
+      AFRAME.INSPECTOR.camera.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
+      //AFRAME.INSPECTOR.camera.setAttribute('position', AFRAME.INSPECTOR.cameras.original.object3D.position);
+      //AFRAME.INSPECTOR.cameras.original.setAttribute('camera', 'active', 'true');
+      //AFRAME.INSPECTOR.sceneEl.camera = AFRAME.INSPECTOR.cameras.original.getObject3D('camera');
+      //AFRAME.INSPECTOR.camera = AFRAME.INSPECTOR.cameras.original.getObject3D('camera');
+      //AFRAME.INSPECTOR.currentCameraEl = AFRAME.INSPECTOR.camera.el
+      console.log("AFRAME.INSPECTOR.camera after ", AFRAME.INSPECTOR.camera);
+
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
