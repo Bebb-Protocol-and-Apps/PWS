@@ -282,31 +282,25 @@
     if(toolbar) {
       // Add a new button for adding a URL link to an item to the toolbar
       addLinkButtonToToolbar(toolbar);
-      
-      // DEBUG
-      console.log("AFRAME.INSPECTOR", AFRAME.INSPECTOR);
-      console.log("AFRAME.INSPECTOR.cameras ", AFRAME.INSPECTOR.cameras);
-      console.log("AFRAME.INSPECTOR.cameras.original ", AFRAME.INSPECTOR.cameras.original);
-      console.log("AFRAME.INSPECTOR.cameras.original.getObject3D ", AFRAME.INSPECTOR.cameras.original.getObject3D('camera'));
-      console.log("AFRAME.INSPECTOR.cameras.original.getObject3D .position ", AFRAME.INSPECTOR.cameras.original.getObject3D('camera').position);
-      console.log("AFRAME.INSPECTOR.cameras.original.object3D.position ", AFRAME.INSPECTOR.cameras.original.object3D.position);
-      console.log("AFRAME.INSPECTOR.camera ", AFRAME.INSPECTOR.camera);
-      console.log("AFRAME.INSPECTOR.camera.position ", AFRAME.INSPECTOR.camera.position);
-      console.log("AFRAME.INSPECTOR.camera.position.x ", AFRAME.INSPECTOR.camera.position.x);
-      console.log("AFRAME.INSPECTOR.camera.position.y ", AFRAME.INSPECTOR.camera.position.y);
-      console.log("AFRAME.INSPECTOR.camera.position.z ", AFRAME.INSPECTOR.camera.position.z);
-      AFRAME.INSPECTOR.camera.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
-      //AFRAME.INSPECTOR.camera.setAttribute('position', AFRAME.INSPECTOR.cameras.original.object3D.position);
-      //AFRAME.INSPECTOR.cameras.original.setAttribute('camera', 'active', 'true');
-      //AFRAME.INSPECTOR.sceneEl.camera = AFRAME.INSPECTOR.cameras.original.getObject3D('camera');
-      //AFRAME.INSPECTOR.camera = AFRAME.INSPECTOR.cameras.original.getObject3D('camera');
-      //AFRAME.INSPECTOR.currentCameraEl = AFRAME.INSPECTOR.camera.el
-      console.log("AFRAME.INSPECTOR.camera after ", AFRAME.INSPECTOR.camera);
-
     } else {
       // Inspector hasn't loaded yet
       setTimeout(() => {
         customizeCentralToolbar();
+      }, 500);
+    };
+  };
+
+  const changeInspectorCameraPosition = () => {
+    // Ensure Inspector has loaded successfully
+    const toolbar = document.getElementById("transformToolbar");
+    if(toolbar) {
+      // Set the Inspector's camera to match the last scene view (the user had before opening the Inspector)
+      AFRAME.INSPECTOR.cameras.perspective.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
+      AFRAME.INSPECTOR.cameras.perspective.rotation.set(AFRAME.INSPECTOR.cameras.original.object3D.rotation.x, AFRAME.INSPECTOR.cameras.original.object3D.rotation.y, AFRAME.INSPECTOR.cameras.original.object3D.rotation.z);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        changeInspectorCameraPosition();
       }, 500);
     };
   };
@@ -1133,6 +1127,8 @@
   // Change A-Frame's default Inspector according to our specific requirements
     // TODO: put camera to same position as when scene is loaded
   const customizeInspector = () => {
+    // Move the Inspector's initial camera view to the current view
+    changeInspectorCameraPosition();
     // Remove any 3D Neighbors from the scene
     remove3dNeighborsFromScene();
     // Hide VR menu
