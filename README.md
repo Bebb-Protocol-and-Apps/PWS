@@ -40,6 +40,7 @@ npm install
 ```bash
 npm run dev
 ```
+
 Note: this starts a replica which includes the canisters state stored from previous sessions.
 If you want to start a clean local IC replica (i.e. all canister state is erased) run instead:
 ```bash
@@ -64,6 +65,7 @@ dfx deploy --argument "(
 dfx deploy
 ```
 --> Access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
+
 Access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
 or http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/space/0 (for space with spaceid 0)
 
@@ -73,8 +75,8 @@ Alternative: Run a local vite UI (note that this had issues communicating to the
 ```bash
 npm run vite
 ```
---> runs on port 3000
-Access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+--> runs on port 3000; access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+
 Hot reloads with every UI change
 
 For more detailed notes on running this locally, also see [NotesOnLocalDev.md](./notes/NotesOnLocalDev.md)
@@ -88,57 +90,6 @@ dfx start --background
 
 Deploy to Mainnet (live IC):
 Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
-
-Development Canisters:
-```bash
-dfx deploy --network development --argument "(
-  principal\"$(dfx identity get-principal)\",
-  record {
-    logo = record {
-      logo_type = \"image/png\";
-      data = \"\";
-    };
-    name = \"PersonalWebSpace\";
-    symbol = \"PWS\";
-    maxLimit = 65535;
-  }
-)" PersonalWebSpace_backend
-dfx deploy --network development PersonalWebSpace_frontend
-```
-Testing Canisters:
-```bash
-dfx deploy --network testing --argument "(
-  principal\"$(dfx identity get-principal)\",
-  record {
-    logo = record {
-      logo_type = \"image/png\";
-      data = \"\";
-    };
-    name = \"PersonalWebSpace\";
-    symbol = \"PWS\";
-    maxLimit = 65535;
-  }
-)" PersonalWebSpace_backend
-dfx deploy --network testing PersonalWebSpace_frontend
-```
-
-Alex Staging Canisters:
-```bash
-dfx deploy --network alexStaging --argument "(
-  principal\"$(dfx identity get-principal)\",
-  record {
-    logo = record {
-      logo_type = \"image/png\";
-      data = \"\";
-    };
-    name = \"PersonalWebSpace\";
-    symbol = \"PWS\";
-    maxLimit = 65535;
-  }
-)" PersonalWebSpace_backend
-
-dfx deploy --network alexStaging
-```
 
 Production Canisters:
 ```bash
@@ -177,6 +128,8 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
 dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)"
 ```
 
+For deployment to other stages (e.g. development, testing) and setting up other stages, take a look at [these notes](./notes/NotesOnStages.md)
+
 # Additional Notes
 ## Get and delete Email Subscribers
 ```bash
@@ -201,52 +154,6 @@ dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 30
 ```
 
 ## Web Space NFT format
-For details, see Types.mo in PersonalWebSpace_backend
-  Space NFT looks like:
-    {
-      owner: Principal;
-      id: TokenId;
-      metadata: MetadataDesc;
-    }
+Each space in OIM is stored as an NFT. 
 
-  Types.MetadataDesc for this project looks like:
-    [
-      {
-        purpose: #Rendered ;
-        data: spaceAsHtmlTextBlob // Text.encodeUtf8(spaceAsHtmlText) to get Blob from Text (probably change to spaceAsJsonFormattedTextBlob later)
-        key_val_data: [
-          {
-            key = "ownerName";
-            val = #TextContent ownerName;
-          },
-          {
-            key = "ownerContactInfo";
-            val = #TextContent ownerContactInfo;
-          },
-          {
-            key = "aboutDescription";
-            val = #TextContent aboutDescription;
-          },
-          {
-            key = "spaceDescription";
-            val = #TextContent spaceDescription;
-          },
-          {
-            key = "spaceName";
-            val = #TextContent spaceName;
-          },
-          {
-            key = "creator";
-            val: #PrincipalContent caller;
-          },
-          {
-            key = "creationTime";
-            val = #Nat64Content generatedTimestamp;
-          },
-          {
-            key = "protocolEntityId";
-            val = #TextContent protocolEntityId;
-          },
-        ];
-      }
-    ]
+For details, please [find the format here](./resources/WebSpaceNftFormat.md) and [Types.mo in PersonalWebSpace_backend](./src/PersonalWebSpace_backend/Types.mo)
