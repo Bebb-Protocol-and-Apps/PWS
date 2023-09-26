@@ -32,10 +32,10 @@
   <h3 class="text-xl font-bold">My Personal Web Spaces</h3>
   {#if !$store.isAuthed}
     <p id='spacesSubtext'>Log in to see which Spaces you own in the Open Internet Metaverse.</p>
-    <Login />
+    <!-- <Login /> -->
   {:else}
-    <h3 class="font-bold">You're Logged In</h3>
-    <Button on:click={() => store.disconnect()}>disconnect</Button>
+    <!-- <h3 class="font-bold">You're Logged In</h3>
+    <Button on:click={() => store.disconnect()}>disconnect</Button> -->
     <p id='spacesSubtext'>Let's see which Spaces you own...</p>
     {#if !hasLoadedSpaces}
       <p hidden>{loadUserSpaces()}</p>

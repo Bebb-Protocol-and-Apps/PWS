@@ -273,10 +273,11 @@
   <h3 class="text-xl font-bold">Create Your Personal Web Space</h3>
   {#if !$store.isAuthed}
     <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-    <Login />
+    <!-- <Login /> -->
   {:else}
-    <h3 class="font-bold">You're Logged In</h3>
-    <Button on:click={() => store.disconnect()}>disconnect</Button>
+    <p id='createSubtext'>Generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards from the options below. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+    <!-- <h3 class="font-bold">You're Logged In</h3>
+    <Button on:click={() => store.disconnect()}>disconnect</Button> -->
   {/if}
   <h3 class="text-xl font-bold">Create a new Space</h3>
   <!-- Default Spaces -->
