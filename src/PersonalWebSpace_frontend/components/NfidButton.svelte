@@ -9,14 +9,6 @@
 
   export let loading;
   export let toggleModal;
-  
-  onMount(async () => {
-    const authClient = await AuthClient.create();
-    if (await authClient.isAuthenticated()) {
-      console.log("NFID connection detected");
-      store.nfidConnect();
-    };
-  });
 
   async function connect() {
     loading = "nfid";
