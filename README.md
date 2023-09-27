@@ -13,6 +13,8 @@ The Open Internet Metaverse (OIM) is not just a vision; it's live and operationa
 If you like, take a look at our [User Guide](./resources/user_guide.md)
 
 ![Get Your virtual Island in OIM](https://j.gifs.com/57k9nv.gif)
+[![Get Your virtual Island in OIM](https://j.gifs.com/57k9nv.gif)](https://j.gifs.com/57k9nv.gif)
+
 
 ### As a developer
 If you like, take a look at our [Integration Guide](./resources/integration_guide.md)
