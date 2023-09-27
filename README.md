@@ -12,14 +12,13 @@ The Open Internet Metaverse (OIM) is not just a vision; it's live and operationa
 ### As a user
 If you like, take a look at our [User Guide](./resources/user_guide.md)
 
-![Get Your virtual Island in OIM](https://j.gifs.com/57k9nv.gif)
-[![Get Your virtual Island in OIM](https://j.gifs.com/57k9nv.gif)](https://gifs.com/gif/open-internet-metaverse-island-impressions-57k9nv)
+[![Get Your virtual Island in OIM](./resources/media/OpenInternetMetaverse_Island_impressions.gif)](https://j.gifs.com/57k9nv.gif)
 
 
 ### As a developer
 If you like, take a look at our [Integration Guide](./resources/integration_guide.md)
 
-![Get Your virtual Space Station in OIM](https://j.gifs.com/K8NZXY.gif)
+[![Get Your virtual Space Station in OIM](./resources/media/OpenInternetMetaverse_SpaceStation_impressions.gif)](https://j.gifs.com/K8NZXY.gif)
 
 ## Features
 - Fully Operational on the Internet Computer: Experience the metaverse today, live on the Internet Computer.
@@ -34,7 +33,7 @@ If you like, take a look at our [Integration Guide](./resources/integration_guid
 
 - Built with A-Frame: OIM leverages A-Frame, a Web framework for building 3D mixed reality experiences.
 
-![Get Your virtual Nature Retreat in OIM](https://j.gifs.com/28Pv4N.gif)
+[![Get Your virtual Nature Retreat in OIM](./resources/media/OpenInternetMetaverse_NatureRetreat_impressions.gif)](https://j.gifs.com/28Pv4N.gif)
 
 # Development & Deployment
 ## Running the project locally
