@@ -1455,7 +1455,6 @@
     // @ts-ignore
     const spaceNFTResponse: NftResult = await $store.backendActor.getSpace(Number(params.spaceId));
     
-    loadingInProgress = false;
     if (spaceNFTResponse.Err) {
       spaceLoadingError = true;
     } else {
@@ -1467,6 +1466,8 @@
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
       loadSceneCustomizations();
     };
+
+    loadingInProgress = false;
   };
 
 // User clicked to see Space's metadata

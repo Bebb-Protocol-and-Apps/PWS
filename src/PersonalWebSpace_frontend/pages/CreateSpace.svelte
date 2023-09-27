@@ -285,7 +285,9 @@
   <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
   <!-- Default Space 1 -->
   <h3 class="text-l font-semibold">Your Nature Retreat</h3>
-  <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  <div class="iframe-holder">
+    <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  </div>
   {#if !$store.isAuthed}
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
     <p id='createSubtextDefault1'>{loginSubtext}</p>
@@ -309,7 +311,9 @@
   {/if}
   <!-- Default Space 2 -->
   <h3 class="text-l font-semibold">Your Internet Island</h3>
-  <iframe src="#/defaultspace/2" title="Your Internet Island" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  <div class="iframe-holder">
+    <iframe src="#/defaultspace/2" title="Your Internet Island" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  </div>
   {#if !$store.isAuthed}
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
     <p id='createSubtextDefault2'>{loginSubtext}</p>
@@ -333,7 +337,9 @@
   {/if}
   <!-- Default Space 0 -->
   <h3 class="text-l font-semibold">Your Web Space Station</h3>
-  <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  <div class="iframe-holder">
+    <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
+  </div>
   {#if !$store.isAuthed}
     <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
     <p id='createSubtextDefault0'>{loginSubtext}</p>
@@ -468,5 +474,9 @@
 <style>
   .urlInput {
     width: 100%;
+  }
+
+  .iframe-holder {
+    background:url(../assets/loading.gif) center center no-repeat;
   }
 </style>
