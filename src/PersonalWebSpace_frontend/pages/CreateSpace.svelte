@@ -13,6 +13,7 @@
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
     import MediaContentPreview from "../components/MediaContentPreview.svelte";
+  import {push} from "svelte-spa-router";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -62,7 +63,7 @@
   let fileType;
   let fileSizeToUpload;
   let fileSizeUploadLimit = 2000000; // 2 MB
-  
+
   const supportedMediaExtensions = supportedVideoExtensions.concat(supportedImageExtensions);
   let is360Degree = false;
 
@@ -146,7 +147,7 @@
         setTimeout(() => {
           addUserFileToScene(userFiles);
         }, 1000);
-      }    
+      }
     }
   };
 
@@ -179,7 +180,7 @@
           };
         } else {
           console.error("Create Entity Error:", spaceEntityIdResponse);
-        };              
+        };
       } else {
         console.error("Create Space Error:", spaceResponse);
       };
@@ -270,201 +271,254 @@
 <Topnav />
 
 <section id="createspace" class="py-7 space-y-6 items-center text-center bg-slate-100">
-  <h3 class="text-xl font-bold">Create Your Personal Web Space</h3>
-  {#if !$store.isAuthed}
-    <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-    <!-- <Login /> -->
-  {:else}
-    <p id='createSubtext'>Generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards from the options below. Fun fact: The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-    <!-- <h3 class="font-bold">You're Logged In</h3>
-    <Button on:click={() => store.disconnect()}>disconnect</Button> -->
-  {/if}
-  <h3 class="text-xl font-bold">Create a new Space</h3>
-  <!-- Default Spaces -->
-  <h3 class="text-xl font-semibold">Spaces Ready For You:</h3>
-  <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
-  <!-- Default Space 1 -->
-  <h3 class="text-l font-semibold">Your Nature Retreat</h3>
-  <div class="iframe-holder">
-    <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-  </div>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault1'>{loginSubtext}</p>
-  {:else}
-    {#if isSpaceCreationInProgress}
-      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/1"}
-        <p id='createSubtextDefault1'>{inProgressSubtext}</p>
-      {/if}
-    {:else if wasSpaceCreatedSuccessfully}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/1"}
-        <p id='createSubtextDefault1'>{createdSubtext}</p>
-      {:else}
-        <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
-      {/if}
-    {:else}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
-    {/if}
-  {/if}
-  <!-- Default Space 2 -->
-  <h3 class="text-l font-semibold">Your Internet Island</h3>
-  <div class="iframe-holder">
-    <iframe src="#/defaultspace/2" title="Your Internet Island" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-  </div>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault2'>{loginSubtext}</p>
-  {:else}
-    {#if isSpaceCreationInProgress}
-      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/2"}
-        <p id='createSubtextDefault2'>{inProgressSubtext}</p>
-      {/if}
-    {:else if wasSpaceCreatedSuccessfully}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/2")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/2"}
-        <p id='createSubtextDefault2'>{createdSubtext}</p>
-      {:else}
-        <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
-      {/if}
-    {:else}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/2")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
-    {/if}
-  {/if}
-  <!-- Default Space 0 -->
-  <h3 class="text-l font-semibold">Your Web Space Station</h3>
-  <div class="iframe-holder">
-    <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="auto" referrerpolicy="no-referrer"></iframe>
-  </div>
-  {#if !$store.isAuthed}
-    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-    <p id='createSubtextDefault0'>{loginSubtext}</p>
-  {:else}
-    {#if isSpaceCreationInProgress}
-      <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{inProgressSubtext}</p>
-      {/if}
-    {:else if wasSpaceCreatedSuccessfully}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      {#if spaceToCreate === "defaultspace/0"}
-        <p id='createSubtextDefault0'>{createdSubtext}</p>
-      {:else}
-        <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-      {/if}
-    {:else}
-      <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-      <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
-    {/if}
-  {/if}
-  <!-- From File -->
-  <h3 class=" text-xl font-semibold">Create Your Space With an Uploaded Item:</h3>
-  <!-- User-Uploaded File -->
-  <h3 class="text-l font-semibold">Upload a File</h3>
-  <p class="text-l">It can be a 3D model, image or video (incl. 360-degree).</p>
-  <p class="text-l">Supported File Types: .glb, .gltf, .mp4, .mov, .jpg, .jpeg, .png, .svg, .gif</p>
-  <form on:submit|preventDefault={() => createNewUserSpaceFromFile()}>
-    <label for="userUploadedFileInput">Select a file from your device:</label>
-    <input
-      bind:files
-      id="userUploadedFileInput"
-      type="file"
-      class="urlInput text-black font-bold"
-    />
-    {#if files}
-      {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-        {#if userFileInputHandler(files)}
-          {#if fileType === "glbModel"}
-            <!-- User-Uploaded GLB Model File -->
-            <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
-          {:else if fileType === "mediaContent"}
-            <!-- User-Uploaded Image or Video File -->
-            <!-- 360-degree toggle -->
-            <div class="py-2">
-              <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
-              <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
-            </div>
-            {#key is360Degree}
-              <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
-            {/key}
-          {/if}
-          {#if !$store.isAuthed}
-            <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-            <p id='createSubtextUserUploadedFile'>{loginSubtext}</p>
-          {:else}
-            {#if isSpaceCreationInProgress}
-              <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-              {#if spaceToCreate === "UserUploadedFile"}
-                <p id='createSubtextUserUploadedFile'>{inProgressSubtext}</p>
-              {/if}
-            {:else if wasSpaceCreatedSuccessfully}
-              <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-              {#if spaceToCreate === "UserUploadedFile"}
-                <p id='createSubtextUserUploadedFile'>{createdSubtext}</p>
-              {:else}
-                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
-              {/if}
-            {:else}
-              {#if fileSizeToUpload <= fileSizeUploadLimit}
-                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-                <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
-              {:else}
-                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-                <p id='createSubtextUserUploadedFile'>{fileTooBigText}</p>
-              {/if}
-            {/if}  
-          {/if}
-        {:else}
-          <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid File (with a supported file type).</h3>
-        {/if}
-      {/key}
-    {/if}
-  </form>
-  <!-- Web-Hosted GLB Model -->
-  <h3 class="text-l font-semibold">GLB Model Hosted on the Web</h3>
-  <form on:submit|preventDefault={() => createNewUserSpaceFromModel("WebHostedGlbModel")}>
-    <input
-        bind:value={webHostedGlbModelUrl}
-        placeholder="Input the URL of the glb model here"
-        class="urlInput text-black font-bold"
-    />
-    {#if webHostedGlbModelUrl !== ""}
-      {#if urlInputHandler(webHostedGlbModelUrl)}
-        {#key webHostedGlbModelUrl}  <!-- Element to rerender everything inside when webHostedGlbModelUrl changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
-          <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl} modelType={"WebHosted"}/>
-        {/key}
+
+
+
+  <section class="bg-white dark:bg-gray-900 bg-[url('/images/hero-pattern-dark.svg')]">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 z-10 relative">
+      <a href="#" class="inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
+        <span class="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 mr-3">New</span> <span class="text-sm font-medium">
+        Create your space with an uploaded item</span>
+        <svg class="w-2.5 h-2.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+      </a>
+      <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+        Create Your Personal Web Space</h1>
+      <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-200">
         {#if !$store.isAuthed}
-          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-          <p id='createSubtextWebHostedGlbModel'>{loginSubtext}</p>
+          <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+          <!-- <Login /> -->
         {:else}
-          {#if isSpaceCreationInProgress}
-            <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-            {#if spaceToCreate === "WebHostedGlbModel"}
-              <p id='createSubtextWebHostedGlbModel'>{inProgressSubtext}</p>
-            {/if}
-          {:else if wasSpaceCreatedSuccessfully}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            {#if spaceToCreate === "WebHostedGlbModel"}
-              <p id='createSubtextWebHostedGlbModel'>{createdSubtext}</p>
+          <p id='createSubtext'>Generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards from the options below. The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
+          <!-- <h3 class="font-bold">You're Logged In</h3>
+          <Button on:click={() => store.disconnect()}>disconnect</Button> -->
+        {/if}
+        <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
+      </p>
+    </div>
+  </section>
+
+
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+    <div style="background-color: #007bc2">
+      <!-- Default Space 1 -->
+      <div class="iframe-holder">
+        <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+    <!-- ... -->
+    <div class="p-12 flex flex-col justify-center">
+      <h3 class="text-4xl text-gray-600 mb-8">Your Nature Retreat</h3>
+      {#if !$store.isAuthed}
+        <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+        <p id='createSubtextDefault1'>{loginSubtext}</p>
+      {:else}
+        {#if isSpaceCreationInProgress}
+          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/1"}
+            <p id='createSubtextDefault1'>{inProgressSubtext}</p>
+          {/if}
+        {:else if wasSpaceCreatedSuccessfully}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/1"}
+            <p id='createSubtextDefault1'>{createdSubtext}</p>
+          {:else}
+            <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
+          {/if}
+        {:else}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/1")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          <p id='createSubtextDefault1'>{clickDefaultSubtext}</p>
+        {/if}
+      {/if}
+    </div>
+  </div>
+
+  <!-- Default Space 2 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-0 mt-0 mb-0">
+    <div class="p-12 flex flex-col justify-center">
+      <h3 class="text-4xl text-gray-600 mb-8">Your Internet Island</h3>
+      {#if !$store.isAuthed}
+        <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+        <p id='createSubtextDefault2'>{loginSubtext}</p>
+      {:else}
+        {#if isSpaceCreationInProgress}
+          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/2"}
+            <p id='createSubtextDefault2'>{inProgressSubtext}</p>
+          {/if}
+        {:else if wasSpaceCreatedSuccessfully}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/2")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/2"}
+            <p id='createSubtextDefault2'>{createdSubtext}</p>
+          {:else}
+            <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
+          {/if}
+        {:else}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/2")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          <p id='createSubtextDefault2'>{clickDefaultSubtext}</p>
+        {/if}
+      {/if}
+    </div>
+
+    <div class="iframe-holder">
+      <iframe src="#/defaultspace/2" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+
+  <!-- Default Space 3 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+    <div style="background-color: #007bc2">
+      <div class="iframe-holder">
+        <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+    <div class="p-12 flex flex-col justify-center">
+      <h3 class="text-4xl text-gray-600 mb-8">Your Web Space Station</h3>
+      {#if !$store.isAuthed}
+        <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+        <p id='createSubtextDefault0'>{loginSubtext}</p>
+      {:else}
+        {#if isSpaceCreationInProgress}
+          <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/0"}
+            <p id='createSubtextDefault0'>{inProgressSubtext}</p>
+          {/if}
+        {:else if wasSpaceCreatedSuccessfully}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          {#if spaceToCreate === "defaultspace/0"}
+            <p id='createSubtextDefault0'>{createdSubtext}</p>
+          {:else}
+            <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
+          {/if}
+        {:else}
+          <button type='button' id='createButton' on:click={() => createNewDefaultUserSpace("defaultspace/0")} class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+          <p id='createSubtextDefault0'>{clickDefaultSubtext}</p>
+        {/if}
+      {/if}
+    </div>
+  </div>
+
+  <!-- From File -->
+  <!-- Default Space 3 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+    <div class="p-12 bg-green-100 flex flex-col justify-center">
+      <h3 class="text-4xl text-gray-600 mb-8">Create Your Space With an Uploaded Item</h3>
+    </div>
+
+    <div class="p-12 flex flex-col text-left">
+      <!-- User-Uploaded File -->
+      <h3 class="text-l font-semibold">Upload a File</h3>
+      <p class="text-l">It can be a 3D model, image or video (incl. 360-degree).</p>
+      <p class="text-l">Supported File Types: .glb, .gltf, .mp4, .mov, .jpg, .jpeg, .png, .svg, .gif</p>
+      <form on:submit|preventDefault={() => createNewUserSpaceFromFile()}>
+        <label for="userUploadedFileInput">Select a file from your device:</label>
+        <input
+                bind:files
+                id="userUploadedFileInput"
+                type="file"
+                class="urlInput text-black font-bold"
+        />
+        {#if files}
+          {#key files}  <!-- Element to rerender everything inside when files change (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+            {#if userFileInputHandler(files)}
+              {#if fileType === "glbModel"}
+                <!-- User-Uploaded GLB Model File -->
+                <GlbModelPreview bind:modelUrl={userUploadedFileURL} modelType={"UserUploaded"}/>
+              {:else if fileType === "mediaContent"}
+                <!-- User-Uploaded Image or Video File -->
+                <!-- 360-degree toggle -->
+                <div class="py-2">
+                  <input type="checkbox" bind:checked={is360Degree} id="360Toggle">
+                  <label for="360Toggle" class="ml-2">Set as 360-degree item</label>
+                </div>
+                {#key is360Degree}
+                  <MediaContentPreview bind:contentUrl={userUploadedFileURL} contentFiles={files} is360Degree={is360Degree}/>
+                {/key}
+              {/if}
+              {#if !$store.isAuthed}
+                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                <p id='createSubtextUserUploadedFile'>{loginSubtext}</p>
+              {:else}
+                {#if isSpaceCreationInProgress}
+                  <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                  {#if spaceToCreate === "UserUploadedFile"}
+                    <p id='createSubtextUserUploadedFile'>{inProgressSubtext}</p>
+                  {/if}
+                {:else if wasSpaceCreatedSuccessfully}
+                  <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                  {#if spaceToCreate === "UserUploadedFile"}
+                    <p id='createSubtextUserUploadedFile'>{createdSubtext}</p>
+                  {:else}
+                    <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
+                  {/if}
+                {:else}
+                  {#if fileSizeToUpload <= fileSizeUploadLimit}
+                    <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                    <p id='createSubtextUserUploadedFile'>{clickFromModelSubtext}</p>
+                  {:else}
+                    <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                    <p id='createSubtextUserUploadedFile'>{fileTooBigText}</p>
+                  {/if}
+                {/if}
+              {/if}
             {:else}
-              <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
+              <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+              <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid File (with a supported file type).</h3>
+            {/if}
+          {/key}
+        {/if}
+      </form>
+      <div class="inline-flex items-center justify-center w-full">
+        <hr class="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700">
+        <span style="margin-left: 25%;" class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 left-1/2 dark:text-white dark:bg-gray-900 mx-auto">or</span>
+      </div>
+      <!-- Web-Hosted GLB Model -->
+      <h3 class="text-l font-semibold">GLB Model Hosted on the Web</h3>
+      <form on:submit|preventDefault={() => createNewUserSpaceFromModel("WebHostedGlbModel")}>
+        <input
+                bind:value={webHostedGlbModelUrl}
+                placeholder="Input the URL of the glb model here"
+                class="urlInput text-black font-bold"
+        />
+        {#if webHostedGlbModelUrl !== ""}
+          {#if urlInputHandler(webHostedGlbModelUrl)}
+            {#key webHostedGlbModelUrl}  <!-- Element to rerender everything inside when webHostedGlbModelUrl changes (https://www.webtips.dev/force-rerender-components-in-svelte) -->
+              <GlbModelPreview bind:modelUrl={webHostedGlbModelUrl} modelType={"WebHosted"}/>
+            {/key}
+            {#if !$store.isAuthed}
+              <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+              <p id='createSubtextWebHostedGlbModel'>{loginSubtext}</p>
+            {:else}
+              {#if isSpaceCreationInProgress}
+                <button type='button' id='createButton' disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+                {#if spaceToCreate === "WebHostedGlbModel"}
+                  <p id='createSubtextWebHostedGlbModel'>{inProgressSubtext}</p>
+                {/if}
+              {:else if wasSpaceCreatedSuccessfully}
+                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                {#if spaceToCreate === "WebHostedGlbModel"}
+                  <p id='createSubtextWebHostedGlbModel'>{createdSubtext}</p>
+                {:else}
+                  <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
+                {/if}
+              {:else}
+                <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
+                <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
+              {/if}
             {/if}
           {:else}
-            <button type=submit id='createButton' class="active-app-button bg-slate-500 text-white font-bold py-2 px-4 rounded">Create This Space!</button>
-            <p id='createSubtextWebHostedGlbModel'>{clickFromModelSubtext}</p>
-          {/if}  
+            <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
+            <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid URL for the GLB Model.</h3>
+          {/if}
         {/if}
-      {:else}
-        <button disabled class="bg-slate-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">Create This Space!</button>
-        <h3 class="py-4 items-center leading-8 text-center text-xl font-bold">Please provide a valid URL for the GLB Model.</h3>
-      {/if}
-    {/if}
-  </form>
+      </form>
+
+    </div>
+  </div>
+
+
 </section>
 
 <div class='clearfix'></div>
