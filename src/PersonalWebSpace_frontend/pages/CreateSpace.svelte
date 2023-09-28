@@ -1,10 +1,9 @@
 <script lang="ts">
   import { store, appDomain } from "../store";
-  import Login from "../components/Login.svelte";
-  import Button from "../components/Button.svelte";
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
   import GlbModelPreview from "../components/GlbModelPreview.svelte";
+  import MediaContentPreview from "../components/MediaContentPreview.svelte";
 
   import { getStringForSpaceFromMediaFile, getStringForSpaceFromModel } from "../helpers/space_helpers";
   import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
@@ -12,8 +11,6 @@
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
-    import MediaContentPreview from "../components/MediaContentPreview.svelte";
-  import {push} from "svelte-spa-router";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -266,6 +263,16 @@
     return true;
   };
 
+// Helper function to scroll to specific element on the page
+  // targetElQuerySelector: e.g. "#createSpaceFromUploadedItemDiv"
+  function scrollIntoView( targetElQuerySelector ) {
+		const el = document.querySelector(targetElQuerySelector);
+		if (!el) return;
+    el.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
+
 </script>
 
 <Topnav />
@@ -275,8 +282,8 @@
 
 
   <section class="bg-white dark:bg-gray-900 bg-[url('/images/hero-pattern-dark.svg')]">
-    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 z-10 relative">
-      <a href="#" class="inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 z-10 relative">	
+      <a href="#createSpaceFromUploadedItemDiv" on:click|preventDefault={() => scrollIntoView("#createSpaceFromUploadedItemDiv")} class="inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
         <span class="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 mr-3">New</span> <span class="text-sm font-medium">
         Create your space with an uploaded item</span>
         <svg class="w-2.5 h-2.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
@@ -288,11 +295,8 @@
       <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-200">
         {#if !$store.isAuthed}
           <p id='createSubtext'>Log in to generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards. The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-          <!-- <Login /> -->
         {:else}
           <p id='createSubtext'>Generate a 3D room (Your Space, Your Realm, Your Virtual Home) which you can edit afterwards from the options below. The Space is an NFT itself and will be sent to your wallet. This way you know it's truly yours!</p>
-          <!-- <h3 class="font-bold">You're Logged In</h3>
-          <Button on:click={() => store.disconnect()}>disconnect</Button> -->
         {/if}
         <!-- TODO <h3 class="text-l font-semibold">Your Web3 Cockpit</h3> -->
       </p>
@@ -300,7 +304,7 @@
   </section>
 
 
-
+<!-- Default Spaces -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
     <div style="background-color: #007bc2">
       <!-- Default Space 1 -->
@@ -400,9 +404,8 @@
     </div>
   </div>
 
-  <!-- From File -->
-  <!-- Default Space 3 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+<!-- From File -->
+  <div id="createSpaceFromUploadedItemDiv" class="grid grid-cols-1 md:grid-cols-2 gap-0">
     <div class="p-12 bg-green-100 flex flex-col justify-center">
       <h3 class="text-4xl text-gray-600 mb-8">Create Your Space With an Uploaded Item</h3>
     </div>
