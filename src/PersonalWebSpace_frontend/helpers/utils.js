@@ -117,3 +117,49 @@ export function saveBlob(blob, filename) {
   link.click();
   // URL.revokeObjectURL(url); breaks Firefox...
 }
+
+export function registerKeydownEventToExitFullscreen(aScene) {
+  console.log("Debug registerKeydownEventToExitFullscreen aScene ", aScene);
+  document.addEventListener("keydown", function(e) {
+    console.log("Debug registerKeydownEventToExitFullscreen keydown ", e);
+    const availableKeys = ["Backspace", "Tab", "Enter", "Escape", "Space", "Home", "MetaLeft", "AltLeft", "AltRight", "ControlLeft", "ControlRight"];
+    if (availableKeys.indexOf(e.code) != -1) {
+      exitFullscreen();
+      exitSceneFullscreen(aScene);
+    };
+  }, true);
+
+  /* aScene.addEventListener("keydown", function(e) {
+    console.log("Debug registerKeydownEventToExitFullscreen keydown aScene ", e);
+    const availableKeys = ["Backspace", "Tab", "Enter", "Escape", "Space", "Home", "AltLeft", "AltRight", "ControlLeft", "ControlRight"];
+    if (availableKeys.indexOf(e.code) != -1) {
+      exitSceneFullscreen(aScene);
+    };
+  }, true); */
+};
+
+export function exitFullscreen() {
+  console.log("Debug exitFullscreen");
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  // @ts-ignore
+  } else if (document.mozCancelFullScreen) {
+    // @ts-ignore
+    document.mozCancelFullScreen();
+  // @ts-ignore
+  } else if (document.webkitExitFullscreen) {
+    // @ts-ignore
+    document.webkitExitFullscreen();
+  };
+};
+
+export function exitSceneFullscreen(aScene) {
+  console.log("Debug exitSceneFullscreen aScene ", aScene);
+  if (aScene) {
+    try {
+      aScene.exitVR();
+    } catch (error) {
+      console.error("Couldn't exit VR mode");      
+    }
+  };
+};
