@@ -117,3 +117,52 @@ export function saveBlob(blob, filename) {
   link.click();
   // URL.revokeObjectURL(url); breaks Firefox...
 }
+
+export function registerKeydownEventToExitFullscreen(aScene) {
+  aScene.ownerDocument.addEventListener("keydown", function(e) {
+    const availableKeys = ["Backspace", "Tab", "Enter", "Escape", "Space", "Home", "MetaLeft", "AltLeft", "AltRight", "ControlLeft", "ControlRight"];
+    if (availableKeys.indexOf(e.code) != -1) {
+      exitFullscreen();
+      exitSceneFullscreen(aScene);
+    };
+  }, true);
+};
+
+export function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  // @ts-ignore
+  } else if (document.mozCancelFullScreen) {
+    // @ts-ignore
+    document.mozCancelFullScreen();
+  // @ts-ignore
+  } else if (document.webkitExitFullscreen) {
+    // @ts-ignore
+    document.webkitExitFullscreen();
+  };
+};
+
+export function exitSceneFullscreen(aScene) {
+  if (aScene) {
+    try {
+      aScene.exitVR();
+    } catch (error) {
+      console.error("Couldn't exit VR mode");      
+    };
+    try {
+      if (aScene.ownerDocument.exitFullscreen) {
+        aScene.ownerDocument.exitFullscreen();
+      // @ts-ignore
+      } else if (aScene.ownerDocument.mozCancelFullScreen) {
+        // @ts-ignore
+        aScene.ownerDocument.mozCancelFullScreen();
+      // @ts-ignore
+      } else if (aScene.ownerDocument.webkitExitFullscreen) {
+        // @ts-ignore
+        aScene.ownerDocument.webkitExitFullscreen();
+      };
+    } catch (error) {
+      console.error("Couldn't exit fullscreen");      
+    };
+  };
+};

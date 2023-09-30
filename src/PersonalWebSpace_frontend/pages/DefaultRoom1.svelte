@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   let spaceString;
-
+  
   const addAFrameTestRoom = async () => {
     const resp = await fetch("defaultRoom_NatureRetreat.html");
     spaceString = await resp.text();

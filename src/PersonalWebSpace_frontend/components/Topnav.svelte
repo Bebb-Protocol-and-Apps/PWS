@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { store } from "../store";
+
   import LoginModal from "./LoginModal.svelte";
 
   let openModal = false;
@@ -22,7 +24,11 @@
       <img src="/images/open-internet-metaverse.svg" class="h-8 mr-3" alt="OIM Logo" />
     </a>
     <div class="flex items-center">
-      <button on:click={toggleModal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+      {#if !$store.isAuthed}
+        <button on:click={toggleModal} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+      {:else}
+        <button on:click={() => store.disconnect()} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Logout</button>
+      {/if}
     </div>
   </div>
 </nav>
