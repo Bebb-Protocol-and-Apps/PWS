@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { store, appDomain } from "../store";
   import Topnav from "../components/Topnav.svelte";
   import Footer from "../components/Footer.svelte";
@@ -6,7 +7,7 @@
   import MediaContentPreview from "../components/MediaContentPreview.svelte";
 
   import { getStringForSpaceFromMediaFile, getStringForSpaceFromModel } from "../helpers/space_helpers";
-  import { supportedImageExtensions, supportedVideoExtensions } from "../helpers/utils";
+  import { supportedImageExtensions, supportedVideoExtensions, registerKeydownEventToExitFullscreen } from "../helpers/utils";
 
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
@@ -273,6 +274,51 @@
     });
   };
 
+  const enableExitFullscreenForIframeScene = function(iframe) {
+    if (iframe) {
+      // Use the 'load' event to ensure the iframe's contents are fully loaded
+      // Get the A-Frame scene inside the iframe
+      // @ts-ignore
+      const aScene = iframe.contentWindow.document.querySelector('a-scene');
+      // Now you can interact with the scene...
+      if (aScene) {
+        if (aScene.hasLoaded) {
+          registerKeydownEventToExitFullscreen(aScene);
+        } else {
+          aScene.addEventListener('loaded', function () {
+            registerKeydownEventToExitFullscreen(aScene);
+          });
+        };
+      } else {
+        // Set timeout and try again
+        setTimeout(() => {
+          enableExitFullscreenForIframeScene(iframe);
+        }, 1000);
+      };
+    } else {
+      // Set timeout and try again
+      setTimeout(() => {
+        enableExitFullscreenForIframeScene(iframe);
+      }, 1000);
+    };
+  };
+
+  const enableExitFullscreenScene = () => {
+    let iframes = document.getElementsByClassName("create-space-preview-iframe");
+    if (iframes) {
+      for (var i = 0; i < iframes.length; i++) {
+        enableExitFullscreenForIframeScene(iframes[i]);
+      };
+    } else {
+      // Set timeout and try again
+      setTimeout(() => {
+        enableExitFullscreenScene();
+      }, 1000);
+    };    
+  };
+
+  onMount(enableExitFullscreenScene);
+
 </script>
 
 <Topnav />
@@ -309,7 +355,7 @@
     <div style="background-color: #007bc2">
       <!-- Default Space 1 -->
       <div class="iframe-holder">
-        <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+        <iframe src="#/defaultspace/1" title="Your Nature Retreat" width="100%" height="444px" referrerpolicy="no-referrer" class="create-space-preview-iframe"></iframe>
       </div>
     </div>
     <!-- ... -->
@@ -367,7 +413,7 @@
     </div>
 
     <div class="iframe-holder">
-      <iframe src="#/defaultspace/2" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+      <iframe src="#/defaultspace/2" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer" class="create-space-preview-iframe"></iframe>
     </div>
   </div>
 
@@ -375,7 +421,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
     <div style="background-color: #007bc2">
       <div class="iframe-holder">
-        <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+        <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer" class="create-space-preview-iframe"></iframe>
       </div>
     </div>
     <div class="p-12 flex flex-col justify-center">
