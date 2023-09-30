@@ -279,7 +279,7 @@
       // Use the 'load' event to ensure the iframe's contents are fully loaded
       // Get the A-Frame scene inside the iframe
       // @ts-ignore
-      let aScene = iframe.contentWindow.document.querySelector('a-scene');
+      const aScene = iframe.contentWindow.document.querySelector('a-scene');
       // Now you can interact with the scene...
       if (aScene) {
         if (aScene.hasLoaded) {
@@ -413,7 +413,7 @@
     </div>
 
     <div class="iframe-holder">
-      <iframe src="#/defaultspace/2" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+      <iframe src="#/defaultspace/2" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer" class="create-space-preview-iframe"></iframe>
     </div>
   </div>
 
@@ -421,7 +421,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
     <div style="background-color: #007bc2">
       <div class="iframe-holder">
-        <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer"></iframe>
+        <iframe src="#/defaultspace/0" title="Your Web Space Station" width="100%" height="444px" referrerpolicy="no-referrer" class="create-space-preview-iframe"></iframe>
       </div>
     </div>
     <div class="p-12 flex flex-col justify-center">
