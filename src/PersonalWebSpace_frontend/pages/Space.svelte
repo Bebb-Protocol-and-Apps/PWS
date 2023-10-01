@@ -290,6 +290,21 @@
     };
   };
 
+  const changeInspectorCameraPosition = () => {
+    // Ensure Inspector has loaded successfully
+    const toolbar = document.getElementById("transformToolbar");
+    if(toolbar) {
+      // Set the Inspector's camera to match the last scene view (the user had before opening the Inspector)
+      AFRAME.INSPECTOR.cameras.perspective.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
+      AFRAME.INSPECTOR.cameras.perspective.rotation.set(AFRAME.INSPECTOR.cameras.original.object3D.rotation.x, AFRAME.INSPECTOR.cameras.original.object3D.rotation.y, AFRAME.INSPECTOR.cameras.original.object3D.rotation.z);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        changeInspectorCameraPosition();
+      }, 500);
+    };
+  };
+
   // Edit mode options
   //  Function to toggle whether any Edit Mode option's popup is open
   let openEditModelPopup = false;
@@ -1112,6 +1127,8 @@
   // Change A-Frame's default Inspector according to our specific requirements
     // TODO: put camera to same position as when scene is loaded
   const customizeInspector = () => {
+    // Move the Inspector's initial camera view to the current view
+    changeInspectorCameraPosition();
     // Remove any 3D Neighbors from the scene
     remove3dNeighborsFromScene();
     // Hide VR menu
@@ -1438,7 +1455,6 @@
     // @ts-ignore
     const spaceNFTResponse: NftResult = await $store.backendActor.getSpace(Number(params.spaceId));
     
-    loadingInProgress = false;
     if (spaceNFTResponse.Err) {
       spaceLoadingError = true;
     } else {
@@ -1450,6 +1466,8 @@
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
       loadSceneCustomizations();
     };
+
+    loadingInProgress = false;
   };
 
 // User clicked to see Space's metadata
