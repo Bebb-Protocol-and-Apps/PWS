@@ -1167,6 +1167,8 @@
     // Ensure a-scene has loaded, otherwise wait and try again
     const aScene = document.querySelector('a-scene');
     if (aScene) {
+      // Movements in Space
+      loadSpaceMovements();
       // VR menu
       loadVRMenu();
       sceneCustomizationsLoaded = true;
@@ -1175,6 +1177,14 @@
         loadSceneCustomizations();
       }, 500);
     };    
+  };
+
+  function loadSpaceMovements () {
+    // Find the camera entity
+    let cameraEntity = document.querySelector('a-entity[camera]');
+    // Enable flying in the space (i.e. pressing the forward button always moves into the direction of view, incl. up and down)
+    // ts-ignore
+    cameraEntity.setAttribute('wasd-controls', { acceleration:65, fly:true });
   };
 
   function loadVRMenu() {
