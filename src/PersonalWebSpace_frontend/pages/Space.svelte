@@ -1125,7 +1125,6 @@
   }
 
   // Change A-Frame's default Inspector according to our specific requirements
-    // TODO: put camera to same position as when scene is loaded
   const customizeInspector = () => {
     // Move the Inspector's initial camera view to the current view
     changeInspectorCameraPosition();

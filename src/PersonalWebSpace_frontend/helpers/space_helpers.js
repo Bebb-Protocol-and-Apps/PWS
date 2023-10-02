@@ -72,7 +72,8 @@ export const getStringForSpaceWithEnvironment = (envToPreview) => {
     </head>
     <body>
       <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
-
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
+        
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
 
@@ -93,6 +94,8 @@ export const getStringForSpaceFromModel = (modelUrl) => {
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         </a-assets>
+
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
 
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
@@ -118,6 +121,8 @@ export const getStringForSpaceFromUserUploadedModel = () => {
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         </a-assets>
 
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
+
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
 
@@ -140,6 +145,8 @@ export const getStringForSpaceFromVideoFile = (videoUrl) => {
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
           <video id="videoToPreview" autoplay loop="true" src="${videoUrl}"></video>
         </a-assets>
+
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
 
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
@@ -164,6 +171,8 @@ export const getStringForSpaceFrom360VideoFile = (videoUrl) => {
           <video id="360videoToPreview" autoplay loop="true" src="${videoUrl}"></video>
         </a-assets>
 
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
+
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
 
@@ -185,6 +194,8 @@ export const getStringForSpaceFromImageFile = (imageUrl) => {
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
           <img crossorigin="anonymous" id="imageToPreview" src="${imageUrl}">
         </a-assets>
+
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
 
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
@@ -208,6 +219,8 @@ export const getStringForSpaceFrom360ImageFile = (imageUrl) => {
         <a-assets>
           <img crossorigin="anonymous" id="skyTexture" src="${imageUrl}">
         </a-assets>
+
+        <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
 
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
         <a-light type="directional" intensity="1.0" position=" 2  1 -1"></a-light>
