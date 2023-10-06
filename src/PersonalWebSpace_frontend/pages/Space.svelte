@@ -19,6 +19,7 @@
   import EnvironmentPreview from "../components/EnvironmentPreview.svelte";
   import FileSpacePreview from "../components/FileSpacePreview.svelte";
   import MyFilesLibrary from "../components/MyFilesLibrary.svelte";
+  import AiAssistantOverlay from "../components/AiAssistantOverlay.svelte";
   
   import { getEntityClipboardRepresentation } from '../helpers/entity.js';
   import { extractSpaceMetadata } from '../helpers/space_helpers.js';
@@ -46,7 +47,10 @@
 
 // Check whether the current space viewer is its owner
   const isViewerSpaceOwner = () => {
-    return $store.principal.toText() === spaceOwnerPrincipal.toText();    
+    if ($store && $store.principal && spaceOwnerPrincipal) {
+      return $store.principal.toText() === spaceOwnerPrincipal.toText();
+    };
+    return false; 
   };
 
 // User clicked on Logout
@@ -1208,7 +1212,7 @@
     openMenuText.setAttribute('class', 'menu-item');
     openMenuText.setAttribute('value', 'Open Menu');
     openMenuText.setAttribute('align', 'center');
-    openMenuText.setAttribute('color', '#FFF');
+    openMenuText.setAttribute('color', '#000000');
     openMenuText.setAttribute('position', '0 0.01 0.01'); // Position relative to the menu (center)
     openMenuText.setAttribute('visible', 'true'); // Initially set to visible
     // Make the text smaller to fit the menu
@@ -1219,45 +1223,75 @@
     closeMenuText.setAttribute('class', 'menu-item');
     closeMenuText.setAttribute('value', 'Close Menu');
     closeMenuText.setAttribute('align', 'center');
-    closeMenuText.setAttribute('color', '#FFF');
+    closeMenuText.setAttribute('color', '#444444');
     closeMenuText.setAttribute('position', '0 0.17 0.01'); // Position relative to the menu (top)
     closeMenuText.setAttribute('visible', 'false'); // Initially set to invisible
     // Make the text smaller to fit the menu
     closeMenuText.setAttribute('scale', '0.5 0.5 0.5');  
 
     // Create a button to load the Space's Neighbors in 3D as a child of the menu
-    let buttonEntity = document.createElement('a-entity');
-    buttonEntity.setAttribute('class', 'menu-item');
-    buttonEntity.setAttribute('visible', 'false'); // Initially set to invisible
-    buttonEntity.setAttribute('geometry', 'primitive: box; height: 0.15; width: 0.5; depth: 0.01');
-    buttonEntity.setAttribute('material', 'color: #555; opacity: 0.8');
-    buttonEntity.setAttribute('position', '0 -0.01 0.015'); // Position relative to the menu
-    buttonEntity.addEventListener('click', function () {
+    let neighborsButtonEntity = document.createElement('a-entity');
+    neighborsButtonEntity.setAttribute('class', 'menu-item');
+    neighborsButtonEntity.setAttribute('visible', 'false'); // Initially set to invisible
+    neighborsButtonEntity.setAttribute('geometry', 'primitive: box; height: 0.13; width: 0.5; depth: 0.01');
+    neighborsButtonEntity.setAttribute('material', 'color: #555; opacity: 0.8');
+    neighborsButtonEntity.setAttribute('position', '0 0.01 0.015'); // Position relative to the menu
+    neighborsButtonEntity.addEventListener('click', function () {
       // Only trigger loading if button is visible (and thus was explicitly clicked)
-      if (buttonEntity.getAttribute('visible')) {
+      if (neighborsButtonEntity.getAttribute('visible')) {
         loadSpaceNeighborsIn3D();
       };
     });
-    buttonEntity.addEventListener('mouseenter', function () {
-      buttonEntity.setAttribute('material', 'color: #888');
+    neighborsButtonEntity.addEventListener('mouseenter', function () {
+      neighborsButtonEntity.setAttribute('material', 'color: #888');
     });
-    buttonEntity.addEventListener('mouseleave', function () {
-      buttonEntity.setAttribute('material', 'color: #555');
+    neighborsButtonEntity.addEventListener('mouseleave', function () {
+      neighborsButtonEntity.setAttribute('material', 'color: #555');
     });
     // Add text to the button
-    let buttonText = document.createElement('a-text');
-    buttonText.setAttribute('value', 'Load Neighbors');
-    buttonText.setAttribute('align', 'center');
-    buttonText.setAttribute('color', '#FFF');
-    buttonText.setAttribute('position', '0 0 0.01'); // Position relative to the button
+    let neighborsButtonText = document.createElement('a-text');
+    neighborsButtonText.setAttribute('value', 'Show Neighbors');
+    neighborsButtonText.setAttribute('align', 'center');
+    neighborsButtonText.setAttribute('color', '#000000');
+    neighborsButtonText.setAttribute('position', '0 0 0.005'); // Position relative to the button
     // Make the text smaller to fit the button
-    buttonText.setAttribute('scale', '0.3 0.3 0.3');
-    buttonEntity.appendChild(buttonText);
+    neighborsButtonText.setAttribute('scale', '0.3 0.3 0.3');
+    neighborsButtonEntity.appendChild(neighborsButtonText);
+
+    // Create a button to load the AI assistant as a child of the menu
+    let aiAssistantButtonEntity = document.createElement('a-entity');
+    aiAssistantButtonEntity.setAttribute('class', 'menu-item');
+    aiAssistantButtonEntity.setAttribute('visible', 'false'); // Initially set to invisible
+    aiAssistantButtonEntity.setAttribute('geometry', 'primitive: box; height: 0.13; width: 0.5; depth: 0.01');
+    aiAssistantButtonEntity.setAttribute('material', 'color: #555; opacity: 0.8');
+    aiAssistantButtonEntity.setAttribute('position', '0 -0.16 0.015'); // Position relative to the menu
+    aiAssistantButtonEntity.addEventListener('click', function () {
+      // Only trigger loading if button is visible (and thus was explicitly clicked)
+      if (aiAssistantButtonEntity.getAttribute('visible')) {
+        loadAiAssistantIntoSpace();
+      };
+    });
+    aiAssistantButtonEntity.addEventListener('mouseenter', function () {
+      aiAssistantButtonEntity.setAttribute('material', 'color: #888');
+    });
+    aiAssistantButtonEntity.addEventListener('mouseleave', function () {
+      aiAssistantButtonEntity.setAttribute('material', 'color: #555');
+    });
+    // Add text to the button
+    let aiAssistantButtonText = document.createElement('a-text');
+    aiAssistantButtonText.setAttribute('value', 'Open AI Assistant');
+    aiAssistantButtonText.setAttribute('align', 'center');
+    aiAssistantButtonText.setAttribute('color', '#000000');
+    aiAssistantButtonText.setAttribute('position', '0 0 0.005'); // Position relative to the button
+    // Make the text smaller to fit the button
+    aiAssistantButtonText.setAttribute('scale', '0.27 0.27 0.27');
+    aiAssistantButtonEntity.appendChild(aiAssistantButtonText);
 
     // Add the elements to the menu
     menuEntity.appendChild(openMenuText);
     menuEntity.appendChild(closeMenuText);
-    menuEntity.appendChild(buttonEntity);
+    menuEntity.appendChild(neighborsButtonEntity);
+    menuEntity.appendChild(aiAssistantButtonEntity);
 
     // Find the camera entity
     let cameraEntity = document.querySelector('a-entity[camera]');
@@ -1336,6 +1370,14 @@
         neighborIndex++;
       };
     };    
+  };
+
+  // AI Assistant
+  let aiAssistantLoadedIntoSpace = false;
+  //let aiAssistantVisualizationImageLoaded = false;
+
+  const loadAiAssistantIntoSpace = async () => {
+    aiAssistantLoadedIntoSpace = true;
   };
 
   const loadSpaceNeighborsIn3D = async () => {
@@ -1509,6 +1551,7 @@
     {#if !$store.isAuthed}
       <Login />
     {:else}
+    <!-- Hamburger Menu -->
       <div class="hamburgerParent">
         <Hamburger
           bind:open />
@@ -1553,9 +1596,14 @@
         <SpaceInfo spaceMetadata={spaceMetadata} />
       {/if}
     {/if}
+  <!-- A-Frame Scene HTML -->
     <div style="position: absolute; height: 100%; width: 100%;">
       {@html spaceString}
     </div>
+  <!-- AI Assistant overlay -->
+    {#if aiAssistantLoadedIntoSpace}
+      <AiAssistantOverlay viewerIsSpaceOwner={isViewerSpaceOwner()} />
+    {/if}
   <!-- Edit Mode Popups -->
     {#if openEditModelPopup}
       <div id="editOptionPopupsContainer">
