@@ -1268,7 +1268,7 @@
     aiAssistantButtonEntity.addEventListener('click', function () {
       // Only trigger loading if button is visible (and thus was explicitly clicked)
       if (aiAssistantButtonEntity.getAttribute('visible')) {
-        loadAiAssistantIntoSpace();
+        toggleAiAssistant();
       };
     });
     aiAssistantButtonEntity.addEventListener('mouseenter', function () {
@@ -1286,6 +1286,16 @@
     // Make the text smaller to fit the button
     aiAssistantButtonText.setAttribute('scale', '0.27 0.27 0.27');
     aiAssistantButtonEntity.appendChild(aiAssistantButtonText);
+
+    const toggleAiAssistant = () => {
+      if (showAiAssistantInSpace) {
+        hideAiAssistantFromSpace();
+        aiAssistantButtonText.setAttribute('value', 'Open AI Assistant');
+      } else {
+        loadAiAssistantIntoSpace();
+        aiAssistantButtonText.setAttribute('value', 'Hide AI Assistant');
+      };
+    };
 
     // Add the elements to the menu
     menuEntity.appendChild(openMenuText);
@@ -1373,11 +1383,15 @@
   };
 
   // AI Assistant
-  let aiAssistantLoadedIntoSpace = false;
+  let showAiAssistantInSpace = false;
   //let aiAssistantVisualizationImageLoaded = false;
 
   const loadAiAssistantIntoSpace = async () => {
-    aiAssistantLoadedIntoSpace = true;
+    showAiAssistantInSpace = true;
+  };
+
+  const hideAiAssistantFromSpace = async () => {
+    showAiAssistantInSpace = false;
   };
 
   const loadSpaceNeighborsIn3D = async () => {
@@ -1601,9 +1615,9 @@
       {@html spaceString}
     </div>
   <!-- AI Assistant overlay -->
-    {#if aiAssistantLoadedIntoSpace}
+    <div hidden={!showAiAssistantInSpace}>
       <AiAssistantOverlay viewerIsSpaceOwner={isViewerSpaceOwner()} />
-    {/if}
+    </div>
   <!-- Edit Mode Popups -->
     {#if openEditModelPopup}
       <div id="editOptionPopupsContainer">

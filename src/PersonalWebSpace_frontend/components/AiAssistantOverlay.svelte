@@ -5,7 +5,7 @@
 
   export let viewerIsSpaceOwner: Boolean = false;
 
-  const aiAssistantUrl = "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io/#/embed"; // TODO
+  const aiAssistantUrl = "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io/#/embedagent"; // TODO
   
   const allowedOrigins = [
     "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io",

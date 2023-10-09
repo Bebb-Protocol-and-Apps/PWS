@@ -35,14 +35,14 @@
 
 // Helper functions to check whether a valid URL was provided in the new neighbor form
     const isValidUrl = (url) => {
-    try {
-      new URL(url);
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-    return true;
-  };
+        try {
+            new URL(url);
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+        return true;
+    };
 
   const neighborUrlInputHandler = function(url) {
     if (!isValidUrl(url)) {
