@@ -295,7 +295,9 @@
     const toolbar = document.getElementById("transformToolbar");
     if(toolbar) {
       // Set the Inspector's camera to match the last scene view (the user had before opening the Inspector)
+      // @ts-ignore
       AFRAME.INSPECTOR.cameras.perspective.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
+      // @ts-ignore
       AFRAME.INSPECTOR.cameras.perspective.rotation.set(AFRAME.INSPECTOR.cameras.original.object3D.rotation.x, AFRAME.INSPECTOR.cameras.original.object3D.rotation.y, AFRAME.INSPECTOR.cameras.original.object3D.rotation.z);
     } else {
       // Inspector hasn't loaded yet
@@ -1471,7 +1473,7 @@
   };
 
 // User clicked to see Space's metadata
-  const spaceMetadata = {
+  let spaceMetadata = {
     spaceName: "",
     spaceDescription: "",
     creationTime: "",
@@ -1482,14 +1484,20 @@
     spaceOwnerPrincipal: null,
     spaceData: null,
   };
+  let spaceMetadataHasBeenExtracted = false;
   let showSpaceInfoView = false;
 
   const spaceInfoButtonOnClick = () => {
-    extractSpaceMetadata(spaceNft, spaceMetadata); // Fill with Space's info from NFT metadata
-    // Fill additional fields for usage in SpaceInfo
-    spaceMetadata.id = spaceNft.id;
-    spaceMetadata.spaceOwnerPrincipal = spaceOwnerPrincipal;
-    spaceMetadata.spaceData = spaceNft.metadata[0].data;
+    if (!spaceMetadataHasBeenExtracted) {
+      // Only extract data from spaceNft on first load
+        // and not again later on, as data in spaceMetadata might have been updated
+      extractSpaceMetadata(spaceNft, spaceMetadata); // Fill with Space's info from NFT metadata
+      // Fill additional fields for usage in SpaceInfo
+      spaceMetadata.id = spaceNft.id;
+      spaceMetadata.spaceOwnerPrincipal = spaceOwnerPrincipal;
+      spaceMetadata.spaceData = spaceNft.metadata[0].data;
+      spaceMetadataHasBeenExtracted = true;
+    };
 
     open = false;
     showSpaceInfoView = true;
@@ -1550,7 +1558,7 @@
           <SpaceNeighbors spaceNft={spaceNft} />
         </div>
       {:else if showSpaceInfoView}
-        <SpaceInfo spaceMetadata={spaceMetadata} />
+        <SpaceInfo bind:spaceMetadata={spaceMetadata} />
       {/if}
     {/if}
     <div style="position: absolute; height: 100%; width: 100%;">
