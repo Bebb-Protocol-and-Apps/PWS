@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Entity } from "src/integrations/BebbProtocol/bebb.did";
+  import type { BebbEntity } from "../helpers/bebb_utils";
 
-  export let entity : Entity;
+  export let entity : BebbEntity;
   export let viewerIsSpaceOwner: Boolean = false;
   export let deleteSpaceNeighborFunction; // Function passed to delete the link between the Space and the Neighbor
 

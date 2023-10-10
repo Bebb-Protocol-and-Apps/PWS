@@ -1,6 +1,18 @@
 <script lang="ts">
-    import type { Principal } from "@dfinity/principal";
-    import type { EntityInitiationObject, BridgeInitiationObject, EntityAttachedBridgesResult, EntityAttachedBridges, Bridge, Entity } from "src/integrations/BebbProtocol/bebb.did";
+    import type {
+        BebbBridge,
+        BebbBridgeInitiationObject,
+        BebbEntity,
+        BebbEntityAttachedBridges,
+        BebbEntityAttachedBridgesResult,
+        BebbEntityInitiationObject,
+    } from "../helpers/bebb_utils";
+    import {
+        createBebbEntityAndBridge,
+        getBebbBridgesBetweenEntities,
+        deleteBebbBridgesByOwner,
+        getConnectedEntitiesInBebb,
+    } from "../helpers/bebb_utils";
     import { onMount } from "svelte";
     import ProtocolEntity from "./ProtocolEntity.svelte";
     import UserSpaces from "./UserSpaces.svelte";
@@ -71,7 +83,7 @@
         if (neighborUrlInputHandler(newNeighborUrl) && spaceEntityId) {
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
             const externalId : [string] = [newNeighborUrl];
-            const entityInitiationObject : EntityInitiationObject= {
+            const entityInitiationObject : BebbEntityInitiationObject= {
                 settings: [],
                 entityType: { 'Resource' : { 'Web' : null } },
                 name: [],
@@ -80,7 +92,7 @@
                 entitySpecificFields: externalId,
             };
 
-            const bridgeEntityInitiationObject : BridgeInitiationObject = {
+            const bridgeEntityInitiationObject : BebbBridgeInitiationObject = {
                 settings: [],
                 name: [],
                 description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
@@ -91,19 +103,9 @@
                 toEntityId: "",
             };
             try {
-                const createEntityResponse = await $store.protocolActor.create_entity(entityInitiationObject);
-                // @ts-ignore
-                if (createEntityResponse && createEntityResponse.Ok) {
-                    // @ts-ignore
-                    const newNeighborEntityId = createEntityResponse.Ok;
-                    bridgeEntityInitiationObject.toEntityId = newNeighborEntityId;
-                    const createBridgeResponse = await $store.protocolActor.create_bridge(bridgeEntityInitiationObject);
-                    // @ts-ignore
-                    if (createBridgeResponse && createBridgeResponse.Ok) {
-                        successfullyAddedNeighbor = true;
-                    } else {
-                        errorAddingNeighbor = true;
-                    };
+                const createBebbEntityAndBridgeResponse = await createBebbEntityAndBridge(entityInitiationObject, bridgeEntityInitiationObject);
+                if (createBebbEntityAndBridgeResponse) {
+                    successfullyAddedNeighbor = true;
                 } else {
                     errorAddingNeighbor = true;
                 };
@@ -127,69 +129,30 @@
         neighborCreationInProgress = false;
     };
 
-// Helper function to find Bridge(s) between Space and a Neighbor
-    const getBridgesBetweenEntities = async (spaceEntityId, neighborProtocolEntityId, bothBridgingDirections = false, includePendingBridges = false) : Promise<Bridge[]> => {
-        if (neighborProtocolEntityId && spaceEntityId) {
-            let getBridgesResponse : EntityAttachedBridgesResult;
-            try {
-                getBridgesResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
-            } catch (error) {
-                console.error("Error Getting Bridges", error);
-                return null;                
-            };
-            // @ts-ignore
-            if (getBridgesResponse && getBridgesResponse.Ok && getBridgesResponse.Ok.length > 0) {
-                // Filter for Bridges to Neighbor
-                // @ts-ignore
-                const bridgesRetrieved : EntityAttachedBridges = getBridgesResponse.Ok;
-                let getBridgeRequestPromises = [];
-                for (var i = 0; i < bridgesRetrieved.length; i++) {
-                    if (bridgesRetrieved[i] && bridgesRetrieved[i].id) {
-                        getBridgeRequestPromises.push($store.protocolActor.get_bridge(bridgesRetrieved[i].id)); // Send requests in parallel and then await all to speed up
-                    };
-                };
-                const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
-                const bridgesBetweenEntities : Bridge[] = [];
-                for (var j = 0; j < getBridgeResponses.length; j++) {
-                    if (getBridgeResponses[j].Err) {
-                        console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
-                    } else {
-                        const bridge : Bridge = getBridgeResponses[j].Ok;
-                        if (bridge && bridge.id && bridge.toEntityId === neighborProtocolEntityId) {
-                            bridgesBetweenEntities.push(bridge);
-                        };
-                    };
-                };
-                return bridgesBetweenEntities;
-            };
-        };
-        return null;
-    };
-
 // Owner clicked to delete a Neighbor
     // neighborProtocolEntityId: internal id in Bebb Protocol of the Neighbor to be deleted
     const deleteSpaceNeighbor = async (neighborProtocolEntityId) => {
         const spaceEntityId = extractSpaceEntityId();
         if (neighborProtocolEntityId && spaceEntityId && isViewerSpaceOwner()) {
             // Find id of Bridge between Space's and Neighbor's Entities in Bebb Protocol (note: there might be multiple)
-            const findBridgesResponse : Bridge[] = await getBridgesBetweenEntities(spaceEntityId, neighborProtocolEntityId);
+            let findBridgesResponse : BebbBridge[];
+            try {
+                findBridgesResponse = await getBebbBridgesBetweenEntities(spaceEntityId, neighborProtocolEntityId);
+            } catch (error) {
+                console.error("Error Getting Bridges ", error);                
+                return null;                
+            };
+            
             if (findBridgesResponse && findBridgesResponse.length > 0) {
-                // Delete Bridge(s) in Bebb Protocol owned by Space owner
-                let requestPromises = [];
-                for (var i = 0; i < findBridgesResponse.length; i++) {
-                    const bridgeId = findBridgesResponse[i].id;
-                    if (bridgeId && findBridgesResponse[i].owner?.toText() === spaceNft.owner?.toText()) {
-                        requestPromises.push($store.protocolActor.delete_bridge(bridgeId)); // Send requests in parallel and then await all to speed up
+                try {
+                    const deleteBebbBridgesByOwnerResponse = await deleteBebbBridgesByOwner(findBridgesResponse, spaceNft.owner?.toText());
+                    if (deleteBebbBridgesByOwnerResponse) {
+                        return true;
                     };
+                } catch (error) {
+                    console.error("Error deleting Space Neighbor ", error);                
+                    return null;                
                 };
-                const deletionResponses = await Promise.all(requestPromises);
-                for (var j = 0; j < deletionResponses.length; j++) {
-                    if (deletionResponses[j].Err) {
-                        console.error("Error deleting Space Neighbor", deletionResponses[j].Err);
-                        return null;
-                    };
-                };
-                return true;
             };
         };
         return null;
@@ -228,49 +191,16 @@
 
     const loadSpaceNeighbors = async () => {
         const spaceEntityId = extractSpaceEntityId();
-        let spaceNeighborsResponse : EntityAttachedBridgesResult;
-        let retrievedNeighborEntities : Entity[] = [];
+        let spaceNeighborsResponse : BebbEntityAttachedBridgesResult;
+        let retrievedNeighborEntities : BebbEntity[] = [];
         try {
-            try {
-                spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
-            } catch (error) {
-                console.error("Error Getting Bridges", error);
-                return null;                
-            };
-            // @ts-ignore
-            if (spaceNeighborsResponse && spaceNeighborsResponse.Ok && spaceNeighborsResponse.Ok.length > 0) {
-                // @ts-ignore
-                const bridgesRetrieved : EntityAttachedBridges = spaceNeighborsResponse.Ok;
-                const bridgeIds = [];
-                let getBridgeRequestPromises = [];
-                for (var i = 0; i < bridgesRetrieved.length; i++) {
-                    if (bridgesRetrieved[i] && bridgesRetrieved[i].id && bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')) {
-                        bridgeIds.push(bridgesRetrieved[i].id);
-                        getBridgeRequestPromises.push($store.protocolActor.get_bridge(bridgesRetrieved[i].id)); // Send requests in parallel and then await all to speed up
-                    };
-                };
-                const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
-                let getConnectedEntityRequestPromises = [];
-                for (var j = 0; j < getBridgeResponses.length; j++) {
-                    if (getBridgeResponses[j].Err) {
-                        console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
-                    } else {
-                        const bridge : Bridge = getBridgeResponses[j].Ok;
-                        getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
-                    };
-                };
-                const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
-                for (var j = 0; j < getConnectedEntityResponses.length; j++) {
-                    if (getConnectedEntityResponses[j].Err) {
-                        console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
-                    } else {
-                        const connectedEntity : Entity = getConnectedEntityResponses[j].Ok;
-                        retrievedNeighborEntities.push(connectedEntity);
-                    };
-                };
+            const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId);
+            for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
+                const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
+                retrievedNeighborEntities.push(connectedEntity);
             };
         } catch(err) {
-            console.error("Error getting SpaceNeighbors", err);
+            console.error("Error getting SpaceNeighbors ", err);
             neighborsLoadingError = true;
         };
         loadingInProgress = false;
