@@ -22,7 +22,7 @@ function addImageEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('src', '#' + assetId);
     const newElementId = `assistantAddedImage_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 3 -6'); // TODO
+    contentEntity.setAttribute('position', '0 6 -6'); // TODO
     console.log("Debug addImageEntityToScene contentEntity ", contentEntity);
     aScene.appendChild(contentEntity);
   };
@@ -54,7 +54,7 @@ function addVideoEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('src', '#' + assetId);
     const newElementId = `assistantAddedVideo_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 3 -6'); // TODO
+    contentEntity.setAttribute('position', '0 6 -6'); // TODO
     console.log("Debug addVideoEntityToScene contentEntity ", contentEntity);
     contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
     aScene.appendChild(contentEntity);
@@ -66,13 +66,15 @@ function addModelEntityToScene(elementData, assetId, aScene) {
   if (!elementData || !assetId || !aScene) {
     return;
   };
-  // Determine whether the image is 360 degree and set the appropriate attribute
+  if (!elementData.elementSubType) {
+    elementData.elementSubType = "gltf";
+  };
   if (elementData.elementSubType === "gltf") {
     const contentEntity = aScene.ownerDocument.createElement('a-entity');
     contentEntity.setAttribute('gltf-model', '#' + assetId);
     const newElementId = `assistantAddedModel_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 3 -6'); // TODO
+    contentEntity.setAttribute('position', '0 6 -6'); // TODO
     // @ts-ignore
     contentEntity.setAttribute('animation-mixer');
     console.log("Debug addModelEntityToScene contentEntity ", contentEntity);
@@ -121,10 +123,14 @@ export const addElementToSpace = (elementData, aScene = null) => {
   } else {
     // Create a new asset
     let assetType = 'img';
-    if (elementData.elementType === "model") {
+    let eventToListenTo = 'load'; // the different file types emit different events that we need to listen to
+    if (elementData.elementType === "model" || elementData.elementType === "3D-model") {
+      elementData.elementType = "model";
       assetType = 'a-asset-item';
+      eventToListenTo = 'loaded';
     } else if (elementData.elementType === "video") {
       assetType = 'video';
+      eventToListenTo = 'loadeddata';
     };
     console.log("Debug addElementToSpace assetType ", assetType);
 
@@ -137,7 +143,8 @@ export const addElementToSpace = (elementData, aScene = null) => {
     var assets = document.querySelector('a-assets');
     assets.appendChild(newAsset);
     console.log("Debug addElementToSpace newAsset ", newAsset);
-    newAsset.addEventListener('load', function(){
+    newAsset.addEventListener(eventToListenTo, function(){
+      console.log("Debug newAsset.addEventListener elementData ", elementData);
       loadedElementCallback(elementData, newAssetId, aScene);
     });
   };
