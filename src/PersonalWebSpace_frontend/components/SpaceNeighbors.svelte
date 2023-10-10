@@ -191,7 +191,6 @@
 
     const loadSpaceNeighbors = async () => {
         const spaceEntityId = extractSpaceEntityId();
-        let spaceNeighborsResponse : BebbEntityAttachedBridgesResult;
         let retrievedNeighborEntities : BebbEntity[] = [];
         try {
             const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId);

@@ -11,7 +11,12 @@
 
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
-  import type { EntityInitiationObject } from "src/integrations/BebbProtocol/bebb.did";
+  import type {
+    BebbEntityInitiationObject,
+  } from "../helpers/bebb_utils";
+  import {
+    createBebbEntity,
+  } from "../helpers/bebb_utils";
 
   let webHostedGlbModelUrl : string = "";
 
@@ -159,7 +164,7 @@
         setSpaceWasCreated();
         // Protocol integration: create Space as Entity in Protocol
         const externalId = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
-        let entityInitiationObject : EntityInitiationObject = {
+        let entityInitiationObject : BebbEntityInitiationObject = {
           settings: [],
           entityType: { 'Resource' : { 'Web' : null } },
           name: ["Personal Web Space"],
@@ -167,11 +172,11 @@
           keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
           entitySpecificFields: [externalId],
         };
-        const spaceEntityIdResponse = await $store.protocolActor.create_entity(entityInitiationObject);
+        const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
         // @ts-ignore
-        if (spaceEntityIdResponse && spaceEntityIdResponse.Ok) {
+        if (spaceEntityIdResponse) {
           // @ts-ignore
-          const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse.Ok);
+          const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse);
           // @ts-ignore
           if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
             console.error("Update Space Error:", spaceEntityIdUpdateResponse);

@@ -25,7 +25,12 @@
   import { supportedImageExtensions, supportedVideoExtensions, supported3dModelExtensions } from "../helpers/utils";
   
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
-  import type { Entity, EntityAttachedBridgesResult, Bridge } from "src/integrations/BebbProtocol/bebb.did";
+  import type {
+    BebbEntity,
+  } from "../helpers/bebb_utils";
+  import {
+    getConnectedEntitiesInBebb,
+  } from "../helpers/bebb_utils";
   
 
 // This is needed for URL params
@@ -1185,7 +1190,7 @@
     // Find the camera entity
     let cameraEntity = document.querySelector('a-entity[camera]');
     // Enable flying in the space (i.e. pressing the forward button always moves into the direction of view, incl. up and down)
-    // ts-ignore
+    // @ts-ignore
     cameraEntity.setAttribute('wasd-controls', { acceleration:65, fly:true });
   };
 
@@ -1286,12 +1291,12 @@
 
   const extractSpaceEntityId = () => {
     if (spaceNft && spaceNft.metadata && spaceNft.metadata.length > 0) {
-        for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
-            let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
-            if (fieldKey === "protocolEntityId") {
-                return spaceNft.metadata[0].key_val_data[j].val.TextContent;
-            };
+      for (var j = 0; j < spaceNft.metadata[0].key_val_data.length; j++) {
+        let fieldKey = spaceNft.metadata[0].key_val_data[j].key;
+        if (fieldKey === "protocolEntityId") {
+          return spaceNft.metadata[0].key_val_data[j].val.TextContent;
         };
+      };
     };
   };
 
@@ -1352,49 +1357,15 @@
   const loadSpaceNeighborsIn3D = async () => {
     // Load the Space's Neighbors from Bebb Protocol and display them in 3D in the scene
     const spaceEntityId = extractSpaceEntityId();
-    let spaceNeighborsResponse : EntityAttachedBridgesResult;
-    let retrievedNeighborEntities : Entity[] = [];
+    let retrievedNeighborEntities : BebbEntity[] = [];
     try {
-      try {
-          spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
-      } catch (error) {
-          console.error("Error Getting Bridges", error);
-          return null;                
-      };
-      // @ts-ignore
-      if (spaceNeighborsResponse && spaceNeighborsResponse.Ok && spaceNeighborsResponse.Ok.length > 0) {
-        // @ts-ignore
-        const bridgesRetrieved : EntityAttachedBridges = spaceNeighborsResponse.Ok;
-        const bridgeIds = [];
-        let getBridgeRequestPromises = [];
-        for (var i = 0; i < bridgesRetrieved.length; i++) {
-            if (bridgesRetrieved[i] && bridgesRetrieved[i].id && bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')) {
-                bridgeIds.push(bridgesRetrieved[i].id);
-                getBridgeRequestPromises.push($store.protocolActor.get_bridge(bridgesRetrieved[i].id)); // Send requests in parallel and then await all to speed up
-            };
-        };
-        const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
-        let getConnectedEntityRequestPromises = [];
-        for (var j = 0; j < getBridgeResponses.length; j++) {
-            if (getBridgeResponses[j].Err) {
-                console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
-            } else {
-                const bridge : Bridge = getBridgeResponses[j].Ok;
-                getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
-            };
-        };
-        const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
-        for (var j = 0; j < getConnectedEntityResponses.length; j++) {
-            if (getConnectedEntityResponses[j].Err) {
-                console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
-            } else {
-                const connectedEntity : Entity = getConnectedEntityResponses[j].Ok;
-                retrievedNeighborEntities.push(connectedEntity);
-            };
-        };
+      const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId);
+      for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
+        const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
+        retrievedNeighborEntities.push(connectedEntity);
       };
     } catch(err) {
-        console.error("Error getting SpaceNeighbors", err);
+      console.error("Error getting SpaceNeighbors ", err);
     };
 
     // Only load Neighbors if they haven't been loaded yet or reload if new Neighbors have been added

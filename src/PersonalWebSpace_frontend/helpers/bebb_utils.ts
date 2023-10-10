@@ -1,6 +1,13 @@
 import { store } from "../store";
 
-import type { EntityInitiationObject, BridgeInitiationObject, EntityAttachedBridgesResult, EntityAttachedBridges, Bridge, Entity } from "src/integrations/BebbProtocol/bebb.did";
+import type {
+  EntityInitiationObject,
+  BridgeInitiationObject,
+  EntityAttachedBridgesResult,
+  EntityAttachedBridges,
+  Bridge,
+  Entity,
+} from "src/integrations/BebbProtocol/bebb.did";
 
 export type BebbEntity = Entity;
 export type BebbEntityInitiationObject = EntityInitiationObject;
@@ -12,19 +19,49 @@ export type BebbBridge = Bridge;
 let appStore;
 store.subscribe((value) => appStore = value);
 
-export async function createBebbEntityAndBridge(entityInitiationObject: BebbEntityInitiationObject, bridgeEntityInitiationObject: BebbBridgeInitiationObject) {
+export async function createBebbEntity(entityInitiationObject: BebbEntityInitiationObject) {
   if (!appStore) {
-    throw new Error("Error in createBebbEntityAndBridge: store not initialized");
+    throw new Error("Error in createBebbEntity: store not initialized");
   };
   const createEntityResponse = await appStore.protocolActor.create_entity(entityInitiationObject);
   // @ts-ignore
   if (createEntityResponse && createEntityResponse.Ok) {
+    return createEntityResponse.Ok;
+  } else {
+    throw new Error("Error creating new Entity");   
+  };
+};
+
+export async function createBebbBridge(bridgeEntityInitiationObject: BebbBridgeInitiationObject) {
+  if (!appStore) {
+    throw new Error("Error in createBebbBridge: store not initialized");
+  };
+  const createBridgeResponse = await appStore.protocolActor.create_bridge(bridgeEntityInitiationObject);
+  // @ts-ignore
+  if (createBridgeResponse && createBridgeResponse.Ok) {
+    return createBridgeResponse.Ok;
+  } else {
+    throw new Error("Error creating new Bridge");
+  };
+};
+
+export async function createBebbEntityAndBridge(entityInitiationObject: BebbEntityInitiationObject, bridgeEntityInitiationObject: BebbBridgeInitiationObject) {
+  if (!appStore) {
+    throw new Error("Error in createBebbEntityAndBridge: store not initialized");
+  };
+  const createEntityResponse = await createBebbEntity(entityInitiationObject);
+  // @ts-ignore
+  if (createEntityResponse) {
     // @ts-ignore
-    const newNeighborEntityId = createEntityResponse.Ok;
-    bridgeEntityInitiationObject.toEntityId = newNeighborEntityId;
-    const createBridgeResponse = await appStore.protocolActor.create_bridge(bridgeEntityInitiationObject);
+    const newNeighborEntityId = createEntityResponse;
+    if (!bridgeEntityInitiationObject.toEntityId || bridgeEntityInitiationObject.toEntityId === "") {
+      bridgeEntityInitiationObject.toEntityId = newNeighborEntityId;
+    } else {
+      bridgeEntityInitiationObject.fromEntityId = newNeighborEntityId;
+    };
+    const createBridgeResponse = await createBebbBridge(bridgeEntityInitiationObject);
     // @ts-ignore
-    if (createBridgeResponse && createBridgeResponse.Ok) {
+    if (createBridgeResponse) {
       return true;
     } else {
       throw new Error("Error creating new Bridge");
@@ -37,7 +74,7 @@ export async function createBebbEntityAndBridge(entityInitiationObject: BebbEnti
 // Helper function to find Bridge(s) between Space and a Neighbor
 export const getBebbBridgesBetweenEntities = async (bebbEntityId: string, connectedBebbEntityId: string, bothBridgingDirections = false, includePendingBridges = false) : Promise<BebbBridge[]> => {
   if (!appStore) {
-    throw new Error("Error in createBebbEntityAndBridge: store not initialized");
+    throw new Error("Error in getBebbBridgesBetweenEntities: store not initialized");
   };
   if (connectedBebbEntityId && bebbEntityId) {
     let getBridgesResponse : BebbEntityAttachedBridgesResult;
@@ -77,7 +114,7 @@ export const getBebbBridgesBetweenEntities = async (bebbEntityId: string, connec
 
 export async function deleteBebbBridgesByOwner(bebbBridges: BebbBridge[], ownerIdentifier: string) {
   if (!appStore) {
-    throw new Error("Error in createBebbEntityAndBridge: store not initialized");
+    throw new Error("Error in deleteBebbBridgesByOwner: store not initialized");
   };
   // Delete Bridge(s) in Bebb Protocol owned by Space owner
   let requestPromises = [];
@@ -97,13 +134,69 @@ export async function deleteBebbBridgesByOwner(bebbBridges: BebbBridge[], ownerI
   return true;
 };
 
-export async function getConnectedBridgesFromEntityInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<BebbBridge[]> {
+export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<string[]> {
+  if (!appStore) {
+    throw new Error("Error in getConnectedBridgeIdsForEntityInBebb: store not initialized");
+  };
+  const bridgeIds : string[] = [];
+  try {
+    if (bridgingDirection === "from") {
+      const bridgeIdsResponse = await appStore.protocolActor.get_from_bridge_ids_by_entity_id(bebbEntityId);
+      if (bridgeIdsResponse && bridgeIdsResponse.Ok && bridgeIdsResponse.Ok.length > 0) {
+        const bridgesRetrieved : BebbEntityAttachedBridges = bridgeIdsResponse.Ok;
+        for (var i = 0; i < bridgesRetrieved.length; i++) {
+          if (bridgesRetrieved[i] && bridgesRetrieved[i].id) {
+            bridgeIds.push(bridgesRetrieved[i].id);
+          };
+        };
+      };
+    } else { // bridgingDirection === "to"
+      const bridgeIdsResponse = await appStore.protocolActor.get_to_bridge_ids_by_entity_id(bebbEntityId);
+      if (bridgeIdsResponse && bridgeIdsResponse.Ok && bridgeIdsResponse.Ok.length > 0) {
+        const bridgesRetrieved : BebbEntityAttachedBridges = bridgeIdsResponse.Ok;
+        for (var i = 0; i < bridgesRetrieved.length; i++) {
+          if (bridgesRetrieved[i] && bridgesRetrieved[i].id) {
+            bridgeIds.push(bridgesRetrieved[i].id);
+          };
+        };
+      };
+    };    
+  } catch (error) {
+    console.error("Error in getConnectedBridgeIdsForEntityInBebb ", error);    
+  };
+  return bridgeIds;
+};
 
+export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<BebbBridge[]> {
+  if (!appStore) {
+    throw new Error("Error in getConnectedBridgesForEntityInBebb: store not initialized");
+  };
+  const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection);
+  let getBridgeRequestPromises = [];
+  for (var i = 0; i < bridgeIds.length; i++) {
+    if (bridgeIds[i]) { // TODO: filter like bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')
+      getBridgeRequestPromises.push(appStore.protocolActor.get_bridge(bridgeIds[i])); // Send requests in parallel and then await all to speed up
+    };
+  };
+  const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
+  let bridges : BebbBridge[] = [];
+  for (var j = 0; j < getBridgeResponses.length; j++) {
+    if (getBridgeResponses[j].Err) {
+        console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
+    } else {
+      const bridge : BebbBridge = getBridgeResponses[j].Ok;
+      bridges.push(bridge);
+    };
+  };
+  return bridges;
 };
 
 export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<BebbEntity[]> {
+  if (!appStore) {
+    throw new Error("Error in getConnectedEntitiesInBebb: store not initialized");
+  };
   try {
-    const getBridgesResponse = await getConnectedBridgesFromEntityInBebb(bebbEntityId, bridgingDirection);
+    const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection);
     let getConnectedEntityRequestPromises = [];
     for (var j = 0; j < getBridgesResponse.length; j++) {
       const bridge : BebbBridge = getBridgesResponse[j];
@@ -113,51 +206,15 @@ export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingD
     let connectedEntities = [];
     for (var j = 0; j < getConnectedEntityResponses.length; j++) {
       if (getConnectedEntityResponses[j].Err) {
-          console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
+        console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
       } else {
-          const connectedEntity : BebbEntity = getConnectedEntityResponses[j].Ok;
-          connectedEntities.push(connectedEntity);
+        const connectedEntity : BebbEntity = getConnectedEntityResponses[j].Ok;
+        connectedEntities.push(connectedEntity);
       };
     };
     return connectedEntities;
-
-
-
-    spaceNeighborsResponse = await $store.protocolActor.get_from_bridge_ids_by_entity_id(spaceEntityId);
   } catch (error) {
       console.error("Error Getting Connected Entities in Bebb ", error);
       return null;                
-  };
-  // @ts-ignore
-  if (spaceNeighborsResponse && spaceNeighborsResponse.Ok && spaceNeighborsResponse.Ok.length > 0) {
-      // @ts-ignore
-      const bridgesRetrieved : EntityAttachedBridges = spaceNeighborsResponse.Ok;
-      const bridgeIds = [];
-      let getBridgeRequestPromises = [];
-      for (var i = 0; i < bridgesRetrieved.length; i++) {
-          if (bridgesRetrieved[i] && bridgesRetrieved[i].id && bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')) {
-              bridgeIds.push(bridgesRetrieved[i].id);
-              getBridgeRequestPromises.push($store.protocolActor.get_bridge(bridgesRetrieved[i].id)); // Send requests in parallel and then await all to speed up
-          };
-      };
-      const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
-      let getConnectedEntityRequestPromises = [];
-      for (var j = 0; j < getBridgeResponses.length; j++) {
-          if (getBridgeResponses[j].Err) {
-              console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
-          } else {
-              const bridge : BebbBridge = getBridgeResponses[j].Ok;
-              getConnectedEntityRequestPromises.push($store.protocolActor.get_entity(bridge.toEntityId)); // Send requests in parallel and then await all to speed up
-          };
-      };
-      const getConnectedEntityResponses = await Promise.all(getConnectedEntityRequestPromises);
-      for (var j = 0; j < getConnectedEntityResponses.length; j++) {
-          if (getConnectedEntityResponses[j].Err) {
-              console.error("Error retrieving connected Entity", getConnectedEntityResponses[j].Err);
-          } else {
-              const connectedEntity : BebbEntity = getConnectedEntityResponses[j].Ok;
-              retrievedNeighborEntities.push(connectedEntity);
-          };
-      };
   };
 };
