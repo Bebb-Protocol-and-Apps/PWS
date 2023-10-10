@@ -1135,6 +1135,8 @@
     changeInspectorCameraPosition();
     // Remove any 3D Neighbors from the scene
     remove3dNeighborsFromScene();
+    // Hide the AI Assistant 
+    hideAiAssistantFromSpace();
     // Hide VR menu
     hideVRMenu();
     // Customizes the left panel
