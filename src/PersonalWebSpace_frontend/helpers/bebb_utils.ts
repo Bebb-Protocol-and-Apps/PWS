@@ -79,9 +79,9 @@ export const getBebbBridgesBetweenEntities = async (bebbEntityId: string, connec
   if (connectedBebbEntityId && bebbEntityId) {
     let getBridgesResponse : BebbEntityAttachedBridgesResult;
     try {
-        getBridgesResponse = await appStore.protocolActor.get_from_bridge_ids_by_entity_id(bebbEntityId);
+      getBridgesResponse = await appStore.protocolActor.get_from_bridge_ids_by_entity_id(bebbEntityId);
     } catch (error) {
-        throw new Error("Error getting from Bridge ids from Bebb for Entity");    
+      throw new Error("Error getting from Bridge ids from Bebb for Entity");    
     };
     // @ts-ignore
     if (getBridgesResponse && getBridgesResponse.Ok && getBridgesResponse.Ok.length > 0) {
@@ -182,7 +182,7 @@ export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, b
   let bridges : BebbBridge[] = [];
   for (var j = 0; j < getBridgeResponses.length; j++) {
     if (getBridgeResponses[j].Err) {
-        console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
+      console.error("Error retrieving Bridge", getBridgeResponses[j].Err);
     } else {
       const bridge : BebbBridge = getBridgeResponses[j].Ok;
       bridges.push(bridge);
@@ -214,7 +214,7 @@ export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingD
     };
     return connectedEntities;
   } catch (error) {
-      console.error("Error Getting Connected Entities in Bebb ", error);
-      return null;                
+    console.error("Error Getting Connected Entities in Bebb ", error);
+    return null;                
   };
 };
