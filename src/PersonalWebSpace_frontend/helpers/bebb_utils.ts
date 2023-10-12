@@ -72,16 +72,20 @@ export async function createBebbEntityAndBridge(entityInitiationObject: BebbEnti
 };
 
 // Helper function to find Bridge(s) between Space and a Neighbor
-export const getBebbBridgesBetweenEntities = async (bebbEntityId: string, connectedBebbEntityId: string, bothBridgingDirections = false, includePendingBridges = false) : Promise<BebbBridge[]> => {
+export const getBebbBridgesBetweenEntities = async (bebbEntityId: string, connectedBebbEntityId: string, bridgingDirection = "from") : Promise<BebbBridge[]> => {
   if (!appStore) {
     throw new Error("Error in getBebbBridgesBetweenEntities: store not initialized");
   };
   if (connectedBebbEntityId && bebbEntityId) {
     let getBridgesResponse : BebbEntityAttachedBridgesResult;
     try {
-      getBridgesResponse = await appStore.protocolActor.get_from_bridge_ids_by_entity_id(bebbEntityId);
+      if (bridgingDirection === "from") {
+        getBridgesResponse = await appStore.protocolActor.get_from_bridge_ids_by_entity_id(bebbEntityId);
+      } else {
+        getBridgesResponse = await appStore.protocolActor.get_to_bridge_ids_by_entity_id(bebbEntityId);
+      };
     } catch (error) {
-      throw new Error("Error getting from Bridge ids from Bebb for Entity");    
+      throw new Error("Error getting Bridge ids from Bebb for Entity");    
     };
     // @ts-ignore
     if (getBridgesResponse && getBridgesResponse.Ok && getBridgesResponse.Ok.length > 0) {
@@ -174,7 +178,7 @@ export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, b
   const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection);
   let getBridgeRequestPromises = [];
   for (var i = 0; i < bridgeIds.length; i++) {
-    if (bridgeIds[i]) { // TODO: filter like bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')
+    if (bridgeIds[i]) { // TODO: filters like bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')
       getBridgeRequestPromises.push(appStore.protocolActor.get_bridge(bridgeIds[i])); // Send requests in parallel and then await all to speed up
     };
   };
