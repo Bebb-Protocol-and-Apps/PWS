@@ -1,3 +1,13 @@
+const isValidUrl = (url) => {
+  try {
+    new URL(url);
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+  return true;
+};
+
 function addImageEntityToScene(elementData, assetId, aScene) {
   console.log("Debug addImageEntityToScene");
   if (!elementData || !assetId || !aScene) {
@@ -82,6 +92,26 @@ function addModelEntityToScene(elementData, assetId, aScene) {
   };
 };
 
+function addIframeEntityToScene(elementData, assetId, aScene) {
+  console.log("Debug addIframeEntityToScene elementData ", elementData);
+  if (!elementData || !aScene) { // no asset needed for iframe
+    return;
+  };
+  if (isValidUrl(elementData.src)) {
+    console.log("Debug addIframeEntityToScene elementData.src ", `url:${elementData.src}?autoplay=0&mute=1`);
+    // Create a new entity for the iframe
+    const contentEntity = aScene.ownerDocument.createElement('a-entity');
+    // Set properties on the new entity
+    contentEntity.setAttribute('web-portal', `url:${elementData.src}?autoplay=0&mute=1; text:Video; enableFrame:false; sandboxPortal:false;`);
+    const newElementId = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
+    contentEntity.setAttribute('id', newElementId);
+    contentEntity.setAttribute('position', '0 6 -6'); // TODO
+    //neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
+    console.log("Debug addIframeEntityToScene contentEntity ", contentEntity);
+    aScene.appendChild(contentEntity);
+  };
+};
+
 const loadedElementCallback = (elementData, assetId, aScene) => {
   console.log("Debug loadedElementCallback elementData.elementType ", elementData.elementType);
   if (elementData.elementType === "image") {
@@ -90,6 +120,8 @@ const loadedElementCallback = (elementData, assetId, aScene) => {
     addVideoEntityToScene(elementData, assetId, aScene);
   } else if (elementData.elementType === "model") {
     addModelEntityToScene(elementData, assetId, aScene);
+  } else if (elementData.elementType === "iframe") {
+    addIframeEntityToScene(elementData, assetId, aScene);
   };
 };
 
@@ -131,6 +163,11 @@ export const addElementToSpace = (elementData, aScene = null) => {
     } else if (elementData.elementType === "video") {
       assetType = 'video';
       eventToListenTo = 'loadeddata';
+      if (elementData.src.includes("embed")) {
+        // Video cannot be loaded directly but must be embedded via an iframe
+        elementData.elementType = "iframe";
+        return loadedElementCallback(elementData, elementData.assetId, aScene); // iframe elements don't load via an asset in A-Frame
+      };
     };
     console.log("Debug addElementToSpace assetType ", assetType);
 

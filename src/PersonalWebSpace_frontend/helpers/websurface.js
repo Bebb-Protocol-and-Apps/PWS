@@ -10,6 +10,7 @@ export const component = AFRAME.registerComponent('websurface', {
     isInteractable: { default: true },
     frameSkips: { default: 1 },
     autoSceneStyling: { default: true },
+    sandboxPortal: { default: true },
   },
 
   init: function () {
@@ -48,9 +49,12 @@ export const component = AFRAME.registerComponent('websurface', {
       iframe.setAttribute('id', data.url);
       iframe.setAttribute('src', data.url);
       // Secure iframe
-      //iframe.setAttribute('credentialless', 'true');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');      
+      if (data.sandboxPortal) {
+        //iframe.setAttribute('credentialless', 'true');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+      };
+
       iframe.style.border = 'none';
 
       const camera = el.sceneEl.camera;

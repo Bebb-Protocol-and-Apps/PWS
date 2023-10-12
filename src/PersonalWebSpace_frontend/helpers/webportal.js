@@ -13,6 +13,7 @@ AFRAME.registerComponent('web-portal', {
     enableReturnButton: { default: false },
     enableCollisionDetection: { default: false },
     enableOnClickTransition: { default: true },
+    sandboxPortal: { default: true },
   },
 
   init: function () {
@@ -30,6 +31,7 @@ AFRAME.registerComponent('web-portal', {
         width: data.width,
         height: data.height,
         isInteractable: false,
+        sandboxPortal: data.sandboxPortal,
       });
     } else {
       el.setAttribute('geometry', { primitive: 'plane', width: data.width, height: data.height });
@@ -49,9 +51,12 @@ AFRAME.registerComponent('web-portal', {
       iframe.style.zIndex = 10;
       iframe.style.display = 'none';
       // Secure iframe
-      //iframe.setAttribute('credentialless', 'true');
-      iframe.setAttribute('referrerpolicy', 'no-referrer');
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      console.log("Debug webportal data.sandboxPortal ", data.sandboxPortal);
+      if (data.sandboxPortal) {
+        //iframe.setAttribute('credentialless', 'true');
+        iframe.setAttribute('referrerpolicy', 'no-referrer');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+      };
     };
 
     // Transition to the portal's URL on click
