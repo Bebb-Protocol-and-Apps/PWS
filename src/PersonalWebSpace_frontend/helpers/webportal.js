@@ -14,6 +14,7 @@ AFRAME.registerComponent('web-portal', {
     enableCollisionDetection: { default: false },
     enableOnClickTransition: { default: true },
     sandboxPortal: { default: true },
+    isInteractable: { default: false },
   },
 
   init: function () {
@@ -30,7 +31,7 @@ AFRAME.registerComponent('web-portal', {
         url: data.url,
         width: data.width,
         height: data.height,
-        isInteractable: false,
+        isInteractable: data.isInteractable,
         sandboxPortal: data.sandboxPortal,
       });
     } else {
@@ -51,10 +52,9 @@ AFRAME.registerComponent('web-portal', {
       iframe.style.zIndex = 10;
       iframe.style.display = 'none';
       // Secure iframe
-      console.log("Debug webportal data.sandboxPortal ", data.sandboxPortal);
+      iframe.setAttribute('referrerpolicy', 'no-referrer');
       if (data.sandboxPortal) {
         //iframe.setAttribute('credentialless', 'true');
-        iframe.setAttribute('referrerpolicy', 'no-referrer');
         iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
       };
     };

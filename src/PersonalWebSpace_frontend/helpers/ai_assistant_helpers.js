@@ -98,17 +98,31 @@ function addIframeEntityToScene(elementData, assetId, aScene) {
     return;
   };
   if (isValidUrl(elementData.src)) {
-    console.log("Debug addIframeEntityToScene elementData.src ", `url:${elementData.src}?autoplay=0&mute=1`);
+    console.log("Debug addIframeEntityToScene elementData.src ", `url:${elementData.src}`);
     // Create a new entity for the iframe
     const contentEntity = aScene.ownerDocument.createElement('a-entity');
     // Set properties on the new entity
-    contentEntity.setAttribute('web-portal', `url:${elementData.src}?autoplay=0&mute=1; text:Video; enableFrame:false; sandboxPortal:false;`);
+    contentEntity.setAttribute('web-portal', `url:${elementData.src}; text:Video; width:4.4; height:3; frameWidth:0.03; sandboxPortal:false; isInteractable:true; enableOnClickTransition:false;`);
     const newElementId = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 6 -6'); // TODO
-    //neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
+    contentEntity.setAttribute('position', '0 1 -6'); // TODO
     console.log("Debug addIframeEntityToScene contentEntity ", contentEntity);
     aScene.appendChild(contentEntity);
+
+    // DEBUG
+   /*  const contentEntity2 = aScene.ownerDocument.createElement('a-entity');
+    contentEntity2.setAttribute('web-portal', `url:https://www.youtube.com/embed/R9gz7uxEL4Q; text:YtLink; sandboxPortal:false;`);
+    const newElementId2 = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
+    contentEntity2.setAttribute('id', newElementId2);
+    contentEntity2.setAttribute('position', '-2 2 -6');
+    //<iframe width="560" height="315" src="https://www.youtube.com/embed/R9gz7uxEL4Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    const contentEntity3 = aScene.ownerDocument.createElement('a-entity');
+    contentEntity3.setAttribute('web-portal', `url:https://c5rfj-tqaaa-aaaan-qd5qq-cai.icp0.io/; text:YtLink; sandboxPortal:false;`);
+    const newElementId3 = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
+    contentEntity3.setAttribute('id', newElementId3);
+    contentEntity3.setAttribute('position', '2 2 -6');
+    aScene.appendChild(contentEntity2);
+    aScene.appendChild(contentEntity3); */
   };
 };
 

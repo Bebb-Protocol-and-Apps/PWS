@@ -35,9 +35,9 @@
 
 <div class="ai-assistant-overlay">
   <iframe src={aiAssistantUrl} title="AI Assistant window" width="100%" height="100%"></iframe>
-  {#if viewerIsSpaceOwner}
+  <!-- {#if viewerIsSpaceOwner}
     <p>You can configure this assistant on the DeVinci app</p>
-  {/if}
+  {/if} -->
   <button on:click={() => window.open(aiAssistantUrl,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded">Go to DeVinci</button>
 </div>
 
@@ -46,13 +46,16 @@
     border: 1px solid white;
     border-radius: 10px;
     z-index: 10;
-    position: relative;
-    height: 20%; 
-    width: 30%;
-    margin-left: 4%;
-    margin-top: 2%;
+    position: fixed;
+    height: 60%; 
+    width: 40%;
+    /* margin-left: 4%;
+    margin-top: 2%; */
+    top: 2%;
+    left: 4%;
     text-align: center;
     padding-top: 0.5em;
+    padding-bottom: 0.5em;
     background: #1d1d2f;
     opacity: 70%;
     color: #eef;
