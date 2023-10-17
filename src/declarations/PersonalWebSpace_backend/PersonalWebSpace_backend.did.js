@@ -7,6 +7,35 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'symbol' : IDL.Text,
   });
+  const TokenIdentifier = IDL.Text;
+  const AccountIdentifier = IDL.Text;
+  const User = IDL.Variant({
+    'principal' : IDL.Principal,
+    'address' : AccountIdentifier,
+  });
+  const BalanceRequest = IDL.Record({
+    'token' : TokenIdentifier,
+    'user' : User,
+  });
+  const Balance = IDL.Nat;
+  const CommonError__1 = IDL.Variant({
+    'InvalidToken' : TokenIdentifier,
+    'Other' : IDL.Text,
+  });
+  const BalanceResponse = IDL.Variant({
+    'ok' : Balance,
+    'err' : CommonError__1,
+  });
+  const TokenIdentifier__1 = IDL.Text;
+  const AccountIdentifier__1 = IDL.Text;
+  const CommonError = IDL.Variant({
+    'InvalidToken' : TokenIdentifier,
+    'Other' : IDL.Text,
+  });
+  const Result_4 = IDL.Variant({
+    'ok' : AccountIdentifier__1,
+    'err' : CommonError,
+  });
   const TokenId = IDL.Nat64;
   List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(IDL.Text, IDL.Text), List)));
   const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(IDL.Text, IDL.Text), List));
@@ -72,6 +101,7 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : FileResultSuccessOptions,
     'Err' : ApiError,
   });
+  const Extension = IDL.Text;
   const EmailSubscriber = IDL.Record({
     'subscribedAt' : IDL.Nat64,
     'emailAddress' : IDL.Text,
@@ -116,20 +146,80 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const ExtMetadata = IDL.Variant({
+    'fungible' : IDL.Record({
+      'decimals' : IDL.Nat8,
+      'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)),
+      'name' : IDL.Text,
+      'symbol' : IDL.Text,
+    }),
+    'nonfungible' : IDL.Record({ 'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)) }),
+  });
+  const Result_3 = IDL.Variant({ 'ok' : ExtMetadata, 'err' : CommonError });
   const MintReceiptPart = IDL.Record({ 'id' : IDL.Nat, 'token_id' : TokenId });
   const MintReceipt = IDL.Variant({ 'Ok' : MintReceiptPart, 'Err' : ApiError });
+  const ExtMintRequest = IDL.Record({
+    'to' : User,
+    'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)),
+  });
   const OwnerResult = IDL.Variant({ 'Ok' : IDL.Principal, 'Err' : ApiError });
   const TxReceipt = IDL.Variant({ 'Ok' : IDL.Nat, 'Err' : ApiError });
   const SignUpFormInput = IDL.Record({
     'emailAddress' : IDL.Text,
     'pageSubmittedFrom' : IDL.Text,
   });
+  const Balance__1 = IDL.Nat;
+  const Result_2 = IDL.Variant({ 'ok' : Balance__1, 'err' : CommonError });
   const InterfaceId = IDL.Variant({
     'Burn' : IDL.Null,
     'Mint' : IDL.Null,
     'Approval' : IDL.Null,
     'TransactionHistory' : IDL.Null,
     'TransferNotification' : IDL.Null,
+  });
+  const TokenIndex = IDL.Nat32;
+  const Result_1 = IDL.Variant({
+    'ok' : IDL.Vec(TokenIndex),
+    'err' : CommonError,
+  });
+  const SubAccount = IDL.Vec(IDL.Nat8);
+  const Time = IDL.Int;
+  const EntrepotTypesListing = IDL.Record({
+    'subaccount' : IDL.Opt(SubAccount),
+    'locked' : IDL.Opt(Time),
+    'seller' : IDL.Principal,
+    'price' : IDL.Nat64,
+  });
+  const Result = IDL.Variant({
+    'ok' : IDL.Vec(
+      IDL.Tuple(
+        TokenIndex,
+        IDL.Opt(EntrepotTypesListing),
+        IDL.Opt(IDL.Vec(IDL.Nat8)),
+      )
+    ),
+    'err' : CommonError,
+  });
+  const Memo = IDL.Vec(IDL.Nat8);
+  const TransferRequest = IDL.Record({
+    'to' : User,
+    'token' : TokenIdentifier,
+    'notify' : IDL.Bool,
+    'from' : User,
+    'memo' : Memo,
+    'subaccount' : IDL.Opt(SubAccount),
+    'amount' : Balance,
+  });
+  const TransferResponse = IDL.Variant({
+    'ok' : Balance,
+    'err' : IDL.Variant({
+      'CannotNotify' : AccountIdentifier,
+      'InsufficientBalance' : IDL.Null,
+      'InvalidToken' : TokenIdentifier,
+      'Rejected' : IDL.Null,
+      'Unauthorized' : AccountIdentifier,
+      'Other' : IDL.Text,
+    }),
   });
   const UpdateMetadataValuesInput = IDL.Record({
     'id' : TokenId,
@@ -142,11 +232,14 @@ export const idlFactory = ({ IDL }) => {
   });
   const File = IDL.Vec(IDL.Nat8);
   const PersonalWebSpace = IDL.Service({
+    'balance' : IDL.Func([BalanceRequest], [BalanceResponse], ['query']),
     'balanceOfDip721' : IDL.Func([IDL.Principal], [IDL.Nat64], ['query']),
+    'bearer' : IDL.Func([TokenIdentifier__1], [Result_4], ['query']),
     'check_user_has_nft' : IDL.Func([], [IDL.Bool], ['query']),
     'createSpace' : IDL.Func([IDL.Text], [NftResult], []),
     'deleteEmailSubscriber' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteFile' : IDL.Func([IDL.Text], [FileResult], []),
+    'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'getCallerSpaces' : IDL.Func([], [IDL.Vec(Nft)], ['query']),
     'getEmailSubscribers' : IDL.Func(
         [],
@@ -176,7 +269,9 @@ export const idlFactory = ({ IDL }) => {
     'listUserFileIdsAndNames' : IDL.Func([], [FileResult], ['query']),
     'listUserFileNames' : IDL.Func([], [FileResult], ['query']),
     'logoDip721' : IDL.Func([], [LogoResult], ['query']),
+    'metadata' : IDL.Func([TokenIdentifier__1], [Result_3], ['query']),
     'mintDip721' : IDL.Func([IDL.Principal, MetadataDesc], [MintReceipt], []),
+    'mintNFT' : IDL.Func([ExtMintRequest], [], []),
     'nameDip721' : IDL.Func([], [IDL.Text], ['query']),
     'ownerOfDip721' : IDL.Func([TokenId], [OwnerResult], ['query']),
     'safeTransferFromDip721' : IDL.Func(
@@ -185,13 +280,17 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'submitSignUpForm' : IDL.Func([SignUpFormInput], [IDL.Text], []),
+    'supply' : IDL.Func([TokenIdentifier__1], [Result_2], ['query']),
     'supportedInterfacesDip721' : IDL.Func(
         [],
         [IDL.Vec(InterfaceId)],
         ['query'],
       ),
     'symbolDip721' : IDL.Func([], [IDL.Text], ['query']),
+    'tokens' : IDL.Func([AccountIdentifier__1], [Result_1], ['query']),
+    'tokens_ext' : IDL.Func([AccountIdentifier__1], [Result], ['query']),
     'totalSupplyDip721' : IDL.Func([], [IDL.Nat64], ['query']),
+    'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
     'transferFromDip721' : IDL.Func(
         [IDL.Principal, IDL.Principal, TokenId],
         [TxReceipt],
