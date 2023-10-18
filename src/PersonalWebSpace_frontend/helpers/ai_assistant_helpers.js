@@ -102,7 +102,7 @@ function addIframeEntityToScene(elementData, assetId, aScene) {
     // Create a new entity for the iframe
     const contentEntity = aScene.ownerDocument.createElement('a-entity');
     // Set properties on the new entity
-    contentEntity.setAttribute('web-portal', `url:${elementData.src}; text:Video; width:4.4; height:3; frameWidth:0.03; sandboxPortal:false; isInteractable:true; enableOnClickTransition:false;`);
+    contentEntity.setAttribute('expandable-iframe', `url:${elementData.src}; text:Video;`);
     const newElementId = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
     contentEntity.setAttribute('position', '0 1 -6'); // TODO
