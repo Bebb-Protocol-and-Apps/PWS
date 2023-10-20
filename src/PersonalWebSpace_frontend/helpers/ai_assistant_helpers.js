@@ -32,7 +32,7 @@ function addImageEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('src', '#' + assetId);
     const newElementId = `assistantAddedImage_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 6 -6'); // TODO
+    contentEntity.setAttribute('position', elementData.assignedPosition);
     console.log("Debug addImageEntityToScene contentEntity ", contentEntity);
     aScene.appendChild(contentEntity);
   };
@@ -64,7 +64,7 @@ function addVideoEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('src', '#' + assetId);
     const newElementId = `assistantAddedVideo_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 6 -6'); // TODO
+    contentEntity.setAttribute('position', elementData.assignedPosition);
     console.log("Debug addVideoEntityToScene contentEntity ", contentEntity);
     contentEntity.setAttribute('video-play-on-click', true); // Add component to play video on click
     aScene.appendChild(contentEntity);
@@ -84,7 +84,7 @@ function addModelEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('gltf-model', '#' + assetId);
     const newElementId = `assistantAddedModel_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 6 -6'); // TODO
+    contentEntity.setAttribute('position', elementData.assignedPosition);
     // @ts-ignore
     contentEntity.setAttribute('animation-mixer');
     console.log("Debug addModelEntityToScene contentEntity ", contentEntity);
@@ -105,7 +105,7 @@ function addIframeEntityToScene(elementData, assetId, aScene) {
     contentEntity.setAttribute('expandable-iframe', `url:${elementData.src}; text:Video;`);
     const newElementId = `assistantAddedIframe_${Math.random().toString(16).slice(2)}`;
     contentEntity.setAttribute('id', newElementId);
-    contentEntity.setAttribute('position', '0 1 -6'); // TODO
+    contentEntity.setAttribute('position', elementData.assignedPosition);
     console.log("Debug addIframeEntityToScene contentEntity ", contentEntity);
     aScene.appendChild(contentEntity);
 

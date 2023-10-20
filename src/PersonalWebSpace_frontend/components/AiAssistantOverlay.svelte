@@ -10,15 +10,126 @@
   const allowedOrigins = [
     "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io",
   ];
+
+  // Functionality to get the position in the scene for a new element to be added
+  async function checkCollisionAtPosition(sceneEl, positionToCheck) {
+    // Convert the position to a THREE.Vector3 if it's not already one
+    var position = positionToCheck;
+    // @ts-ignore
+    if (!(position instanceof THREE.Vector3)) {
+      // @ts-ignore
+      position = new THREE.Vector3(positionToCheck.x, positionToCheck.y, positionToCheck.z);
+    };
+
+    // Direction for raycasting (downward in this case, but can be any direction)
+    // @ts-ignore
+    var direction = new THREE.Vector3(0, -1, 0);
+
+    // Create a raycaster
+    // @ts-ignore
+    var raycaster = new THREE.Raycaster(position, direction.normalize());
+
+    // Check for collisions
+    var collisions = raycaster.intersectObjects(sceneEl.object3D.children, true);
+
+    if (collisions.length > 0) {
+      return collisions[0]; // return the collided entity
+    } else {
+      return false;
+    };
+  };
+
+  async function checkPositionForEntity(sceneEl, positionToCheck, checksConducted = 0) {
+    // check the position with checkCollisionAtPosition 
+    const collision = await checkCollisionAtPosition(sceneEl, positionToCheck);
+    
+    // if there is a collision, determine a good next position (e.g., to the right of it)
+    if (collision && collision.distance < 0.1 && checksConducted < 5) {
+      // Assuming we're moving to the right of the collided entity, adjust the x-coordinate. You might want to adjust the value '1' depending on your scene scale.
+      const nextPosition = {
+        x: collision.object.position.x + 1, // moving to the right; adjust as needed
+        y: collision.object.position.y, // same height
+        z: collision.object.position.z // same depth
+      };
+      return await checkPositionForEntity(sceneEl, nextPosition, checksConducted++); // recursive check with the new position
+    } else {
+      return positionToCheck;
+    };
+  };
+
+  const addedElements = []; // already added elements
+  /* 
+    an element looks like this:
+    {
+      elementType: "image" || "video" || "model",
+      src: urlToAsset, // asset for element will be loaded from here
+      elementSubType: e.g. "360Degree" || "gltf", // optional, depends on elementType
+      assetId: existingContentAssetToUseForElement, // optional
+      assignedPosition: positionInScene,
+    }
+  */
+
+  async function calculateElementPosition(elementData) {
+    let proposedPosition;
+    if (addedElements.length === 0) {
+      // @ts-ignore
+      proposedPosition = new THREE.Vector3(-2, 2, -6); // starting position
+    } else {
+      const lastElement = addedElements[addedElements.length - 1];
+      let offset;
+      switch (lastElement.elementType) {
+        case 'image':
+          offset = 0.2;
+          break;
+        case 'video':
+          offset = 2;
+          break;
+        case 'model':
+          offset = 2;
+          break;
+        case '3D-model':
+          offset = 2;
+          break;
+        default:
+          offset = 2; // handle unknown types or adjust as necessary
+      };
+      switch (elementData.elementType) {
+        case 'image':
+          offset += 1;
+          break;
+        case 'video':
+          offset += 2.5;
+          break;
+        case 'model':
+          offset += 3;
+          break;
+        case '3D-model':
+          offset += 3;
+          break;
+        default:
+          offset += 3; // handle unknown types or adjust as necessary
+      };
+      // @ts-ignore
+      proposedPosition = new THREE.Vector3(lastElement.assignedPosition.x + offset, lastElement.assignedPosition.y, lastElement.assignedPosition.z);
+    };
+    // Check if the proposed position is free, or find the next suitable position
+    const suitablePosition = await checkPositionForEntity(document.querySelector('a-scene'), proposedPosition);
+    // assign the position to the elementData
+    elementData.assignedPosition = suitablePosition;
+
+    // Add element data to the list of added elements
+    addedElements.push(elementData);
+  };
   
   const handleMessage = async (event) => {
     // Check if event.origin is in allowedOrigins
     if (!allowedOrigins.includes(event.origin)) return;
 
-    const { action, data } = event.data;
-    console.log("Debug handleMessage ", action, data);
+    let { action, data } = event.data;
     if (action === 'addElementToSpace') {
-      console.log("Heeeyaa");
+      console.log("Debug Heeeyaa");
+      data = JSON.parse(data);
+      await calculateElementPosition(data);
       addElementToSpace(data);
     };
   };
@@ -28,7 +139,6 @@
   });
 
   onDestroy(() => {
-    console.log("Debug in onDestroy");
     window.removeEventListener('message', handleMessage);
   });
 </script>
