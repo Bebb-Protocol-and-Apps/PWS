@@ -5,7 +5,7 @@ AFRAME.registerComponent('expandable-iframe', {
   schema: {
     url: { default: 'https://aframe.io' },
     text: { default: '' },
-    width: { default: 4.4 },
+    width: { default: 4 },
     height: { default: 3 },
     frameWidth: { default: 0.03 },
     enableFrame: { default: true },
@@ -213,15 +213,14 @@ AFRAME.registerComponent('expandable-iframe', {
           context.children[0].style = '';
 
           iframe.style.position = 'fixed';
-          iframe.style.top = '0';
-          iframe.style.left = '0';
           iframe.style.width = '90%';
-          iframe.style.height = '80%';
+          iframe.style.height = '90%';
           iframe.style.overflow = 'none';
           iframe.style.zIndex = 19;
+          iframe.style.left = '5%';
+          iframe.style.top = '5%';
         };
-
-        scene.style.display = 'none';
+        
         iframe.style.display = 'block';
         if (data.returnButton) data.returnButton.style.display = 'block';
 

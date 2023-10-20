@@ -1,3 +1,4 @@
+//uses a modified version of https://github.com/CodyJasonBennett/three-dom-elements
 import { DOMContext } from './lib/DOMContext';
 import { DOMElement } from './lib/DOMElement';
 
@@ -12,40 +13,38 @@ export const component = AFRAME.registerComponent('websurface', {
     sandboxPortal: { default: true },
   },
 
-  init: function() {
+  init: function () {
     const el = this.el;
     const data = this.data;
 
-    if (data.autoSceneStyling) {
+    if (data.autoSceneStyling == true) {
       el.sceneEl.style.position = 'absolute';
       el.sceneEl.style.zIndex = '1';
-    }
+    };
 
-    if (data.isInteractable) {
+    if (data.isInteractable == true) {
+      data.mouseHasLeftScreen = true;
       //geometry for click detection
       el.setAttribute('geometry', `primitive:plane; width:${data.width}; height:${data.height};`);
 
-      el.addEventListener('click', function() {
-        // Make the iframe take the full viewport when trying to interact
-        if (data.mouseHasLeftScreen) {
-          document.exitPointerLock();
-          data.context.domElement.style.zIndex = '2000';
-          data.context.domElement.style.width = '100%';
-          data.context.domElement.style.height = '100%';
-          data.mouseHasLeftScreen = false;
-        }
+      el.addEventListener('click', function () {
+        if (data.mouseHasLeftScreen == false) return;
+        document.exitPointerLock();
+        el.sceneEl.style.zIndex = '-1';
+        data.mouseHasLeftScreen = false;
       });
 
-      el.addEventListener('mouseenter', function() {
+      el.addEventListener('mouseenter', function () {
         data.context.domElement.style.zIndex = '0';
       });
 
-      el.addEventListener('mouseleave', function() {
+      el.addEventListener('mouseleave', function () {
+        data.context.domElement.style.zIndex = '-2';
         data.mouseHasLeftScreen = true;
       });
     }
 
-    el.addEventListener('cam-loaded', function() {
+    el.addEventListener('cam-loaded', function () {
       const iframe = document.createElement('iframe');
       iframe.setAttribute('id', data.url);
       iframe.setAttribute('src', data.url);
@@ -54,7 +53,8 @@ export const component = AFRAME.registerComponent('websurface', {
       if (data.sandboxPortal) {
         //iframe.setAttribute('credentialless', 'true');
         iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
-      }
+      };
+
       iframe.style.border = 'none';
 
       const camera = el.sceneEl.camera;
@@ -63,28 +63,26 @@ export const component = AFRAME.registerComponent('websurface', {
       document.body.appendChild(context.domElement);
 
       const element = new DOMElement(context, iframe, data.width, data.height);
-      let isInVRMode = el.sceneEl.is('vr-mode');
-      let isInFullscreenMode = document.fullscreenElement != null;
+      
+      // Add the iframe visualization to the element only if the user currently isn't in VR/fullscreen mode
+      let isInVRMode = el.sceneEl.is('vr-mode'); // returns true if in VR mode
+      let isInFullscreenMode = document.fullscreenElement != null; // returns true if in Fullscreen mode
       if (!isInVRMode && !isInFullscreenMode) {
         el.object3D.add(element);
-      }
+      };
 
-      if (data.isInteractable) {
+      if (data.isInteractable == true) {
         const div = document.createElement('div');
         div.style.position = 'fixed';
         div.style.top = '0';
         div.style.width = '100%';
         div.style.height = '100%';
-        div.style.zIndex = '1'; // Placed below the iframe but above the A-Frame scene
+        div.style.zIndex = '-1';
         context.domElement.appendChild(div);
-
-        div.addEventListener('click', function() {
-          // Minimize or hide the iframe when the interaction is done
-          data.context.domElement.style.zIndex = '0';
-          data.context.domElement.style.width = '0';
-          data.context.domElement.style.height = '0';
+        div.addEventListener('click', function () {
+          el.sceneEl.style.zIndex = 1;
         });
-      }
+      };
 
       this.websurface_iframe = iframe;
       this.css3d_context = context;
@@ -98,19 +96,19 @@ export const component = AFRAME.registerComponent('websurface', {
     });
 
     // Iframes don't work in VR/fullscreen mode, so we remove the texture based on them
-    el.sceneEl.addEventListener('enter-vr', function() {
+    el.sceneEl.addEventListener('enter-vr', function () {
       el.object3D.remove(data.element);
     });
-
-    el.sceneEl.addEventListener('exit-vr', function() {
+  
+    el.sceneEl.addEventListener('exit-vr', function () {
       el.object3D.add(data.element);
     });
 
-    el.sceneEl.addEventListener('enter-fullscreen', function() {
+    el.sceneEl.addEventListener('enter-fullscreen', function () {
       el.object3D.remove(data.element);
     });
-
-    el.sceneEl.addEventListener('exit-fullscreen', function() {
+  
+    el.sceneEl.addEventListener('exit-fullscreen', function () {
       el.object3D.add(data.element);
     });
 
@@ -118,13 +116,13 @@ export const component = AFRAME.registerComponent('websurface', {
     data.isCamLoaded = false;
   },
 
-  tick: function() {
+  tick: function () {
     const el = this.el;
     const data = this.data;
 
-    if (data.isPaused) return;
+    if (data.isPaused == true) return;
 
-    if (!data.isCamLoaded) {
+    if (data.isCamLoaded == false) {
       const camera = el.sceneEl.camera;
       if (camera) {
         this.el.emit('cam-loaded');
@@ -135,7 +133,7 @@ export const component = AFRAME.registerComponent('websurface', {
 
     const context = data.context;
     const element = data.element;
-    if (data.frames % data.frameSkips === 0) {
+    if (data.frames % data.frameSkips == 0) {
       if (context) {
         context.update();
       }
@@ -147,11 +145,15 @@ export const component = AFRAME.registerComponent('websurface', {
     data.frames++;
   },
 
-  pause: function() {
-    this.data.isPaused = true;
+  pause: function () {
+    const data = this.data;
+
+    data.isPaused = true;
   },
 
-  play: function() {
-    this.data.isPaused = false;
+  play: function () {
+    const data = this.data;
+
+    data.isPaused = false;
   },
 });
