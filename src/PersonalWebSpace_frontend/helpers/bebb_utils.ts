@@ -284,35 +284,45 @@ export async function getConnectedEntitiesAndBridgesInBebb(bebbEntityId: string,
 };
 
 export async function getBebbEntityUrlPreview(url: string) : Promise<BebbEntityPreview> {
+  console.log("Debug getBebbEntityUrlPreview url ", url);
   var enc = new TextEncoder(); // always utf-8
   const urlSpacePreview : BebbEntityPreview = {
     'previewData': enc.encode(url),
     'previewType': { 'Other' : "URL" },
   };
+  console.log("Debug getBebbEntityUrlPreview urlSpacePreview ", urlSpacePreview);
   return urlSpacePreview;
 };
 
 async function captureAFrameScene(spaceHtml) {
+  console.log("Debug captureAFrameScene spaceHtml ", spaceHtml);
   return new Promise(async (resolve, reject) => {
     // 1. Insert spaceHtml into the DOM
+    // TODO: disturbing UI
     const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.top = '-10000px'; // Offscreen
+    container.setAttribute("hidden", "hidden");
+    //container.style.position = 'fixed';
+    //container.style.top = '-10000px'; // Offscreen
     container.innerHTML = spaceHtml;
+    console.log("Debug captureAFrameScene container ", container);
     document.body.appendChild(container);
 
     const sceneEl = container.querySelector('a-scene');
+    console.log("Debug captureAFrameScene sceneEl ", sceneEl);
 
     // Ensure A-Frame scene has loaded
     // @ts-ignore
     if (!sceneEl.hasLoaded) {
       await new Promise(resolve => sceneEl.addEventListener('loaded', resolve));
     };
-
+    console.log("Debug captureAFrameScene sceneEl.hasLoaded ", sceneEl.hasLoaded);
     // 2. & 3. Capture the screenshot
     sceneEl.addEventListener('screenshotready', function(evt) {
+      // TODO: not triggered
+      console.log("Debug captureAFrameScene screenshotready");
       // @ts-ignore
       const dataURI = evt.detail;
+      console.log("Debug captureAFrameScene screenshotready dataURI ", dataURI);
       
       // 4. Convert data URI to Uint8Array
       const byteString = atob(dataURI.split(',')[1]);
@@ -324,20 +334,30 @@ async function captureAFrameScene(spaceHtml) {
 
       // Clean up and resolve the promise
       document.body.removeChild(container);
+      console.log("Debug captureAFrameScene screenshotready intArray ", intArray);
       resolve(intArray);
     });
-    // @ts-ignore
-    sceneEl.components.screenshot.capture('perspective');
+    // Wait until assets have loaded
+    let assetsEl = sceneEl.querySelector('a-assets');
+    console.log("Debug captureAFrameScene assetsEl ", assetsEl);
+    setTimeout(() => {
+      console.log("Debug captureAFrameScene setTimeout");
+      // @ts-ignore
+      sceneEl.components.screenshot.capture('perspective'); // TODO: downloads image to device
+    }, 3000);
   });
 };
 
 export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string) : Promise<BebbEntityPreview> {
+  console.log("Debug getBebbEntityImagePreviewFromAframeHtml sceneHtml ", sceneHtml);
   // @ts-ignore
   const imageData : Uint8Array  = await captureAFrameScene(sceneHtml);
+  console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageData ", imageData);
   const imageSpacePreview : BebbEntityPreview = {
     'previewData': imageData,
     'previewType': { 'Jpg' : null },
   };
+  console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageSpacePreview ", imageSpacePreview);
   return imageSpacePreview;
 };
 

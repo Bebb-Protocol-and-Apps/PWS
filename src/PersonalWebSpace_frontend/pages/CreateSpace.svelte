@@ -158,8 +158,10 @@
   };
 
   const createSpace = async (spaceHtml) => {
+        console.log("Debug createSpace spaceHtml ", spaceHtml);
     try {
       const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
+        console.log("Debug createSpace spaceResponse ", spaceResponse);
       // @ts-ignore
       if (spaceResponse && spaceResponse.Ok) {
         // @ts-ignore
@@ -167,23 +169,27 @@
         setSpaceWasCreated();
         // Protocol integration: create Space as Entity in Protocol
         const spaceUrl = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
+        console.log("Debug createSpace spaceUrl ", spaceUrl);
         const entitySpecificFields = {
           externalId: spaceUrl,
         };
 
-        const entityPreviews = [];        
+        const entityPreviews = [];
+        // TODO: decouple preview generation from main creation path (add to end and update Entity)      
         try {
           const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
           entityPreviews.push(urlSpacePreview);
         } catch (error) {
           console.error("Error creating url preview for space: ", error);
         };
+        console.log("Debug createSpace entityPreviews after getBebbEntityUrlPreview ", entityPreviews);
         try {
           const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
           entityPreviews.push(imageSpacePreview);         
         } catch (error) {
           console.error("Error creating image preview for space: ", error);
         };
+        console.log("Debug createSpace entityPreviews ", entityPreviews);
         
         let entityInitiationObject : BebbEntityInitiationObject = {
           settings: [],
@@ -195,10 +201,12 @@
           previews: [entityPreviews],
         };
         const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
+        console.log("Debug createSpace spaceEntityIdResponse ", spaceEntityIdResponse);
         // @ts-ignore
         if (spaceEntityIdResponse) {
           // @ts-ignore
           const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse);
+        console.log("Debug createSpace spaceEntityIdUpdateResponse ", spaceEntityIdUpdateResponse);
           // @ts-ignore
           if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
             console.error("Update Space Error:", spaceEntityIdUpdateResponse);

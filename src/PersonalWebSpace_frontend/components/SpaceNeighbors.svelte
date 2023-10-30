@@ -79,11 +79,17 @@
 
 // Owner submitted form to create a new space neighbor
     const submitAddNeighborForm = async () => {
+        // TODO: clicking button has no effect
+        console.log("Debug submitAddNeighborForm");
         neighborCreationInProgress = true;
         const spaceEntityId = extractSpaceEntityId();
+        console.log("Debug submitAddNeighborForm spaceEntityId ", spaceEntityId);
+        console.log("Debug submitAddNeighborForm newNeighborUrl ", newNeighborUrl);
+        console.log("Debug submitAddNeighborForm neighborUrlInputHandler(newNeighborUrl) ", neighborUrlInputHandler(newNeighborUrl));
         if (neighborUrlInputHandler(newNeighborUrl) && spaceEntityId) {
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
             const spaceUrl = newNeighborUrl.replace(/\/+$/, ""); // strip any trailing slashes
+        console.log("Debug submitAddNeighborForm spaceUrl ", spaceUrl);
             const entitySpecificFields = {
                 externalId: spaceUrl,
             };
@@ -101,6 +107,7 @@
             } catch (error) {
                 console.error("Error creating image preview for space: ", error);
             };
+            console.log("Debug submitAddNeighborForm entityPreviews ", entityPreviews);
             
             const entityInitiationObject : BebbEntityInitiationObject = {
                 settings: [],
@@ -136,6 +143,7 @@
             };
             try {
                 const createBebbEntityAndBridgeResponse = await createBebbEntityAndBridge(entityInitiationObject, bridgeEntityInitiationObject);
+                console.log("Debug submitAddNeighborForm createBebbEntityAndBridgeResponse ", createBebbEntityAndBridgeResponse);
                 if (createBebbEntityAndBridgeResponse) {
                     successfullyAddedNeighbor = true;
                 } else {
