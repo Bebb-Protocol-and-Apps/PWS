@@ -13,9 +13,12 @@
   import { canisterId as PersonalWebSpace_frontend_canister_id } from "canisters/PersonalWebSpace_frontend";
   import type {
     BebbEntityInitiationObject,
+    BebbEntityPreview,
   } from "../helpers/bebb_utils";
   import {
     createBebbEntity,
+    getBebbEntityUrlPreview,
+    getBebbEntityImagePreviewFromAframeHtml,
   } from "../helpers/bebb_utils";
 
   let webHostedGlbModelUrl : string = "";
@@ -163,14 +166,33 @@
         const spaceId = spaceResponse.Ok.id;
         setSpaceWasCreated();
         // Protocol integration: create Space as Entity in Protocol
-        const externalId = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
+        const spaceUrl = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
+        const entitySpecificFields = {
+          externalId: spaceUrl,
+        };
+
+        const entityPreviews = [];        
+        try {
+          const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
+          entityPreviews.push(urlSpacePreview);
+        } catch (error) {
+          console.error("Error creating url preview for space: ", error);
+        };
+        try {
+          const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
+          entityPreviews.push(imageSpacePreview);         
+        } catch (error) {
+          console.error("Error creating image preview for space: ", error);
+        };
+        
         let entityInitiationObject : BebbEntityInitiationObject = {
           settings: [],
           entityType: { 'Resource' : { 'Web' : null } },
           name: ["Personal Web Space"],
           description: ["Flaming Hot Personal Web Space"],
           keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
-          entitySpecificFields: [externalId],
+          entitySpecificFields: [JSON.stringify(entitySpecificFields)],
+          previews: [entityPreviews],
         };
         const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
         // @ts-ignore

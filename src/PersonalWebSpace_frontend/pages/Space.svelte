@@ -27,9 +27,10 @@
   import { canisterId as backendCanisterId } from "canisters/PersonalWebSpace_backend";
   import type {
     BebbEntity,
+    BebbEntityAndBridge,
   } from "../helpers/bebb_utils";
   import {
-    getConnectedEntitiesInBebb,
+    getConnectedEntitiesAndBridgesInBebb,
   } from "../helpers/bebb_utils";
   
 
@@ -1300,7 +1301,7 @@
     };
   };
 
-  const entityHasValidUrl = (entity: Entity) => {
+  const entityHasValidUrl = (entity: BebbEntity) => {
     return isValidUrl(entity.entitySpecificFields);
   };
 
@@ -1334,22 +1335,84 @@
     };
   };
 
-  function loadNeighborsIn3D(spaceNeighbors: Entity[]) {
+  function loadNeighborsIn3D(spaceNeighbors: BebbEntityAndBridge[]) {
     // Create a new entity for each neighbor
     let neighborIndex = 0;
     for (const neighbor of spaceNeighbors) {
-      // Only display neighbors that have a valid URL
-      if (entityHasValidUrl(neighbor)) {
-        // Create a new entity for the neighbor
-        let neighborEntity = document.createElement('a-entity');
-        // Set properties on the new neighbor entity
-        neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.id}`);
-        neighborEntity.setAttribute('web-portal', `url:${neighbor.entitySpecificFields}; text:${neighbor.name[0] || "Neighbor " + neighborIndex};`);
-        neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
-        // Add the neighbor entity to the scene
-        let scene = document.querySelector('a-scene');
-        scene.appendChild(neighborEntity);
-        neighborIndex++;
+      var hasAdditionalPresentationMetadata = false;
+      var additionalPresentationMetadata;
+      if (neighbor.bridge.entitySpecificFields) {
+        try {
+          const entitySpecificFields = JSON.parse(neighbor.bridge.entitySpecificFields);
+          if (entitySpecificFields.presentationMetadata) {
+            additionalPresentationMetadata = entitySpecificFields.presentationMetadata;
+            hasAdditionalPresentationMetadata = true;
+          };
+        } catch(error) {
+          hasAdditionalPresentationMetadata = false;
+        };
+      };
+      if (hasAdditionalPresentationMetadata) {
+        var neighborUrl;
+        try {
+          if (neighbor.entity.previews && neighbor.entity.previews[0]) {
+            var urlPreview;
+            for (const preview of neighbor.entity.previews) {
+              // @ts-ignore
+              if (preview.previewType.hasOwnProperty('Other') && preview.previewType.Other === "URL") {
+                var enc = new TextDecoder("utf-8");
+                const url = enc.decode(preview.previewData);
+                if (isValidUrl(url)) {
+                  neighborUrl = url;
+                  urlPreview = preview;
+                };
+              };
+            };
+          } else {
+            if (neighbor.entity.entitySpecificFields) {
+              const entitySpecificFields = JSON.parse(neighbor.entity.entitySpecificFields);
+              if (entitySpecificFields.externalId && isValidUrl(entitySpecificFields.externalId)) {
+                neighborUrl = entitySpecificFields.externalId;
+              };
+            };
+          };
+        } catch(error) {
+          console.error("Neighbor doesn't have a valid url ", error);
+        };
+        if (neighborUrl) {
+          // Create a new entity for the neighbor
+          let neighborEntity = document.createElement('a-entity');
+          // Set properties on the new neighbor entity
+          neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.entity.id}`);
+          if (additionalPresentationMetadata && additionalPresentationMetadata.data && additionalPresentationMetadata.data.width && additionalPresentationMetadata.data.height) {
+            neighborEntity.setAttribute('web-portal', `url:${neighborUrl}; text:${neighbor.entity.name[0] || "Neighbor " + neighborIndex}; width:${additionalPresentationMetadata.data.width}; height:${additionalPresentationMetadata.data.height}`);
+          } else {
+            neighborEntity.setAttribute('web-portal', `url:${neighborUrl}; text:${neighbor.entity.name[0] || "Neighbor " + neighborIndex};`);
+          };
+          if (additionalPresentationMetadata && additionalPresentationMetadata.data && additionalPresentationMetadata.data.position) {
+            neighborEntity.setAttribute('position', additionalPresentationMetadata.data.position);
+          } else {
+            neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
+          };
+          // Add the neighbor entity to the scene
+          let scene = document.querySelector('a-scene');
+          scene.appendChild(neighborEntity);
+          neighborIndex++;
+        };
+      } else { // no additional presentation metadata
+        // Only display neighbors that have a valid URL
+        if (entityHasValidUrl(neighbor.entity)) {
+          // Create a new entity for the neighbor
+          let neighborEntity = document.createElement('a-entity');
+          // Set properties on the new neighbor entity
+          neighborEntity.setAttribute('id', `OIM-VR-neighbor-${neighbor.entity.id}`);
+          neighborEntity.setAttribute('web-portal', `url:${neighbor.entity.entitySpecificFields}; text:${neighbor.entity.name[0] || "Neighbor " + neighborIndex};`);
+          neighborEntity.setAttribute('position', `${-5 - neighborIndex*3} 1.25 -10`); // Position all Neighbors along one line
+          // Add the neighbor entity to the scene
+          let scene = document.querySelector('a-scene');
+          scene.appendChild(neighborEntity);
+          neighborIndex++;
+        };
       };
     };    
   };
@@ -1357,11 +1420,11 @@
   const loadSpaceNeighborsIn3D = async () => {
     // Load the Space's Neighbors from Bebb Protocol and display them in 3D in the scene
     const spaceEntityId = extractSpaceEntityId();
-    let retrievedNeighborEntities : BebbEntity[] = [];
+    let retrievedNeighborEntities : BebbEntityAndBridge[] = [];
     try {
-      const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId);
+      const getConnectedEntitiesResponse = await getConnectedEntitiesAndBridgesInBebb(spaceEntityId, "from", {OwnerCreated: true});
       for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
-        const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
+        const connectedEntity : BebbEntityAndBridge = getConnectedEntitiesResponse[j];
         retrievedNeighborEntities.push(connectedEntity);
       };
     } catch(err) {

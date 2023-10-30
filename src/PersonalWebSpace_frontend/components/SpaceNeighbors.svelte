@@ -3,15 +3,16 @@
         BebbBridge,
         BebbBridgeInitiationObject,
         BebbEntity,
-        BebbEntityAttachedBridges,
-        BebbEntityAttachedBridgesResult,
         BebbEntityInitiationObject,
+        BebbEntityPreview,
     } from "../helpers/bebb_utils";
     import {
         createBebbEntityAndBridge,
         getBebbBridgesBetweenEntities,
         deleteBebbBridgesByOwner,
         getConnectedEntitiesInBebb,
+        getBebbEntityUrlPreview,
+        getBebbEntityImagePreviewFromUrl,
     } from "../helpers/bebb_utils";
     import { onMount } from "svelte";
     import ProtocolEntity from "./ProtocolEntity.svelte";
@@ -82,22 +83,53 @@
         const spaceEntityId = extractSpaceEntityId();
         if (neighborUrlInputHandler(newNeighborUrl) && spaceEntityId) {
             // Create Neighbor connection as Bridge from Space in Bebb Protocol
-            const externalId : [string] = [newNeighborUrl];
-            const entityInitiationObject : BebbEntityInitiationObject= {
+            const spaceUrl = newNeighborUrl.replace(/\/+$/, ""); // strip any trailing slashes
+            const entitySpecificFields = {
+                externalId: spaceUrl,
+            };
+
+            const entityPreviews = [];        
+            try {
+                const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
+                entityPreviews.push(urlSpacePreview);
+            } catch (error) {
+                console.error("Error creating url preview for space: ", error);
+            };
+            try {
+                const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromUrl(spaceUrl);
+                entityPreviews.push(imageSpacePreview);         
+            } catch (error) {
+                console.error("Error creating image preview for space: ", error);
+            };
+            
+            const entityInitiationObject : BebbEntityInitiationObject = {
                 settings: [],
                 entityType: { 'Resource' : { 'Web' : null } },
                 name: [],
                 description: [`Created as a Space Neighbor in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
                 keywords: [["Space Neighbor", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-                entitySpecificFields: externalId,
+                entitySpecificFields: [JSON.stringify(entitySpecificFields)],
+                previews: [entityPreviews],
             };
 
+            const bridgePresentationMetadata = {
+                framework: "A-Frame",
+                environment: "Open Internet Metaverse",
+                type: "Virtual Neighbor",
+                data: {
+                    width: 1.2,
+                    height: 2,
+                },
+            };
+            const bridgeSpecificFields = {
+                presentationMetadata: bridgePresentationMetadata,
+            };
             const bridgeEntityInitiationObject : BebbBridgeInitiationObject = {
                 settings: [],
                 name: [],
                 description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
                 keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-                entitySpecificFields: [],
+                entitySpecificFields: [JSON.stringify(bridgeSpecificFields)],
                 bridgeType: { 'IsRelatedto' : null },
                 fromEntityId: spaceEntityId,
                 toEntityId: "",
@@ -193,7 +225,7 @@
         const spaceEntityId = extractSpaceEntityId();
         let retrievedNeighborEntities : BebbEntity[] = [];
         try {
-            const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId);
+            const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId, "from", {OwnerCreated: true});
             for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
                 const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
                 retrievedNeighborEntities.push(connectedEntity);

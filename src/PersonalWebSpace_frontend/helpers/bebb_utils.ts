@@ -1,3 +1,4 @@
+import html2canvas from "html2canvas";
 import { store } from "../store";
 
 import type {
@@ -8,6 +9,8 @@ import type {
   EntityAttachedBridge,
   Bridge,
   Entity,
+  EntityPreview,
+  EntityFilterCriterion,
 } from "src/integrations/BebbProtocol/bebb.did";
 
 export type BebbEntity = Entity;
@@ -18,6 +21,8 @@ export type BebbEntityAttachedBridges = EntityAttachedBridges;
 export type BebbEntityAttachedBridge = EntityAttachedBridge;
 export type BebbBridge = Bridge;
 export type BebbEntityAndBridge = { entity: BebbEntity, bridge: BebbBridge };
+export type BebbEntityPreview = EntityPreview;
+export type BebbEntityFilterCriterion = EntityFilterCriterion;
 
 let appStore;
 store.subscribe((value) => appStore = value);
@@ -48,11 +53,36 @@ export async function createBebbBridge(bridgeEntityInitiationObject: BebbBridgeI
   };
 };
 
+export async function createBebbEntityIfNonExistent(entityInitiationObject: BebbEntityInitiationObject) {
+  if (!appStore) {
+    throw new Error("Error in createBebbEntityIfNonExistent: store not initialized");
+  };
+  
+  // Check that Entity doesn't already exist in Bebb
+  const entitySpecificFields = JSON.parse(entityInitiationObject.entitySpecificFields[0]);
+  const filterCriteria: BebbEntityFilterCriterion[] = [{
+    criterionKey: "externalId",
+    criterionValue: entitySpecificFields.externalId,
+  }];
+  
+  const matchResult = await appStore.protocolActor.match_entities(filterCriteria);
+
+  // Check if any Entities matched the filter criteria
+  if (matchResult && matchResult.Ok && matchResult.Ok.length > 0) {
+    // Assuming the first matched Entity is the correct one (and there are no duplicates)
+    return matchResult.Ok[0].id;  // Return the id of the existing Entity
+  };
+
+  // Entity does not exist, so create it
+  return createBebbEntity(entityInitiationObject); 
+}
+
+
 export async function createBebbEntityAndBridge(entityInitiationObject: BebbEntityInitiationObject, bridgeEntityInitiationObject: BebbBridgeInitiationObject) {
   if (!appStore) {
     throw new Error("Error in createBebbEntityAndBridge: store not initialized");
   };
-  const createEntityResponse = await createBebbEntity(entityInitiationObject);
+  const createEntityResponse = await createBebbEntityIfNonExistent(entityInitiationObject);
   // @ts-ignore
   if (createEntityResponse) {
     // @ts-ignore
@@ -123,13 +153,16 @@ export async function deleteBebbBridgesByOwner(bebbBridges: BebbBridge[], ownerI
   return true;
 };
 
-function extractBridgeIds(bridgesRetrieved: BebbEntityAttachedBridges): string[] {
-  return bridgesRetrieved
-    .filter(bridge => bridge && bridge.id)
-    .map(bridge => bridge.id);
+function extractBridgeIds(bridgesRetrieved: BebbEntityAttachedBridges, filters = {}): string[] {
+  var filteredBridges = bridgesRetrieved.filter(bridge => bridge && bridge.id);
+  // @ts-ignore
+  if (filters && filters.OwnerCreated) {
+    filteredBridges = filteredBridges.filter((attachedBridge: BebbEntityAttachedBridge) => attachedBridge.linkStatus.hasOwnProperty('CreatedOwner'));
+  };
+  return filteredBridges.map(bridge => bridge.id);    
 };
 
-export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string, bridgingDirection = "from"): Promise<string[]> {
+export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<string[]> {
   if (!appStore) {
     throw new Error("Error in getConnectedBridgeIdsForEntityInBebb: store not initialized");
   };
@@ -144,7 +177,7 @@ export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string,
     };
 
     if (bridgeIdsResponse && bridgeIdsResponse.Ok && bridgeIdsResponse.Ok.length > 0) {
-      return extractBridgeIds(bridgeIdsResponse.Ok);
+      return extractBridgeIds(bridgeIdsResponse.Ok, filters);
     };    
   } catch (error) {
     console.error("Error in getConnectedBridgeIdsForEntityInBebb ", error);
@@ -162,7 +195,7 @@ export async function getBebbBridges(bridgeIds: string[]): Promise<BebbBridge[]>
   for (var i = 0; i < bridgeIds.length; i++) {
     if (bridgeIds[i]) { // TODO: filters like bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')
       getBridgeRequestPromises.push(appStore.protocolActor.get_bridge(bridgeIds[i])); // Send requests in parallel and then await all to speed up
-    }
+    };
   };
 
   const getBridgeResponses = await Promise.all(getBridgeRequestPromises);
@@ -179,12 +212,12 @@ export async function getBebbBridges(bridgeIds: string[]): Promise<BebbBridge[]>
   return bridges;
 };
 
-export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, bridgingDirection = "from"): Promise<BebbBridge[]> {
+export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<BebbBridge[]> {
   if (!appStore) {
     throw new Error("Error in getConnectedBridgesForEntityInBebb: store not initialized");
   };
   
-  const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection);
+  const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection, filters);
   return getBebbBridges(bridgeIds);
 };
 
@@ -204,13 +237,13 @@ async function getBebbEntities(entityIds: string[]) : Promise<BebbEntity[]> {
   return entities;
 };
 
-export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<BebbEntity[]> {
+export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}) : Promise<BebbEntity[]> {
   if (!appStore) {
     throw new Error("Error in getConnectedEntitiesInBebb: store not initialized");
   };
 
   try {
-    const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection);
+    const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection, filters);
     const entityIds = getBridgesResponse.map((bridge: BebbBridge) => bridgingDirection === "from" ? bridge.toEntityId : bridge.fromEntityId);
     const connectedEntities = await getBebbEntities(entityIds);
     return connectedEntities;
@@ -220,13 +253,13 @@ export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingD
   };
 };
 
-export async function getConnectedEntitiesAndBridgesInBebb(bebbEntityId: string, bridgingDirection = "from") : Promise<BebbEntityAndBridge[]> {
+export async function getConnectedEntitiesAndBridgesInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}) : Promise<BebbEntityAndBridge[]> {
   if (!appStore) {
-    throw new Error("Error in getConnectedEntitiesInBebb: store not initialized");
+    throw new Error("Error in getConnectedEntitiesAndBridgesInBebb: store not initialized");
   };
 
   try {
-    const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection);
+    const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection, filters);
     const entityIds = getBridgesResponse.map((bridge: BebbBridge) => bridgingDirection === "from" ? bridge.toEntityId : bridge.fromEntityId);
     const connectedEntities = await getBebbEntities(entityIds);
 
@@ -247,5 +280,138 @@ export async function getConnectedEntitiesAndBridgesInBebb(bebbEntityId: string,
   } catch (error) {
     console.error("Error Getting Connected Entities and Bridges in Bebb ", error);
     return null;                
+  };
+};
+
+export async function getBebbEntityUrlPreview(url: string) : Promise<BebbEntityPreview> {
+  var enc = new TextEncoder(); // always utf-8
+  const urlSpacePreview : BebbEntityPreview = {
+    'previewData': enc.encode(url),
+    'previewType': { 'Other' : "URL" },
+  };
+  return urlSpacePreview;
+};
+
+async function captureAFrameScene(spaceHtml) {
+  return new Promise(async (resolve, reject) => {
+    // 1. Insert spaceHtml into the DOM
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '-10000px'; // Offscreen
+    container.innerHTML = spaceHtml;
+    document.body.appendChild(container);
+
+    const sceneEl = container.querySelector('a-scene');
+
+    // Ensure A-Frame scene has loaded
+    // @ts-ignore
+    if (!sceneEl.hasLoaded) {
+      await new Promise(resolve => sceneEl.addEventListener('loaded', resolve));
+    };
+
+    // 2. & 3. Capture the screenshot
+    sceneEl.addEventListener('screenshotready', function(evt) {
+      // @ts-ignore
+      const dataURI = evt.detail;
+      
+      // 4. Convert data URI to Uint8Array
+      const byteString = atob(dataURI.split(',')[1]);
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const intArray = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < byteString.length; i++) {
+        intArray[i] = byteString.charCodeAt(i);
+      };
+
+      // Clean up and resolve the promise
+      document.body.removeChild(container);
+      resolve(intArray);
+    });
+    // @ts-ignore
+    sceneEl.components.screenshot.capture('perspective');
+  });
+};
+
+export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string) : Promise<BebbEntityPreview> {
+  // @ts-ignore
+  const imageData : Uint8Array  = await captureAFrameScene(sceneHtml);
+  const imageSpacePreview : BebbEntityPreview = {
+    'previewData': imageData,
+    'previewType': { 'Jpg' : null },
+  };
+  return imageSpacePreview;
+};
+
+async function captureImageOfAFrameSceneFromUrl(url: string) : Promise<Uint8Array> {
+  return new Promise(async (resolve, reject) => {
+    let iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    iframe.onload = async () => {
+      try {
+        // @ts-ignore
+        let canvas = iframe.contentDocument.querySelector('a-scene').components.screenshot.getCanvas('perspective');
+        // @ts-ignore
+        let blob : Blob = await canvasToBlob(canvas);
+        let arrayBuffer = await blob.arrayBuffer();
+        document.body.removeChild(iframe);
+        resolve(new Uint8Array(arrayBuffer));
+      } catch (err) {
+        console.error("Error capturing image from A-Frame scene: " + err);
+        reject("Error capturing image from A-Frame scene: " + err);
+      };
+    };
+  });
+};
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve) => {
+    canvas.toBlob(resolve);
+  });
+};
+
+async function captureImageOfWebsiteFromUrl(url: string) : Promise<Uint8Array> {
+  return new Promise(async (resolve, reject) => {
+    let iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    iframe.onload = async () => {
+      try {
+        const canvas = await html2canvas(iframe.contentDocument.body);
+        // @ts-ignore
+        let blob : Blob = await canvasToBlob(canvas);
+        let arrayBuffer = await blob.arrayBuffer();
+        document.body.removeChild(iframe);
+        resolve(new Uint8Array(arrayBuffer));
+      } catch (err) {
+        console.error("Error capturing image from website: " + err);
+        reject("Error capturing image from website: " + err);
+      };
+    };
+  });
+};
+
+export async function getBebbEntityImagePreviewFromUrl(url: string) : Promise<BebbEntityPreview> {
+  if (url.includes("/#/space/")) {
+    // OIM Space URL, i.e. A-Frame scene
+    // @ts-ignore
+    const imageData : Uint8Array  = await captureImageOfAFrameSceneFromUrl(url);
+    const imageSpacePreview : BebbEntityPreview = {
+      'previewData': imageData,
+      'previewType': { 'Jpg' : null },
+    };
+    return imageSpacePreview;
+  } else {
+    // External URL
+    // @ts-ignore
+    const imageData : Uint8Array  = await captureImageOfWebsiteFromUrl(url);
+    const imageSpacePreview : BebbEntityPreview = {
+      'previewData': imageData,
+      'previewType': { 'Jpg' : null },
+    };
+    return imageSpacePreview;
   };
 };

@@ -50,24 +50,36 @@
     const spaceEntityId = extractSpaceEntityId();
     if (entityIdToLinkTo !== "" && spaceEntityId) {
       // Create link as Bridge from Space in Bebb Protocol
+      const bridgePresentationMetadata = {
+        framework: "A-Frame",
+        environment: "Open Internet Metaverse",
+        type: "Virtual Neighbor",
+        data: {
+          width: 1.2,
+          height: 2,
+        },
+      };
+      const entitySpecificFields = {
+        presentationMetadata: bridgePresentationMetadata,
+      };
       const bridgeEntityInitiationObject : BebbBridgeInitiationObject = {
         settings: [],
         name: [],
         description: [`Created to connect two Spaces as Neighbors in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
         keywords: [["Space Neighbors", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-        entitySpecificFields: [],
+        entitySpecificFields: [JSON.stringify(entitySpecificFields)],
         bridgeType: { 'IsRelatedto' : null },
         fromEntityId: spaceEntityId,
         toEntityId: entityIdToLinkTo,
       };
       try {
-          const createBridgeResponse = await createBebbBridge(bridgeEntityInitiationObject);
-          // @ts-ignore
-          if (createBridgeResponse) {
-            successfullyCreatedLink = true;
-          } else {
-            errorCreatingLink = true;
-          };
+        const createBridgeResponse = await createBebbBridge(bridgeEntityInitiationObject);
+        // @ts-ignore
+        if (createBridgeResponse) {
+          successfullyCreatedLink = true;
+        } else {
+          errorCreatingLink = true;
+        };
       } catch(err) {
         console.error("Link Space err", err);
         errorCreatingLink = true;
