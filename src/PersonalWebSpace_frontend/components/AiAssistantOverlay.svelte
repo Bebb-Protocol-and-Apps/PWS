@@ -72,45 +72,58 @@
   async function calculateElementPosition(elementData) {
     let proposedPosition;
     if (addedElements.length === 0) {
-      // @ts-ignore
-      proposedPosition = new THREE.Vector3(-2, 2, -6); // starting position
-    } else {
-      const lastElement = addedElements[addedElements.length - 1];
-      let offset;
-      switch (lastElement.elementType) {
-        case 'image':
-          offset = 0.2;
-          break;
-        case 'video':
-          offset = 2;
-          break;
+      let yOffset = 2;
+      switch (elementData.elementType) {
         case 'model':
-          offset = 2;
+          yOffset += 3;
           break;
         case '3D-model':
-          offset = 2;
+          yOffset += 3;
+          break;
+      };
+      // @ts-ignore
+      proposedPosition = new THREE.Vector3(-2, yOffset, -6); // starting position
+    } else {
+      const lastElement = addedElements[addedElements.length - 1];
+      let xOffset;
+      let yOffset = 0;
+      switch (lastElement.elementType) {
+        case 'image':
+          xOffset = 0.2;
+          break;
+        case 'video':
+          xOffset = 2;
+          break;
+        case 'model':
+          xOffset = 2;
+          break;
+        case '3D-model':
+          xOffset = 2;
           break;
         default:
-          offset = 2; // handle unknown types or adjust as necessary
+          xOffset = 2; // handle unknown types or adjust as necessary
       };
       switch (elementData.elementType) {
         case 'image':
-          offset += 1;
+          xOffset += 1;
           break;
         case 'video':
-          offset += 2.5;
+          xOffset += 2.5;
           break;
         case 'model':
-          offset += 3;
+          xOffset += 3;
+          yOffset += 3;
           break;
         case '3D-model':
-          offset += 3;
+          xOffset += 3;
+          yOffset += 3;
           break;
         default:
-          offset += 3; // handle unknown types or adjust as necessary
+          xOffset += 3; // handle unknown types or adjust as necessary
+          yOffset += 1.5;
       };
       // @ts-ignore
-      proposedPosition = new THREE.Vector3(lastElement.assignedPosition.x + offset, lastElement.assignedPosition.y, lastElement.assignedPosition.z);
+      proposedPosition = new THREE.Vector3(lastElement.assignedPosition.x + xOffset, lastElement.assignedPosition.y + yOffset, lastElement.assignedPosition.z);
     };
     // Check if the proposed position is free, or find the next suitable position
     const suitablePosition = await checkPositionForEntity(document.querySelector('a-scene'), proposedPosition);
