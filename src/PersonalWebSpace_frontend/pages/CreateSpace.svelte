@@ -174,7 +174,7 @@
           externalId: spaceUrl,
         };
 
-        const entityPreviews = [];
+        const entityPreviews : Array<BebbEntityPreview> = [];
         // TODO: decouple preview generation from main creation path (add to end and update Entity)      
         try {
           const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
@@ -182,23 +182,16 @@
         } catch (error) {
           console.error("Error creating url preview for space: ", error);
         };
-        console.log("Debug createSpace entityPreviews after getBebbEntityUrlPreview ", entityPreviews);
-        try {
-          const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
-          entityPreviews.push(imageSpacePreview);         
-        } catch (error) {
-          console.error("Error creating image preview for space: ", error);
-        };
-        console.log("Debug createSpace entityPreviews ", entityPreviews);
-        
+        console.log("Debug createSpace entityPreviews after getBebbEntityUrlPreview ", entityPreviews);        
         let entityInitiationObject : BebbEntityInitiationObject = {
           settings: [],
           entityType: { 'Resource' : { 'Web' : null } },
           name: ["Personal Web Space"],
           description: ["Flaming Hot Personal Web Space"],
           keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
-          entitySpecificFields: [JSON.stringify(entitySpecificFields)],
-          previews: [entityPreviews],
+          entitySpecificFields: [JSON.stringify(entitySpecificFields)] as [string],
+          //previews: [entityPreviews] as [Array<BebbEntityPreview>], // TODO: causes error in createBebbEntity call (invalid record)
+          previews: [],
         };
         const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
         console.log("Debug createSpace spaceEntityIdResponse ", spaceEntityIdResponse);
@@ -208,7 +201,16 @@
           const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse);
         console.log("Debug createSpace spaceEntityIdUpdateResponse ", spaceEntityIdUpdateResponse);
           // @ts-ignore
-          if (!spaceEntityIdUpdateResponse || !spaceEntityIdUpdateResponse.Ok) {
+          if (spaceEntityIdUpdateResponse && spaceEntityIdUpdateResponse.Ok) {
+            /* try {
+              const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
+              entityPreviews.push(imageSpacePreview);
+              // TODO: update Entity previews
+            } catch (error) {
+              console.error("Error creating image preview for space: ", error);
+            };
+            console.log("Debug createSpace entityPreviews ", entityPreviews); */
+          } else {
             console.error("Update Space Error:", spaceEntityIdUpdateResponse);
           };
         } else {

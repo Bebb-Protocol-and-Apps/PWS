@@ -94,7 +94,7 @@
                 externalId: spaceUrl,
             };
 
-            const entityPreviews = [];        
+            const entityPreviews : Array<BebbEntityPreview> = []; // TODO: decouple preview generation from main creation path (add to end and update Entity)     
             try {
                 const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
                 entityPreviews.push(urlSpacePreview);
@@ -115,8 +115,9 @@
                 name: [],
                 description: [`Created as a Space Neighbor in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
                 keywords: [["Space Neighbor", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
-                entitySpecificFields: [JSON.stringify(entitySpecificFields)],
-                previews: [entityPreviews],
+                entitySpecificFields: [JSON.stringify(entitySpecificFields)] as [string],
+                //previews: [entityPreviews] as [Array<BebbEntityPreview>], // TODO: causes error in createBebbEntity call (invalid record)
+                previews: [],
             };
 
             const bridgePresentationMetadata = {
