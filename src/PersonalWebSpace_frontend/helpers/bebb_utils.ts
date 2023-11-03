@@ -11,6 +11,7 @@ import type {
   Entity,
   EntityPreview,
   EntityFilterCriterion,
+  EntityUpdateObject,
 } from "src/integrations/BebbProtocol/bebb.did";
 
 export type BebbEntity = Entity;
@@ -23,6 +24,7 @@ export type BebbBridge = Bridge;
 export type BebbEntityAndBridge = { entity: BebbEntity, bridge: BebbBridge };
 export type BebbEntityPreview = EntityPreview;
 export type BebbEntityFilterCriterion = EntityFilterCriterion;
+export type BebbEntityUpdateObject = EntityUpdateObject;
 
 let appStore;
 store.subscribe((value) => appStore = value);
@@ -40,6 +42,19 @@ export async function createBebbEntity(entityInitiationObject: BebbEntityInitiat
   };
 };
 
+export async function updateBebbEntity(entityUpdateObject: BebbEntityUpdateObject) {
+  if (!appStore) {
+    throw new Error("Error in updateBebbEntity: store not initialized");
+  };
+  const updateEntityResponse = await appStore.protocolActor.update_entity(entityUpdateObject);
+  // @ts-ignore
+  if (updateEntityResponse && updateEntityResponse.Ok) {
+    return updateEntityResponse.Ok;
+  } else {
+    throw new Error("Error updating Entity");   
+  };
+};
+
 export async function createBebbBridge(bridgeEntityInitiationObject: BebbBridgeInitiationObject) {
   if (!appStore) {
     throw new Error("Error in createBebbBridge: store not initialized");
@@ -52,6 +67,8 @@ export async function createBebbBridge(bridgeEntityInitiationObject: BebbBridgeI
     throw new Error("Error creating new Bridge");
   };
 };
+
+// TODO: updateBebbBridge
 
 export async function createBebbEntityIfNonExistent(entityInitiationObject: BebbEntityInitiationObject) {
   if (!appStore) {
@@ -70,11 +87,17 @@ export async function createBebbEntityIfNonExistent(entityInitiationObject: Bebb
   // Check if any Entities matched the filter criteria
   if (matchResult && matchResult.Ok && matchResult.Ok.length > 0) {
     // Assuming the first matched Entity is the correct one (and there are no duplicates)
-    return matchResult.Ok[0].id;  // Return the id of the existing Entity
+    return {
+      entityId: matchResult.Ok[0].id, // Return the id of the existing Entity
+      newEntityCreated: false,
+    };
   };
 
   // Entity does not exist, so create it
-  return createBebbEntity(entityInitiationObject); 
+  return {
+    entityId: await createBebbEntity(entityInitiationObject),
+    newEntityCreated: true,
+  };
 }
 
 
@@ -86,7 +109,7 @@ export async function createBebbEntityAndBridge(entityInitiationObject: BebbEnti
   // @ts-ignore
   if (createEntityResponse) {
     // @ts-ignore
-    const newNeighborEntityId = createEntityResponse;
+    const newNeighborEntityId = createEntityResponse.entityId;
     if (!bridgeEntityInitiationObject.toEntityId || bridgeEntityInitiationObject.toEntityId === "") {
       bridgeEntityInitiationObject.toEntityId = newNeighborEntityId;
     } else {
@@ -95,7 +118,11 @@ export async function createBebbEntityAndBridge(entityInitiationObject: BebbEnti
     const createBridgeResponse = await createBebbBridge(bridgeEntityInitiationObject);
     // @ts-ignore
     if (createBridgeResponse) {
-      return true;
+      return {
+        entityId: newNeighborEntityId,
+        bridgeId: createBridgeResponse,
+        newEntityCreated: createEntityResponse.newEntityCreated,
+      };
     } else {
       throw new Error("Error creating new Bridge");
     };

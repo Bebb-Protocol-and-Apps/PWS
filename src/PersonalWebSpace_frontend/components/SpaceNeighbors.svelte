@@ -5,6 +5,7 @@
         BebbEntity,
         BebbEntityInitiationObject,
         BebbEntityPreview,
+        BebbEntityUpdateObject,
     } from "../helpers/bebb_utils";
     import {
         createBebbEntityAndBridge,
@@ -13,6 +14,7 @@
         getConnectedEntitiesInBebb,
         getBebbEntityUrlPreview,
         getBebbEntityImagePreviewFromUrl,
+        updateBebbEntity,
     } from "../helpers/bebb_utils";
     import { onMount } from "svelte";
     import ProtocolEntity from "./ProtocolEntity.svelte";
@@ -101,12 +103,6 @@
             } catch (error) {
                 console.error("Error creating url preview for space: ", error);
             };
-            try {
-                const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromUrl(spaceUrl);
-                entityPreviews.push(imageSpacePreview);         
-            } catch (error) {
-                console.error("Error creating image preview for space: ", error);
-            };
             console.log("Debug submitAddNeighborForm entityPreviews ", entityPreviews);
             
             const entityInitiationObject : BebbEntityInitiationObject = {
@@ -147,6 +143,25 @@
                 console.log("Debug submitAddNeighborForm createBebbEntityAndBridgeResponse ", createBebbEntityAndBridgeResponse);
                 if (createBebbEntityAndBridgeResponse) {
                     successfullyAddedNeighbor = true;
+                    if (createBebbEntityAndBridgeResponse.newEntityCreated) { // The Entity did not exist already and it's thus fine to update the previews
+                        // Add image preview to Entity (if a new Entity was created)
+                        try {
+                            const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromUrl(spaceUrl);
+                            entityPreviews.push(imageSpacePreview);
+                            const bebbEntityUpdateObject : BebbEntityUpdateObject = {
+                                'id' : createBebbEntityAndBridgeResponse.entityId,
+                                'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
+                                // don't update other fields (thus leave empty)
+                                'name' : [],
+                                'description' : [],
+                                'keywords' : [],
+                                'settings' : [],
+                            };
+                            const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject);   
+                        } catch (error) {
+                            console.error("Error creating image preview for space: ", error);
+                        };
+                    };
                 } else {
                     errorAddingNeighbor = true;
                 };

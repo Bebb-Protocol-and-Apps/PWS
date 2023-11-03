@@ -205,7 +205,7 @@
             /* try {
               const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
               entityPreviews.push(imageSpacePreview);
-              // TODO: update Entity previews
+              // TODO: update Entity with previews
             } catch (error) {
               console.error("Error creating image preview for space: ", error);
             };
