@@ -5,10 +5,11 @@
 
   export let viewerIsSpaceOwner: Boolean = false;
 
-  const aiAssistantUrl = "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io/#/embedagent"; // TODO
+  const aiAssistantUrl = "https://xfl6h-3qaaa-aaaai-acq3a-cai.raw.icp0.io/#/embedagent"; // TODO
   
   const allowedOrigins = [
     "https://xfl6h-3qaaa-aaaai-acq3a-cai.icp0.io",
+    "https://xfl6h-3qaaa-aaaai-acq3a-cai.raw.icp0.io",
   ];
 
   // Functionality to get the position in the scene for a new element to be added
