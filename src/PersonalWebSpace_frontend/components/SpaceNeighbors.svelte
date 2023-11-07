@@ -96,7 +96,7 @@
                 externalId: spaceUrl,
             };
 
-            const entityPreviews : Array<BebbEntityPreview> = []; // TODO: decouple preview generation from main creation path (add to end and update Entity)     
+            const entityPreviews : Array<BebbEntityPreview> = [];    
             try {
                 const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
                 entityPreviews.push(urlSpacePreview);

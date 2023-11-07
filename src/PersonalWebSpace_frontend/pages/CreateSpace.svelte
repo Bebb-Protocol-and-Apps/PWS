@@ -14,11 +14,13 @@
   import type {
     BebbEntityInitiationObject,
     BebbEntityPreview,
+    BebbEntityUpdateObject,
   } from "../helpers/bebb_utils";
   import {
     createBebbEntity,
     getBebbEntityUrlPreview,
     getBebbEntityImagePreviewFromAframeHtml,
+    updateBebbEntity,
   } from "../helpers/bebb_utils";
 
   let webHostedGlbModelUrl : string = "";
@@ -174,8 +176,7 @@
           externalId: spaceUrl,
         };
 
-        const entityPreviews : Array<BebbEntityPreview> = [];
-        // TODO: decouple preview generation from main creation path (add to end and update Entity)      
+        const entityPreviews : Array<BebbEntityPreview> = [];    
         try {
           const urlSpacePreview : BebbEntityPreview = await getBebbEntityUrlPreview(spaceUrl);
           entityPreviews.push(urlSpacePreview);
@@ -202,25 +203,34 @@
         console.log("Debug createSpace spaceEntityIdUpdateResponse ", spaceEntityIdUpdateResponse);
           // @ts-ignore
           if (spaceEntityIdUpdateResponse && spaceEntityIdUpdateResponse.Ok) {
-            /* try {
+            // Add image preview to Entity (if a new Entity was created)
+            try {
               const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
               entityPreviews.push(imageSpacePreview);
-              // TODO: update Entity with previews
+              const bebbEntityUpdateObject : BebbEntityUpdateObject = {
+                'id' : spaceEntityIdResponse,
+                'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
+                // don't update other fields (thus leave empty)
+                'name' : [],
+                'description' : [],
+                'keywords' : [],
+                'settings' : [],
+              };
+              const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject);   
             } catch (error) {
               console.error("Error creating image preview for space: ", error);
             };
-            console.log("Debug createSpace entityPreviews ", entityPreviews); */
           } else {
-            console.error("Update Space Error:", spaceEntityIdUpdateResponse);
+            console.error("Update Space Error: ", spaceEntityIdUpdateResponse);
           };
         } else {
-          console.error("Create Entity Error:", spaceEntityIdResponse);
+          console.error("Create Entity Error: ", spaceEntityIdResponse);
         };
       } else {
         console.error("Create Space Error:", spaceResponse);
       };
     } catch (error) {
-      console.error("Create Space Error:", error);
+      console.error("Create Space Error: ", error);
     };
   };
 
