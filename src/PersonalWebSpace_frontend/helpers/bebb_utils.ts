@@ -43,10 +43,12 @@ export async function createBebbEntity(entityInitiationObject: BebbEntityInitiat
 };
 
 export async function updateBebbEntity(entityUpdateObject: BebbEntityUpdateObject) {
+  console.log("Debug updateBebbEntity entityUpdateObject ", entityUpdateObject);
   if (!appStore) {
     throw new Error("Error in updateBebbEntity: store not initialized");
   };
   const updateEntityResponse = await appStore.protocolActor.update_entity(entityUpdateObject);
+  console.log("Debug updateBebbEntity updateEntityResponse ", updateEntityResponse);
   // @ts-ignore
   if (updateEntityResponse && updateEntityResponse.Ok) {
     return updateEntityResponse.Ok;
@@ -311,20 +313,64 @@ export async function getConnectedEntitiesAndBridgesInBebb(bebbEntityId: string,
 };
 
 export async function getBebbEntityUrlPreview(url: string) : Promise<BebbEntityPreview> {
-  console.log("Debug getBebbEntityUrlPreview url ", url);
   var enc = new TextEncoder(); // always utf-8
   const urlSpacePreview : BebbEntityPreview = {
     'previewData': enc.encode(url),
     'previewType': { 'Other' : "URL" },
   };
-  console.log("Debug getBebbEntityUrlPreview urlSpacePreview ", urlSpacePreview);
   return urlSpacePreview;
 };
 
+// Convert the Blob to an ArrayBuffer
+const blobToArrayBuffer = (blob) => {
+  return blob.arrayBuffer();
+};
+
+// Convert the ArrayBuffer to a Uint8Array
+const arrayBufferToUint8Array = (buffer) => {
+  return new Uint8Array(buffer);
+};
+
+// Putting it all together
+const getUint8ArrayFromCanvas = async (canvas) => {
+  try {
+    const blob = await canvasToBlob(canvas);
+    const buffer = await blobToArrayBuffer(blob);
+    const uint8Array = arrayBufferToUint8Array(buffer);
+    return uint8Array; // This is the Uint8Array representation of your canvas
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+function displayImageInPopup(screenshotArray) {
+  // Create a Blob from the Uint8Array
+  const blob = new Blob([screenshotArray], { type: 'image/jpeg' });
+
+  // Create an Object URL for the blob
+  const imageUrl = URL.createObjectURL(blob);
+  console.log("Debug captureAFrameScene imageUrl ", imageUrl);
+
+  // Open a new popup window
+  const popup = window.open('', 'Image Preview', 'width=600,height=400');
+
+  // Check if the popup was successfully opened
+  if (popup) {
+    console.log("Debug captureAFrameScene popup");
+    // Write the HTML content for the new window
+    popup.document.write(`<html><head><title>Image Preview</title></head><body><img src="${imageUrl}" onload="window.URL.revokeObjectURL('${imageUrl}')" style="max-width:100%;"></body></html>`);
+    
+    // Close the document to apply the content
+    popup.document.close();
+  } else {
+    console.log('Popup blocked or failed to open.');
+  };
+};
+
 async function captureAFrameScene(spaceHtml) {
-  console.log("Debug captureAFrameScene spaceHtml ", spaceHtml);
+  console.log("Debug captureAFrameScene");
   return new Promise(async (resolve, reject) => {
-    // 1. Insert spaceHtml into the DOM
     // TODO: disturbing UI
     const container = document.createElement('div');
     container.setAttribute("hidden", "hidden");
@@ -335,7 +381,6 @@ async function captureAFrameScene(spaceHtml) {
     document.body.appendChild(container);
 
     const sceneEl = container.querySelector('a-scene');
-    console.log("Debug captureAFrameScene sceneEl ", sceneEl);
 
     // Ensure A-Frame scene has loaded
     // @ts-ignore
@@ -343,42 +388,31 @@ async function captureAFrameScene(spaceHtml) {
       await new Promise(resolve => sceneEl.addEventListener('loaded', resolve));
     };
     console.log("Debug captureAFrameScene sceneEl.hasLoaded ", sceneEl.hasLoaded);
-    // 2. & 3. Capture the screenshot
-    sceneEl.addEventListener('screenshotready', function(evt) {
-      // TODO: not triggered
-      console.log("Debug captureAFrameScene screenshotready");
-      // @ts-ignore
-      const dataURI = evt.detail;
-      console.log("Debug captureAFrameScene screenshotready dataURI ", dataURI);
-      
-      // 4. Convert data URI to Uint8Array
-      const byteString = atob(dataURI.split(',')[1]);
-      const arrayBuffer = new ArrayBuffer(byteString.length);
-      const intArray = new Uint8Array(arrayBuffer);
-      for (let i = 0; i < byteString.length; i++) {
-        intArray[i] = byteString.charCodeAt(i);
-      };
-
-      // Clean up and resolve the promise
-      document.body.removeChild(container);
-      console.log("Debug captureAFrameScene screenshotready intArray ", intArray);
-      resolve(intArray);
-    });
     // Wait until assets have loaded
     let assetsEl = sceneEl.querySelector('a-assets');
     console.log("Debug captureAFrameScene assetsEl ", assetsEl);
-    setTimeout(() => {
-      console.log("Debug captureAFrameScene setTimeout");
-      // @ts-ignore
-      sceneEl.components.screenshot.capture('perspective'); // TODO: downloads image to device
-    }, 3000);
+    await new Promise(resolve =>
+      setTimeout(() => {
+        console.log("Debug captureAFrameScene setTimeout");
+        resolve("");
+      }, 3000)
+    );
+    // @ts-ignore
+    const screenshotCanvas = sceneEl.components.screenshot.getCanvas('perspective');
+    console.log("Debug captureAFrameScene screenshotCanvas ", screenshotCanvas);
+    const screenshotArray = await getUint8ArrayFromCanvas(screenshotCanvas);
+    console.log("Debug captureAFrameScene screenshotArray ", screenshotArray);
+
+    document.body.removeChild(container);
+
+    resolve(screenshotArray);
   });
 };
 
 export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string) : Promise<BebbEntityPreview> {
-  console.log("Debug getBebbEntityImagePreviewFromAframeHtml sceneHtml ", sceneHtml);
+  console.log("Debug getBebbEntityImagePreviewFromAframeHtml");
   // @ts-ignore
-  const imageData : Uint8Array  = await captureAFrameScene(sceneHtml);
+  const imageData : Uint8Array = await captureAFrameScene(sceneHtml);
   console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageData ", imageData);
   const imageSpacePreview : BebbEntityPreview = {
     'previewData': imageData,

@@ -160,7 +160,6 @@
   };
 
   const createSpace = async (spaceHtml) => {
-        console.log("Debug createSpace spaceHtml ", spaceHtml);
     try {
       const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
         console.log("Debug createSpace spaceResponse ", spaceResponse);
@@ -206,6 +205,7 @@
             // Add image preview to Entity (if a new Entity was created)
             try {
               const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
+              console.log("Debug createSpace imageSpacePreview ", imageSpacePreview);
               entityPreviews.push(imageSpacePreview);
               const bebbEntityUpdateObject : BebbEntityUpdateObject = {
                 'id' : spaceEntityIdResponse,
