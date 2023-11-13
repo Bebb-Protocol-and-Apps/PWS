@@ -371,9 +371,18 @@ function displayImageInPopup(screenshotArray) {
 async function captureAFrameScene(spaceHtml) {
   console.log("Debug captureAFrameScene");
   return new Promise(async (resolve, reject) => {
+    // Store the original overflow value
+const originalOverflow = document.body.style.overflow;
+
+// Set overflow to auto
+document.body.style.overflow = 'auto';
     // TODO: disturbing UI
     const container = document.createElement('div');
-    container.setAttribute("hidden", "hidden");
+    //container.setAttribute("hidden", "hidden");
+    //container.style.display = 'none'; // Hide the container
+    container.style.visibility = "hidden";
+    container.style.width = '10%';
+    container.style.height = '10%';
     //container.style.position = 'fixed';
     //container.style.top = '-10000px'; // Offscreen
     container.innerHTML = spaceHtml;
@@ -402,8 +411,11 @@ async function captureAFrameScene(spaceHtml) {
     console.log("Debug captureAFrameScene screenshotCanvas ", screenshotCanvas);
     const screenshotArray = await getUint8ArrayFromCanvas(screenshotCanvas);
     console.log("Debug captureAFrameScene screenshotArray ", screenshotArray);
+    displayImageInPopup(screenshotArray);
 
     document.body.removeChild(container);
+    // Restore the original overflow value
+document.body.style.overflow = originalOverflow;
 
     resolve(screenshotArray);
   });
