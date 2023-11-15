@@ -168,7 +168,6 @@
   const createSpace = async (spaceHtml, iframeElement=null) => {
     try {
       const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
-        console.log("Debug createSpace spaceResponse ", spaceResponse);
       // @ts-ignore
       if (spaceResponse && spaceResponse.Ok) {
         // @ts-ignore
@@ -176,7 +175,6 @@
         setSpaceWasCreated();
         // Protocol integration: create Space as Entity in Protocol
         const spaceUrl = `https://${PersonalWebSpace_frontend_canister_id}${appDomain}/#/space/${spaceId}`;
-        console.log("Debug createSpace spaceUrl ", spaceUrl);
         const entitySpecificFields = {
           externalId: spaceUrl,
         };
@@ -188,7 +186,6 @@
         } catch (error) {
           console.error("Error creating url preview for space: ", error);
         };
-        console.log("Debug createSpace entityPreviews after getBebbEntityUrlPreview ", entityPreviews);        
         let entityInitiationObject : BebbEntityInitiationObject = {
           settings: [],
           entityType: { 'Resource' : { 'Web' : null } },
@@ -200,19 +197,16 @@
           previews: [],
         };
         const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
-        console.log("Debug createSpace spaceEntityIdResponse ", spaceEntityIdResponse);
         // @ts-ignore
         if (spaceEntityIdResponse) {
           // @ts-ignore
           const spaceEntityIdUpdateResponse = await $store.backendActor.updateSpaceEntityId(spaceId, spaceEntityIdResponse);
-        console.log("Debug createSpace spaceEntityIdUpdateResponse ", spaceEntityIdUpdateResponse);
           // @ts-ignore
           if (spaceEntityIdUpdateResponse && spaceEntityIdUpdateResponse.Ok) {
             if (iframeElement) {
               // Add image preview to Entity (if a new Entity was created)
               try {
                 const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromIframe(iframeElement);
-                console.log("Debug createSpace imageSpacePreview ", imageSpacePreview);
                 entityPreviews.push(imageSpacePreview);
                 const bebbEntityUpdateObject : BebbEntityUpdateObject = {
                   'id' : spaceEntityIdResponse,
