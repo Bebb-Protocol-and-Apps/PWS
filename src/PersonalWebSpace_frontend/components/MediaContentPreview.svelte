@@ -36,7 +36,7 @@
 
 </script>
 <div class="media-content-space-preview space-y-1">
-  <iframe srcdoc={mediaContentPreviewString} title="Preview of the File's Content" width="100%" height="auto" class="py-2"></iframe>
+  <iframe id={contentUrl} srcdoc={mediaContentPreviewString} title="Preview of the File's Content" width="100%" height="auto" class="py-2"></iframe>
 </div>
 
 <style>

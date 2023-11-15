@@ -19,7 +19,7 @@
   import {
     createBebbEntity,
     getBebbEntityUrlPreview,
-    getBebbEntityImagePreviewFromAframeHtml,
+    getBebbEntityImagePreviewFromIframe,
     updateBebbEntity,
   } from "../helpers/bebb_utils";
 
@@ -50,18 +50,24 @@
 
   const createNewDefaultUserSpace = async (defaultSpace) => {
     setCreationInProgress(defaultSpace);
+    const iframeSrc = `#/${defaultSpace}`;
+    const iframeSelector = `iframe[src='${iframeSrc}']`;
+
     if (defaultSpace === "defaultspace/0") {
       const resp = await fetch("defaultRoom_Web3Cockpit.html"); // Fetches default space 0
       const defaultSpaceHtml = await resp.text();
-      await createSpace(defaultSpaceHtml);
+      const iframeElement = document.querySelector(iframeSelector);
+      await createSpace(defaultSpaceHtml, iframeElement);
     } else if (defaultSpace === "defaultspace/1") {
       const resp = await fetch("defaultRoom_NatureRetreat.html"); // Fetches default space 1
       const defaultSpaceHtml = await resp.text();
-      await createSpace(defaultSpaceHtml);
+      const iframeElement = document.querySelector(iframeSelector);
+      await createSpace(defaultSpaceHtml, iframeElement);
     } else if (defaultSpace === "defaultspace/2") {
       const resp = await fetch("defaultRoom_InternetIsland.html"); // Fetches default space 2
       const defaultSpaceHtml = await resp.text();
-      await createSpace(defaultSpaceHtml);
+      const iframeElement = document.querySelector(iframeSelector);
+      await createSpace(defaultSpaceHtml, iframeElement);
     };
     setSpaceWasCreated();
   };
@@ -159,7 +165,7 @@
     }
   };
 
-  const createSpace = async (spaceHtml) => {
+  const createSpace = async (spaceHtml, iframeElement=null) => {
     try {
       const spaceResponse = await $store.backendActor.createSpace(spaceHtml);
         console.log("Debug createSpace spaceResponse ", spaceResponse);
@@ -202,23 +208,25 @@
         console.log("Debug createSpace spaceEntityIdUpdateResponse ", spaceEntityIdUpdateResponse);
           // @ts-ignore
           if (spaceEntityIdUpdateResponse && spaceEntityIdUpdateResponse.Ok) {
-            // Add image preview to Entity (if a new Entity was created)
-            try {
-              const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromAframeHtml(spaceHtml);
-              console.log("Debug createSpace imageSpacePreview ", imageSpacePreview);
-              entityPreviews.push(imageSpacePreview);
-              const bebbEntityUpdateObject : BebbEntityUpdateObject = {
-                'id' : spaceEntityIdResponse,
-                'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
-                // don't update other fields (thus leave empty)
-                'name' : [],
-                'description' : [],
-                'keywords' : [],
-                'settings' : [],
+            if (iframeElement) {
+              // Add image preview to Entity (if a new Entity was created)
+              try {
+                const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromIframe(iframeElement);
+                console.log("Debug createSpace imageSpacePreview ", imageSpacePreview);
+                entityPreviews.push(imageSpacePreview);
+                const bebbEntityUpdateObject : BebbEntityUpdateObject = {
+                  'id' : spaceEntityIdResponse,
+                  'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
+                  // don't update other fields (thus leave empty)
+                  'name' : [],
+                  'description' : [],
+                  'keywords' : [],
+                  'settings' : [],
+                };
+                const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject);   
+              } catch (error) {
+                console.error("Error creating image preview for space: ", error);
               };
-              const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject);   
-            } catch (error) {
-              console.error("Error creating image preview for space: ", error);
             };
           } else {
             console.error("Update Space Error: ", spaceEntityIdUpdateResponse);
@@ -238,7 +246,10 @@
     if (modelType === "WebHostedGlbModel" && urlInputHandler(webHostedGlbModelUrl)) {
       setCreationInProgress(modelType);
       const spaceHtml = getStringForSpaceFromModel(webHostedGlbModelUrl);
-      await createSpace(spaceHtml);
+      const iframeId = webHostedGlbModelUrl;
+      const iframeSelector = `iframe[id='${iframeId}']`;
+      const iframeElement = document.querySelector(iframeSelector);
+      await createSpace(spaceHtml, iframeElement);
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded model
     if (modelType === "UserUploadedGlbModel" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
@@ -257,7 +268,10 @@
           ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
           : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
         const spaceHtml = getStringForSpaceFromModel(url);
-        await createSpace(spaceHtml);
+        const iframeId = userUploadedFileURL;
+        const iframeSelector = `iframe[id='${iframeId}']`;
+        const iframeElement = document.querySelector(iframeSelector);
+        await createSpace(spaceHtml, iframeElement);
       } else {
         console.error("File Upload Error:", fileUploadResult);
       };
@@ -267,7 +281,7 @@
   const createNewUserSpaceFromFile = async () => {
     setCreationInProgress("UserUploadedFile");
     if (fileType === "glbModel") {
-      await createNewUserSpaceFromModel("UserUploadedGlbModel")
+      await createNewUserSpaceFromModel("UserUploadedGlbModel");
     };
     // Upload the user's file to the backend canister and create a new space for the user including the uploaded file
     if (fileType === "mediaContent" && userFileInputHandler(files, true) && (fileSizeToUpload <= fileSizeUploadLimit)) {
@@ -286,7 +300,10 @@
           ? `http://127.0.0.1:4943/file/fileId=${fileUploadResult.Ok.FileId}?canisterId=${backendCanisterId}` // e.g. http://127.0.0.1:4943/file/fileId=888?canisterId=bkyz2-fmaaa-aaaaa-qaaaq-cai
           : `https://${backendCanisterId}.raw${appDomain}/file/fileId=${fileUploadResult.Ok.FileId}`; // e.g. https://vee64-zyaaa-aaaai-acpta-cai.raw.ic0.app/file/fileId=777
         const spaceHtml = getStringForSpaceFromMediaFile(url, files[0].name, is360Degree);
-        await createSpace(spaceHtml);
+        const iframeId = userUploadedFileURL;
+        const iframeSelector = `iframe[id='${iframeId}']`;
+        const iframeElement = document.querySelector(iframeSelector);
+        await createSpace(spaceHtml, iframeElement);
       } else {
         console.error("File Upload Error:", fileUploadResult);
       };
@@ -613,7 +630,6 @@
 
     </div>
   </div>
-
 
 </section>
 

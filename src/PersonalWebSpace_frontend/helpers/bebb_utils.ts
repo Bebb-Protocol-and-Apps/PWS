@@ -372,19 +372,18 @@ async function captureAFrameScene(spaceHtml) {
   console.log("Debug captureAFrameScene");
   return new Promise(async (resolve, reject) => {
     // Store the original overflow value
-const originalOverflow = document.body.style.overflow;
-
-// Set overflow to auto
-document.body.style.overflow = 'auto';
-    // TODO: disturbing UI
+    const originalOverflow = document.body.style.overflow;
+    // Set overflow to auto
+    document.body.style.overflow = 'auto';
+    // This is disturbing the UI (while it captures the screenshot correctly, adding the element lets the scrollbar disappear, likely due to the errors while loading the A-Frame scene; loading it within a new iframe ensured that there weren't any UI issues but the screenshot wasn't captured correctly)
     const container = document.createElement('div');
-    //container.setAttribute("hidden", "hidden");
-    //container.style.display = 'none'; // Hide the container
-    container.style.visibility = "hidden";
-    container.style.width = '10%';
-    container.style.height = '10%';
-    //container.style.position = 'fixed';
-    //container.style.top = '-10000px'; // Offscreen
+    container.style.visibility = 'hidden';
+    //container.style.position = 'absolute';
+    container.style.top = '-9999px'; // Move off-screen
+    container.style.left = '-9999px';
+    container.style.zIndex = '-9999';
+    container.style.width = '1px';  // Minimize size
+    container.style.height = '1px';
     container.innerHTML = spaceHtml;
     console.log("Debug captureAFrameScene container ", container);
     document.body.appendChild(container);
@@ -415,7 +414,7 @@ document.body.style.overflow = 'auto';
 
     document.body.removeChild(container);
     // Restore the original overflow value
-document.body.style.overflow = originalOverflow;
+    document.body.style.overflow = originalOverflow;
 
     resolve(screenshotArray);
   });
@@ -431,6 +430,54 @@ export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string)
     'previewType': { 'Jpg' : null },
   };
   console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageSpacePreview ", imageSpacePreview);
+  return imageSpacePreview;
+};
+
+async function captureAFrameSceneFromIframe(iframe) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Ensure the iframe's content is fully loaded
+      if (!iframe.contentWindow || !iframe.contentWindow.document) {
+        return reject('Iframe content is not accessible or not fully loaded.');
+      };
+
+      const sceneEl = iframe.contentWindow.document.querySelector('a-scene');
+      // Ensure the A-Frame scene has loaded
+      if (!sceneEl) {
+        return reject('A-Frame scene is not loaded in the iframe.');
+      };
+      // @ts-ignore
+      if (!sceneEl.hasLoaded) {
+        await new Promise(resolve => sceneEl.addEventListener('loaded', resolve));
+      };
+
+      // Use the screenshot component or a similar method to capture the scene
+      // @ts-ignore
+      const screenshotCanvas = sceneEl.components.screenshot.getCanvas('perspective');
+      const screenshotArray = await getUint8ArrayFromCanvas(screenshotCanvas);
+
+      displayImageInPopup(screenshotArray); // TODO: remove
+
+      resolve(screenshotArray);
+    } catch (error) {
+      console.error("Error capturing A-Frame scene from iframe: ", error);
+      reject(error);
+    }
+  });
+};
+
+export async function getBebbEntityImagePreviewFromIframe(iframe) : Promise<BebbEntityPreview> {
+  console.log("Debug getBebbEntityImagePreviewFromIframe");
+  // @ts-ignore
+  const imageData : Uint8Array = await captureAFrameSceneFromIframe(iframe);
+  console.log("Debug getBebbEntityImagePreviewFromIframe imageData ", imageData);
+
+  const imageSpacePreview : BebbEntityPreview = {
+    'previewData': imageData,
+    'previewType': { 'Jpg' : null },
+  };
+
+  console.log("Debug getBebbEntityImagePreviewFromIframe imageSpacePreview ", imageSpacePreview);
   return imageSpacePreview;
 };
 
