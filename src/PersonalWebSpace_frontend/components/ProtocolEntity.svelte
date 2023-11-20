@@ -6,8 +6,29 @@
   export let deleteSpaceNeighborFunction; // Function passed to delete the link between the Space and the Neighbor
 
 // Helper functions to check whether the Entity has got a valid URL that can be displayed
+  let extractedEntityUrl;
+  const extractUrlFromEntity = (entity) => {
+    try {
+      // Parse the entitySpecificFields as JSON
+      const fields = JSON.parse(entity.entitySpecificFields);
+      // Extract the externalId which contains the URL
+      const url = fields.externalId;
+      return url;
+    } catch (error) {
+      console.error("Error extracting URL: ", error);
+      return null; // or handle the error as needed
+    }
+  };
+
   const entityHasValidUrl = () => {
-    return isValidUrl(entity.entitySpecificFields);
+    console.log("Debug entityHasValidUrl entity ", entity);
+    extractedEntityUrl = extractUrlFromEntity(entity);
+    console.log("Debug entityHasValidUrl extractedEntityUrl ", extractedEntityUrl);
+    if (extractedEntityUrl) {
+      return isValidUrl(extractedEntityUrl);
+    } else {
+      return false;
+    };
   };
 
   const isValidUrl = (url) => {
@@ -47,7 +68,7 @@
 {#if entityHasValidUrl()}
   <div class="space-neighbor-preview space-y-1">
     <a target="_blank" rel="noreferrer" href={entity.entitySpecificFields} >
-      <iframe src={entity.entitySpecificFields} title="Entity Preview" width="100%" height="auto" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
+      <iframe src={extractedEntityUrl} title="Entity Preview" width="100%" height="auto" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
     </a>
     <button on:click={() => window.open(entity.entitySpecificFields,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
     {#if viewerIsSpaceOwner}
@@ -66,7 +87,7 @@
     {/if}
     <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
     <div class="space-details-content">
-      <p>Address: {entity.entitySpecificFields}</p>
+      <p>Address: {extractedEntityUrl}</p>
       <p>Owner: {entity.owner}</p>
     </div>
   </div>

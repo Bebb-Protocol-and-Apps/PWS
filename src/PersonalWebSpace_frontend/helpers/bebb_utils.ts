@@ -83,6 +83,8 @@ export async function createBebbEntityIfNonExistent(entityInitiationObject: Bebb
     criterionKey: "externalId",
     criterionValue: entitySpecificFields.externalId,
   }];
+
+  console.log("Debug createBebbEntityIfNonExistent filterCriteria ", filterCriteria);
   
   const matchResult = await appStore.protocolActor.match_entities(filterCriteria);
 
@@ -183,15 +185,19 @@ export async function deleteBebbBridgesByOwner(bebbBridges: BebbBridge[], ownerI
 };
 
 function extractBridgeIds(bridgesRetrieved: BebbEntityAttachedBridges, filters = {}): string[] {
+  console.log("Debug extractBridgeIds bridgesRetrieved ", bridgesRetrieved);
   var filteredBridges = bridgesRetrieved.filter(bridge => bridge && bridge.id);
+  console.log("Debug extractBridgeIds filteredBridges ", filteredBridges);
   // @ts-ignore
   if (filters && filters.OwnerCreated) {
     filteredBridges = filteredBridges.filter((attachedBridge: BebbEntityAttachedBridge) => attachedBridge.linkStatus.hasOwnProperty('CreatedOwner'));
   };
+  console.log("Debug extractBridgeIds filteredBridges OwnerCreated ", filteredBridges);
   return filteredBridges.map(bridge => bridge.id);    
 };
 
 export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<string[]> {
+  console.log("Debug getConnectedBridgeIdsForEntityInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedBridgeIdsForEntityInBebb: store not initialized");
   };
@@ -204,6 +210,7 @@ export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string,
     } else { // bridgingDirection === "to"
       bridgeIdsResponse = await appStore.protocolActor.get_to_bridge_ids_by_entity_id(bebbEntityId);
     };
+    console.log("Debug getConnectedBridgeIdsForEntityInBebb bridgeIdsResponse ", bridgeIdsResponse);
 
     if (bridgeIdsResponse && bridgeIdsResponse.Ok && bridgeIdsResponse.Ok.length > 0) {
       return extractBridgeIds(bridgeIdsResponse.Ok, filters);
@@ -222,7 +229,7 @@ export async function getBebbBridges(bridgeIds: string[]): Promise<BebbBridge[]>
 
   let getBridgeRequestPromises = [];
   for (var i = 0; i < bridgeIds.length; i++) {
-    if (bridgeIds[i]) { // TODO: filters like bridgesRetrieved[i].linkStatus.hasOwnProperty('CreatedOwner')
+    if (bridgeIds[i]) {
       getBridgeRequestPromises.push(appStore.protocolActor.get_bridge(bridgeIds[i])); // Send requests in parallel and then await all to speed up
     };
   };
@@ -242,11 +249,13 @@ export async function getBebbBridges(bridgeIds: string[]): Promise<BebbBridge[]>
 };
 
 export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<BebbBridge[]> {
+  console.log("Debug getConnectedBridgesForEntityInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedBridgesForEntityInBebb: store not initialized");
   };
   
   const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection, filters);
+  console.log("Debug getConnectedBridgesForEntityInBebb bridgeIds ", bridgeIds);
   return getBebbBridges(bridgeIds);
 };
 
@@ -267,14 +276,18 @@ async function getBebbEntities(entityIds: string[]) : Promise<BebbEntity[]> {
 };
 
 export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}) : Promise<BebbEntity[]> {
+  console.log("Debug getConnectedEntitiesInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedEntitiesInBebb: store not initialized");
   };
 
   try {
     const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection, filters);
+    console.log("Debug getConnectedEntitiesInBebb getBridgesResponse ", getBridgesResponse);
     const entityIds = getBridgesResponse.map((bridge: BebbBridge) => bridgingDirection === "from" ? bridge.toEntityId : bridge.fromEntityId);
+    console.log("Debug getConnectedEntitiesInBebb entityIds ", entityIds);
     const connectedEntities = await getBebbEntities(entityIds);
+    console.log("Debug getConnectedEntitiesInBebb connectedEntities ", connectedEntities);
     return connectedEntities;
   } catch (error) {
     console.error("Error Getting Connected Entities in Bebb ", error);
@@ -368,7 +381,7 @@ function displayImageInPopup(screenshotArray) {
   };
 };
 
-async function captureAFrameScene(spaceHtml) {
+async function captureAFrameScene(spaceHtml) : Promise<Uint8Array> {
   console.log("Debug captureAFrameScene");
   return new Promise(async (resolve, reject) => {
     // Store the original overflow value
@@ -433,7 +446,7 @@ export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string)
   return imageSpacePreview;
 };
 
-async function captureAFrameSceneFromIframe(iframe) {
+async function captureAFrameSceneFromIframe(iframe) : Promise<Uint8Array> {
   return new Promise(async (resolve, reject) => {
     try {
       // Ensure the iframe's content is fully loaded
@@ -455,8 +468,6 @@ async function captureAFrameSceneFromIframe(iframe) {
       // @ts-ignore
       const screenshotCanvas = sceneEl.components.screenshot.getCanvas('perspective');
       const screenshotArray = await getUint8ArrayFromCanvas(screenshotCanvas);
-
-      displayImageInPopup(screenshotArray); // TODO: remove
 
       resolve(screenshotArray);
     } catch (error) {
@@ -482,21 +493,24 @@ export async function getBebbEntityImagePreviewFromIframe(iframe) : Promise<Bebb
 };
 
 async function captureImageOfAFrameSceneFromUrl(url: string) : Promise<Uint8Array> {
+  // Currently doesn't work properly as the url has to point to an A-Frame scene and we don't await until the scene is loaded in the iframe
+  console.log("Debug captureImageOfAFrameSceneFromUrl url ", url);
   return new Promise(async (resolve, reject) => {
     let iframe = document.createElement('iframe');
     iframe.src = url;
     iframe.style.display = "none";
     document.body.appendChild(iframe);
+    console.log("Debug captureImageOfAFrameSceneFromUrl iframe ", iframe);
 
     iframe.onload = async () => {
+      console.log("Debug captureImageOfAFrameSceneFromUrl onload ");
       try {
         // @ts-ignore
         let canvas = iframe.contentDocument.querySelector('a-scene').components.screenshot.getCanvas('perspective');
-        // @ts-ignore
-        let blob : Blob = await canvasToBlob(canvas);
-        let arrayBuffer = await blob.arrayBuffer();
-        document.body.removeChild(iframe);
-        resolve(new Uint8Array(arrayBuffer));
+        console.log("Debug captureImageOfAFrameSceneFromUrl canvas ", canvas);
+        const screenshotArray = await getUint8ArrayFromCanvas(canvas);
+        displayImageInPopup(screenshotArray); // TODO: remove
+        resolve(screenshotArray);
       } catch (err) {
         console.error("Error capturing image from A-Frame scene: " + err);
         reject("Error capturing image from A-Frame scene: " + err);

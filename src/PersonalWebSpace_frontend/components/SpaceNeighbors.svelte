@@ -13,7 +13,7 @@
         deleteBebbBridgesByOwner,
         getConnectedEntitiesInBebb,
         getBebbEntityUrlPreview,
-        getBebbEntityImagePreviewFromUrl,
+        getBebbEntityImagePreviewFromIframe,
         updateBebbEntity,
     } from "../helpers/bebb_utils";
     import { onMount } from "svelte";
@@ -142,26 +142,32 @@
                 const createBebbEntityAndBridgeResponse = await createBebbEntityAndBridge(entityInitiationObject, bridgeEntityInitiationObject);
                 console.log("Debug submitAddNeighborForm createBebbEntityAndBridgeResponse ", createBebbEntityAndBridgeResponse);
                 if (createBebbEntityAndBridgeResponse) {
-                    successfullyAddedNeighbor = true;
                     if (createBebbEntityAndBridgeResponse.newEntityCreated) { // The Entity did not exist already and it's thus fine to update the previews
                         // Add image preview to Entity (if a new Entity was created)
-                        try {
-                            const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromUrl(spaceUrl);
-                            entityPreviews.push(imageSpacePreview);
-                            const bebbEntityUpdateObject : BebbEntityUpdateObject = {
-                                'id' : createBebbEntityAndBridgeResponse.entityId,
-                                'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
-                                // don't update other fields (thus leave empty)
-                                'name' : [],
-                                'description' : [],
-                                'keywords' : [],
-                                'settings' : [],
+                        // TODO: this doesn't work for external Web resources but only iframes that contain A-Frame scenes (i.e. other spaces)
+                        if (newNeighborUrl) {
+                            try {
+                                const iframeSrc = newNeighborUrl;
+                                const iframeSelector = `iframe[src='${iframeSrc}']`;
+                                const iframeElement = document.querySelector(iframeSelector);
+                                const imageSpacePreview : BebbEntityPreview = await getBebbEntityImagePreviewFromIframe(iframeElement);
+                                entityPreviews.push(imageSpacePreview);
+                                const bebbEntityUpdateObject : BebbEntityUpdateObject = {
+                                    'id' : createBebbEntityAndBridgeResponse.entityId,
+                                    'previews' : [entityPreviews] as [Array<BebbEntityPreview>],
+                                    // don't update other fields (thus leave empty)
+                                    'name' : [],
+                                    'description' : [],
+                                    'keywords' : [],
+                                    'settings' : [],
+                                };
+                                const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject); 
+                            } catch (error) {
+                                console.error("Error creating image preview for space: ", error);
                             };
-                            const updateBebbEntityResponse = await updateBebbEntity(bebbEntityUpdateObject);   
-                        } catch (error) {
-                            console.error("Error creating image preview for space: ", error);
                         };
                     };
+                    successfullyAddedNeighbor = true;
                 } else {
                     errorAddingNeighbor = true;
                 };
@@ -250,6 +256,7 @@
         let retrievedNeighborEntities : BebbEntity[] = [];
         try {
             const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId, "from", {OwnerCreated: true});
+            console.log("Debug loadSpaceNeighbors getConnectedEntitiesResponse ", getConnectedEntitiesResponse);
             for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
                 const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
                 retrievedNeighborEntities.push(connectedEntity);
