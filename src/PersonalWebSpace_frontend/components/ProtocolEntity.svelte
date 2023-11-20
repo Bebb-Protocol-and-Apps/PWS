@@ -67,10 +67,10 @@
 
 {#if entityHasValidUrl()}
   <div class="space-neighbor-preview space-y-1">
-    <a target="_blank" rel="noreferrer" href={entity.entitySpecificFields} >
+    <a target="_blank" rel="noreferrer" href={extractedEntityUrl} >
       <iframe src={extractedEntityUrl} title="Entity Preview" width="100%" height="auto" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
     </a>
-    <button on:click={() => window.open(entity.entitySpecificFields,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
+    <button on:click={() => window.open(extractedEntityUrl,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
     {#if viewerIsSpaceOwner}
       {#if linkDeletionInProgress}
         <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Deleting...</button>
