@@ -43,12 +43,10 @@ export async function createBebbEntity(entityInitiationObject: BebbEntityInitiat
 };
 
 export async function updateBebbEntity(entityUpdateObject: BebbEntityUpdateObject) {
-  console.log("Debug updateBebbEntity entityUpdateObject ", entityUpdateObject);
   if (!appStore) {
     throw new Error("Error in updateBebbEntity: store not initialized");
   };
   const updateEntityResponse = await appStore.protocolActor.update_entity(entityUpdateObject);
-  console.log("Debug updateBebbEntity updateEntityResponse ", updateEntityResponse);
   // @ts-ignore
   if (updateEntityResponse && updateEntityResponse.Ok) {
     return updateEntityResponse.Ok;
@@ -83,8 +81,6 @@ export async function createBebbEntityIfNonExistent(entityInitiationObject: Bebb
     criterionKey: "externalId",
     criterionValue: entitySpecificFields.externalId,
   }];
-
-  console.log("Debug createBebbEntityIfNonExistent filterCriteria ", filterCriteria);
   
   const matchResult = await appStore.protocolActor.match_entities(filterCriteria);
 
@@ -185,19 +181,15 @@ export async function deleteBebbBridgesByOwner(bebbBridges: BebbBridge[], ownerI
 };
 
 function extractBridgeIds(bridgesRetrieved: BebbEntityAttachedBridges, filters = {}): string[] {
-  console.log("Debug extractBridgeIds bridgesRetrieved ", bridgesRetrieved);
   var filteredBridges = bridgesRetrieved.filter(bridge => bridge && bridge.id);
-  console.log("Debug extractBridgeIds filteredBridges ", filteredBridges);
   // @ts-ignore
   if (filters && filters.OwnerCreated) {
     filteredBridges = filteredBridges.filter((attachedBridge: BebbEntityAttachedBridge) => attachedBridge.linkStatus.hasOwnProperty('CreatedOwner'));
   };
-  console.log("Debug extractBridgeIds filteredBridges OwnerCreated ", filteredBridges);
   return filteredBridges.map(bridge => bridge.id);    
 };
 
 export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<string[]> {
-  console.log("Debug getConnectedBridgeIdsForEntityInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedBridgeIdsForEntityInBebb: store not initialized");
   };
@@ -210,7 +202,6 @@ export async function getConnectedBridgeIdsForEntityInBebb(bebbEntityId: string,
     } else { // bridgingDirection === "to"
       bridgeIdsResponse = await appStore.protocolActor.get_to_bridge_ids_by_entity_id(bebbEntityId);
     };
-    console.log("Debug getConnectedBridgeIdsForEntityInBebb bridgeIdsResponse ", bridgeIdsResponse);
 
     if (bridgeIdsResponse && bridgeIdsResponse.Ok && bridgeIdsResponse.Ok.length > 0) {
       return extractBridgeIds(bridgeIdsResponse.Ok, filters);
@@ -249,13 +240,11 @@ export async function getBebbBridges(bridgeIds: string[]): Promise<BebbBridge[]>
 };
 
 export async function getConnectedBridgesForEntityInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}): Promise<BebbBridge[]> {
-  console.log("Debug getConnectedBridgesForEntityInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedBridgesForEntityInBebb: store not initialized");
   };
   
   const bridgeIds = await getConnectedBridgeIdsForEntityInBebb(bebbEntityId, bridgingDirection, filters);
-  console.log("Debug getConnectedBridgesForEntityInBebb bridgeIds ", bridgeIds);
   return getBebbBridges(bridgeIds);
 };
 
@@ -276,18 +265,14 @@ async function getBebbEntities(entityIds: string[]) : Promise<BebbEntity[]> {
 };
 
 export async function getConnectedEntitiesInBebb(bebbEntityId: string, bridgingDirection = "from", filters = {}) : Promise<BebbEntity[]> {
-  console.log("Debug getConnectedEntitiesInBebb bebbEntityId ", bebbEntityId);
   if (!appStore) {
     throw new Error("Error in getConnectedEntitiesInBebb: store not initialized");
   };
 
   try {
     const getBridgesResponse = await getConnectedBridgesForEntityInBebb(bebbEntityId, bridgingDirection, filters);
-    console.log("Debug getConnectedEntitiesInBebb getBridgesResponse ", getBridgesResponse);
     const entityIds = getBridgesResponse.map((bridge: BebbBridge) => bridgingDirection === "from" ? bridge.toEntityId : bridge.fromEntityId);
-    console.log("Debug getConnectedEntitiesInBebb entityIds ", entityIds);
     const connectedEntities = await getBebbEntities(entityIds);
-    console.log("Debug getConnectedEntitiesInBebb connectedEntities ", connectedEntities);
     return connectedEntities;
   } catch (error) {
     console.error("Error Getting Connected Entities in Bebb ", error);
@@ -363,14 +348,12 @@ function displayImageInPopup(screenshotArray) {
 
   // Create an Object URL for the blob
   const imageUrl = URL.createObjectURL(blob);
-  console.log("Debug captureAFrameScene imageUrl ", imageUrl);
 
   // Open a new popup window
   const popup = window.open('', 'Image Preview', 'width=600,height=400');
 
   // Check if the popup was successfully opened
   if (popup) {
-    console.log("Debug captureAFrameScene popup");
     // Write the HTML content for the new window
     popup.document.write(`<html><head><title>Image Preview</title></head><body><img src="${imageUrl}" onload="window.URL.revokeObjectURL('${imageUrl}')" style="max-width:100%;"></body></html>`);
     
@@ -382,7 +365,6 @@ function displayImageInPopup(screenshotArray) {
 };
 
 async function captureAFrameScene(spaceHtml) : Promise<Uint8Array> {
-  console.log("Debug captureAFrameScene");
   return new Promise(async (resolve, reject) => {
     // Store the original overflow value
     const originalOverflow = document.body.style.overflow;
@@ -398,7 +380,6 @@ async function captureAFrameScene(spaceHtml) : Promise<Uint8Array> {
     container.style.width = '1px';  // Minimize size
     container.style.height = '1px';
     container.innerHTML = spaceHtml;
-    console.log("Debug captureAFrameScene container ", container);
     document.body.appendChild(container);
 
     const sceneEl = container.querySelector('a-scene');
@@ -408,21 +389,16 @@ async function captureAFrameScene(spaceHtml) : Promise<Uint8Array> {
     if (!sceneEl.hasLoaded) {
       await new Promise(resolve => sceneEl.addEventListener('loaded', resolve));
     };
-    console.log("Debug captureAFrameScene sceneEl.hasLoaded ", sceneEl.hasLoaded);
     // Wait until assets have loaded
     let assetsEl = sceneEl.querySelector('a-assets');
-    console.log("Debug captureAFrameScene assetsEl ", assetsEl);
     await new Promise(resolve =>
       setTimeout(() => {
-        console.log("Debug captureAFrameScene setTimeout");
         resolve("");
       }, 3000)
     );
     // @ts-ignore
     const screenshotCanvas = sceneEl.components.screenshot.getCanvas('perspective');
-    console.log("Debug captureAFrameScene screenshotCanvas ", screenshotCanvas);
     const screenshotArray = await getUint8ArrayFromCanvas(screenshotCanvas);
-    console.log("Debug captureAFrameScene screenshotArray ", screenshotArray);
     displayImageInPopup(screenshotArray);
 
     document.body.removeChild(container);
@@ -434,15 +410,12 @@ async function captureAFrameScene(spaceHtml) : Promise<Uint8Array> {
 };
 
 export async function getBebbEntityImagePreviewFromAframeHtml(sceneHtml: string) : Promise<BebbEntityPreview> {
-  console.log("Debug getBebbEntityImagePreviewFromAframeHtml");
   // @ts-ignore
   const imageData : Uint8Array = await captureAFrameScene(sceneHtml);
-  console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageData ", imageData);
   const imageSpacePreview : BebbEntityPreview = {
     'previewData': imageData,
     'previewType': { 'Jpg' : null },
   };
-  console.log("Debug getBebbEntityImagePreviewFromAframeHtml imageSpacePreview ", imageSpacePreview);
   return imageSpacePreview;
 };
 
@@ -478,38 +451,30 @@ async function captureAFrameSceneFromIframe(iframe) : Promise<Uint8Array> {
 };
 
 export async function getBebbEntityImagePreviewFromIframe(iframe) : Promise<BebbEntityPreview> {
-  console.log("Debug getBebbEntityImagePreviewFromIframe");
   // @ts-ignore
   const imageData : Uint8Array = await captureAFrameSceneFromIframe(iframe);
-  console.log("Debug getBebbEntityImagePreviewFromIframe imageData ", imageData);
 
   const imageSpacePreview : BebbEntityPreview = {
     'previewData': imageData,
     'previewType': { 'Jpg' : null },
   };
-
-  console.log("Debug getBebbEntityImagePreviewFromIframe imageSpacePreview ", imageSpacePreview);
   return imageSpacePreview;
 };
 
 async function captureImageOfAFrameSceneFromUrl(url: string) : Promise<Uint8Array> {
   // Currently doesn't work properly as the url has to point to an A-Frame scene and we don't await until the scene is loaded in the iframe
-  console.log("Debug captureImageOfAFrameSceneFromUrl url ", url);
   return new Promise(async (resolve, reject) => {
     let iframe = document.createElement('iframe');
     iframe.src = url;
     iframe.style.display = "none";
     document.body.appendChild(iframe);
-    console.log("Debug captureImageOfAFrameSceneFromUrl iframe ", iframe);
 
     iframe.onload = async () => {
-      console.log("Debug captureImageOfAFrameSceneFromUrl onload ");
       try {
         // @ts-ignore
         let canvas = iframe.contentDocument.querySelector('a-scene').components.screenshot.getCanvas('perspective');
-        console.log("Debug captureImageOfAFrameSceneFromUrl canvas ", canvas);
         const screenshotArray = await getUint8ArrayFromCanvas(canvas);
-        displayImageInPopup(screenshotArray); // TODO: remove
+        //displayImageInPopup(screenshotArray);
         resolve(screenshotArray);
       } catch (err) {
         console.error("Error capturing image from A-Frame scene: " + err);

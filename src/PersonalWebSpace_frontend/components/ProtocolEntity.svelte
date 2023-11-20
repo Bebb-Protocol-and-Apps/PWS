@@ -21,9 +21,7 @@
   };
 
   const entityHasValidUrl = () => {
-    console.log("Debug entityHasValidUrl entity ", entity);
     extractedEntityUrl = extractUrlFromEntity(entity);
-    console.log("Debug entityHasValidUrl extractedEntityUrl ", extractedEntityUrl);
     if (extractedEntityUrl) {
       return isValidUrl(extractedEntityUrl);
     } else {
