@@ -193,8 +193,7 @@
           description: ["Flaming Hot Personal Web Space"],
           keywords: [["NFT", "Space", "Open Internet Metaverse", "heeyah"]] as [Array<string>],
           entitySpecificFields: [JSON.stringify(entitySpecificFields)] as [string],
-          //previews: [entityPreviews] as [Array<BebbEntityPreview>], // TODO: causes error in createBebbEntity call (invalid record)
-          previews: [],
+          previews: [entityPreviews] as [Array<BebbEntityPreview>],
         };
         const spaceEntityIdResponse = await createBebbEntity(entityInitiationObject);
         // @ts-ignore

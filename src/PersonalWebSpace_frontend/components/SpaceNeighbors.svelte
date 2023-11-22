@@ -97,7 +97,6 @@
             } catch (error) {
                 console.error("Error creating url preview for space: ", error);
             };
-            
             const entityInitiationObject : BebbEntityInitiationObject = {
                 settings: [],
                 entityType: { 'Resource' : { 'Web' : null } },
@@ -105,8 +104,7 @@
                 description: [`Created as a Space Neighbor in the Open Internet Metaverse at https://${PersonalWebSpace_frontend_canister_id}${appDomain}/`] as [string],
                 keywords: [["Space Neighbor", "Open Internet Metaverse", "Virtual Neighborhood"]] as [Array<string>],
                 entitySpecificFields: [JSON.stringify(entitySpecificFields)] as [string],
-                //previews: [entityPreviews] as [Array<BebbEntityPreview>], // TODO: causes error in createBebbEntity call (invalid record)
-                previews: [],
+                previews: [entityPreviews] as [Array<BebbEntityPreview>],
             };
 
             const bridgePresentationMetadata = {
@@ -248,7 +246,7 @@
         let retrievedNeighborEntities : BebbEntity[] = [];
         try {
             const getConnectedEntitiesResponse = await getConnectedEntitiesInBebb(spaceEntityId, "from", {OwnerCreated: true});
-            for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
+        for (var j = 0; j < getConnectedEntitiesResponse.length; j++) {
                 const connectedEntity : BebbEntity = getConnectedEntitiesResponse[j];
                 retrievedNeighborEntities.push(connectedEntity);
             };

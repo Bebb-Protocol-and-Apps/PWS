@@ -77,7 +77,7 @@ export async function createBebbEntityIfNonExistent(entityInitiationObject: Bebb
   
   // Check that Entity doesn't already exist in Bebb
   const entitySpecificFields = JSON.parse(entityInitiationObject.entitySpecificFields[0]);
-  const filterCriteria: BebbEntityFilterCriterion[] = [{
+  const filterCriteria : BebbEntityFilterCriterion[] = [{
     criterionKey: "externalId",
     criterionValue: entitySpecificFields.externalId,
   }];
