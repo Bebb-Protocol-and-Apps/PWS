@@ -1,13 +1,32 @@
 <script lang="ts">
-  import type { Entity } from "src/integrations/BebbProtocol/bebb.did";
+  import type { BebbEntity } from "../helpers/bebb_utils";
 
-  export let entity : Entity;
+  export let entity : BebbEntity;
   export let viewerIsSpaceOwner: Boolean = false;
   export let deleteSpaceNeighborFunction; // Function passed to delete the link between the Space and the Neighbor
 
 // Helper functions to check whether the Entity has got a valid URL that can be displayed
+  let extractedEntityUrl;
+  const extractUrlFromEntity = (entity) => {
+    try {
+      // Parse the entitySpecificFields as JSON
+      const fields = JSON.parse(entity.entitySpecificFields);
+      // Extract the externalId which contains the URL
+      const url = fields.externalId;
+      return url;
+    } catch (error) {
+      console.error("Error extracting URL: ", error);
+      return null; // or handle the error as needed
+    }
+  };
+
   const entityHasValidUrl = () => {
-    return isValidUrl(entity.entitySpecificFields);
+    extractedEntityUrl = extractUrlFromEntity(entity);
+    if (extractedEntityUrl) {
+      return isValidUrl(extractedEntityUrl);
+    } else {
+      return false;
+    };
   };
 
   const isValidUrl = (url) => {
@@ -46,10 +65,10 @@
 
 {#if entityHasValidUrl()}
   <div class="space-neighbor-preview space-y-1">
-    <a target="_blank" rel="noreferrer" href={entity.entitySpecificFields} >
-      <iframe src={entity.entitySpecificFields} title="Entity Preview" width="100%" height="auto" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
+    <a target="_blank" rel="noreferrer" href={extractedEntityUrl} >
+      <iframe src={extractedEntityUrl} title="Entity Preview" width="100%" height="auto" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin"></iframe>
     </a>
-    <button on:click={() => window.open(entity.entitySpecificFields,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
+    <button on:click={() => window.open(extractedEntityUrl,'_blank')} class="active-app-button bg-slate-500 text-white py-2 px-4 rounded font-semibold">Visit Neighbor</button>
     {#if viewerIsSpaceOwner}
       {#if linkDeletionInProgress}
         <button disabled class="bg-slate-500 text-white py-2 px-4 rounded font-bold opacity-50 cursor-not-allowed">Deleting...</button>
@@ -66,7 +85,7 @@
     {/if}
     <button type="button" class="space-details-collapsible bg-slate-500 text-white py-2 px-4 rounded font-semibold">See Details</button>
     <div class="space-details-content">
-      <p>Address: {entity.entitySpecificFields}</p>
+      <p>Address: {extractedEntityUrl}</p>
       <p>Owner: {entity.owner}</p>
     </div>
   </div>
