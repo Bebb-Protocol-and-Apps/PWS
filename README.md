@@ -7,11 +7,18 @@ The Open Internet Metaverse (OIM) is not just a vision; it's live and operationa
 ### Try the OIM App
 [Experience OIM Live!](https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/)
 
+![Become part of the Open Internet Metaverse](./resources/media/OpenInternetMetaverse_banner_impression.png)
+
 ### As a user
 If you like, take a look at our [User Guide](./resources/user_guide.md)
 
+![Get Your virtual Island in OIM](./resources/media/OpenInternetMetaverse_Island_impressions.gif)
+
+
 ### As a developer
 If you like, take a look at our [Integration Guide](./resources/integration_guide.md)
+
+![Get Your virtual Space Station in OIM](./resources/media/OpenInternetMetaverse_SpaceStation_impressions.gif)
 
 ## Features
 - Fully Operational on the Internet Computer: Experience the metaverse today, live on the Internet Computer.
@@ -25,6 +32,8 @@ If you like, take a look at our [Integration Guide](./resources/integration_guid
 - Compatibility: Seamlessly integrates with current Web technologies, ensuring developers have a familiar ground.
 
 - Built with A-Frame: OIM leverages A-Frame, a Web framework for building 3D mixed reality experiences.
+
+![Get Your virtual Nature Retreat in OIM](./resources/media/OpenInternetMetaverse_NatureRetreat_impressions.gif)
 
 # Development & Deployment
 ## Running the project locally
@@ -40,6 +49,7 @@ npm install
 ```bash
 npm run dev
 ```
+
 Note: this starts a replica which includes the canisters state stored from previous sessions.
 If you want to start a clean local IC replica (i.e. all canister state is erased) run instead:
 ```bash
@@ -64,6 +74,7 @@ dfx deploy --argument "(
 dfx deploy
 ```
 --> Access frontend at http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai
+
 Access routes like so http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/testroom
 or http://localhost:4943/?canisterId=ryjl3-tyaaa-aaaaa-aaaba-cai#/space/0 (for space with spaceid 0)
 
@@ -73,8 +84,8 @@ Alternative: Run a local vite UI (note that this had issues communicating to the
 ```bash
 npm run vite
 ```
---> runs on port 3000
-Access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+--> runs on port 3000; access routes like "http://172.30.141.44:3000/#/testroom" (same as on Mainnet)
+
 Hot reloads with every UI change
 
 For more detailed notes on running this locally, also see [NotesOnLocalDev.md](./notes/NotesOnLocalDev.md)
@@ -89,38 +100,6 @@ dfx start --background
 Deploy to Mainnet (live IC):
 Ensure that all changes needed for Mainnet deployment have been made (e.g. define HOST in store.ts)
 
-Development Canisters:
-```bash
-dfx deploy --network development --argument "(
-  principal\"$(dfx identity get-principal)\",
-  record {
-    logo = record {
-      logo_type = \"image/png\";
-      data = \"\";
-    };
-    name = \"PersonalWebSpace\";
-    symbol = \"PWS\";
-    maxLimit = 65535;
-  }
-)" PersonalWebSpace_backend
-dfx deploy --network development PersonalWebSpace_frontend
-```
-Testing Canisters:
-```bash
-dfx deploy --network testing --argument "(
-  principal\"$(dfx identity get-principal)\",
-  record {
-    logo = record {
-      logo_type = \"image/png\";
-      data = \"\";
-    };
-    name = \"PersonalWebSpace\";
-    symbol = \"PWS\";
-    maxLimit = 65535;
-  }
-)" PersonalWebSpace_backend
-dfx deploy --network testing PersonalWebSpace_frontend
-```
 Production Canisters:
 ```bash
 dfx deploy --network ic --argument "(
@@ -158,6 +137,8 @@ dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)" --arg
 dfx deploy --network ic --wallet "$(dfx identity --network ic get-wallet)"
 ```
 
+For deployment to other stages (e.g. development, testing) and setting up other stages, take a look at [these notes](./notes/NotesOnStages.md)
+
 # Additional Notes
 ## Get and delete Email Subscribers
 ```bash
@@ -182,52 +163,6 @@ dfx canister --network ic --wallet 3v5vy-2aaaa-aaaai-aapla-cai deposit-cycles 30
 ```
 
 ## Web Space NFT format
-For details, see Types.mo in PersonalWebSpace_backend
-  Space NFT looks like:
-    {
-      owner: Principal;
-      id: TokenId;
-      metadata: MetadataDesc;
-    }
+Each space in OIM is stored as an NFT. 
 
-  Types.MetadataDesc for this project looks like:
-    [
-      {
-        purpose: #Rendered ;
-        data: spaceAsHtmlTextBlob // Text.encodeUtf8(spaceAsHtmlText) to get Blob from Text (probably change to spaceAsJsonFormattedTextBlob later)
-        key_val_data: [
-          {
-            key = "ownerName";
-            val = #TextContent ownerName;
-          },
-          {
-            key = "ownerContactInfo";
-            val = #TextContent ownerContactInfo;
-          },
-          {
-            key = "aboutDescription";
-            val = #TextContent aboutDescription;
-          },
-          {
-            key = "spaceDescription";
-            val = #TextContent spaceDescription;
-          },
-          {
-            key = "spaceName";
-            val = #TextContent spaceName;
-          },
-          {
-            key = "creator";
-            val: #PrincipalContent caller;
-          },
-          {
-            key = "creationTime";
-            val = #Nat64Content generatedTimestamp;
-          },
-          {
-            key = "protocolEntityId";
-            val = #TextContent protocolEntityId;
-          },
-        ];
-      }
-    ]
+For details, please [find the format here](./resources/WebSpaceNftFormat.md) and [Types.mo in PersonalWebSpace_backend](./src/PersonalWebSpace_backend/Types.mo)

@@ -6,6 +6,7 @@
   import MySpaces from "./pages/MySpaces.svelte";
   import Space from "./pages/Space.svelte";
   import ExploreSpaces from "./pages/ExploreSpaces.svelte";
+  import About from "./pages/About.svelte";
   import DefaultRoom0 from "./pages/DefaultRoom0.svelte";
   import DefaultRoom1 from "./pages/DefaultRoom1.svelte";
   import DefaultRoom2 from "./pages/DefaultRoom2.svelte";
@@ -24,6 +25,7 @@
     "/create": CreateSpace,
     "/space/:spaceId": Space,
     "/explore": ExploreSpaces,
+    "/about": About,
     "/defaultspace/0": DefaultRoom0,
     "/defaultspace/1": DefaultRoom1,
     "/defaultspace/2": DefaultRoom2,

@@ -17,13 +17,22 @@
     let updatedSpaceName : string = spaceMetadata.spaceName;
     let updatedAboutDescription : string = spaceMetadata.aboutDescription;
 
+// Write updated data back to spaceMetadata
+    const updateSpaceMetadata = async (updateObject) => {
+        spaceMetadata.ownerName = updateObject.updatedOwnerName;
+        spaceMetadata.ownerContactInfo = updateObject.updatedOwnerContactInfo;
+        spaceMetadata.spaceDescription = updateObject.updatedSpaceDescription;
+        spaceMetadata.spaceName = updateObject.updatedSpaceName;
+        spaceMetadata.aboutDescription = updateObject.updatedAboutDescription;
+    };
+
 // User submitted form to update Space Info
     let spaceInfoUpdateInProgress = false;
 
     const submitUpdateSpaceInfoForm = async () => {
         spaceInfoUpdateInProgress = true;
         // Write space's updated metadata to backend canister (HTML stays the same)
-        let updateInput = {
+        const updateInput = {
             id: spaceMetadata.id,
             updatedSpaceData: [], // Don't update the space data for display
             updatedOwnerName,
@@ -35,6 +44,7 @@
         try {
             // @ts-ignore
             await $store.backendActor.updateUserSpace(updateInput); // Authenticated call; only space owner may update it
+            updateSpaceMetadata(updateInput);
         } catch (error) {
             console.error("Error in updateUserSpace", error);                        
         }

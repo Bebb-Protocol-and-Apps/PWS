@@ -290,6 +290,23 @@
     };
   };
 
+  const changeInspectorCameraPosition = () => {
+    // Ensure Inspector has loaded successfully
+    const toolbar = document.getElementById("transformToolbar");
+    if(toolbar) {
+      // Set the Inspector's camera to match the last scene view (the user had before opening the Inspector)
+      // @ts-ignore
+      AFRAME.INSPECTOR.cameras.perspective.position.set(AFRAME.INSPECTOR.cameras.original.object3D.position.x, AFRAME.INSPECTOR.cameras.original.object3D.position.y, AFRAME.INSPECTOR.cameras.original.object3D.position.z);
+      // @ts-ignore
+      AFRAME.INSPECTOR.cameras.perspective.rotation.set(AFRAME.INSPECTOR.cameras.original.object3D.rotation.x, AFRAME.INSPECTOR.cameras.original.object3D.rotation.y, AFRAME.INSPECTOR.cameras.original.object3D.rotation.z);
+    } else {
+      // Inspector hasn't loaded yet
+      setTimeout(() => {
+        changeInspectorCameraPosition();
+      }, 500);
+    };
+  };
+
   // Edit mode options
   //  Function to toggle whether any Edit Mode option's popup is open
   let openEditModelPopup = false;
@@ -1110,8 +1127,9 @@
   }
 
   // Change A-Frame's default Inspector according to our specific requirements
-    // TODO: put camera to same position as when scene is loaded
   const customizeInspector = () => {
+    // Move the Inspector's initial camera view to the current view
+    changeInspectorCameraPosition();
     // Remove any 3D Neighbors from the scene
     remove3dNeighborsFromScene();
     // Hide VR menu
@@ -1151,6 +1169,8 @@
     // Ensure a-scene has loaded, otherwise wait and try again
     const aScene = document.querySelector('a-scene');
     if (aScene) {
+      // Movements in Space
+      loadSpaceMovements();
       // VR menu
       loadVRMenu();
       sceneCustomizationsLoaded = true;
@@ -1159,6 +1179,14 @@
         loadSceneCustomizations();
       }, 500);
     };    
+  };
+
+  function loadSpaceMovements () {
+    // Find the camera entity
+    let cameraEntity = document.querySelector('a-entity[camera]');
+    // Enable flying in the space (i.e. pressing the forward button always moves into the direction of view, incl. up and down)
+    // ts-ignore
+    cameraEntity.setAttribute('wasd-controls', { acceleration:65, fly:true });
   };
 
   function loadVRMenu() {
@@ -1438,7 +1466,6 @@
     // @ts-ignore
     const spaceNFTResponse: NftResult = await $store.backendActor.getSpace(Number(params.spaceId));
     
-    loadingInProgress = false;
     if (spaceNFTResponse.Err) {
       spaceLoadingError = true;
     } else {
@@ -1450,10 +1477,12 @@
       spaceOwnerPrincipal = spaceNFTResponse.Ok.owner;
       loadSceneCustomizations();
     };
+
+    loadingInProgress = false;
   };
 
 // User clicked to see Space's metadata
-  const spaceMetadata = {
+  let spaceMetadata = {
     spaceName: "",
     spaceDescription: "",
     creationTime: "",
@@ -1464,14 +1493,20 @@
     spaceOwnerPrincipal: null,
     spaceData: null,
   };
+  let spaceMetadataHasBeenExtracted = false;
   let showSpaceInfoView = false;
 
   const spaceInfoButtonOnClick = () => {
-    extractSpaceMetadata(spaceNft, spaceMetadata); // Fill with Space's info from NFT metadata
-    // Fill additional fields for usage in SpaceInfo
-    spaceMetadata.id = spaceNft.id;
-    spaceMetadata.spaceOwnerPrincipal = spaceOwnerPrincipal;
-    spaceMetadata.spaceData = spaceNft.metadata[0].data;
+    if (!spaceMetadataHasBeenExtracted) {
+      // Only extract data from spaceNft on first load
+        // and not again later on, as data in spaceMetadata might have been updated
+      extractSpaceMetadata(spaceNft, spaceMetadata); // Fill with Space's info from NFT metadata
+      // Fill additional fields for usage in SpaceInfo
+      spaceMetadata.id = spaceNft.id;
+      spaceMetadata.spaceOwnerPrincipal = spaceOwnerPrincipal;
+      spaceMetadata.spaceData = spaceNft.metadata[0].data;
+      spaceMetadataHasBeenExtracted = true;
+    };
 
     open = false;
     showSpaceInfoView = true;
@@ -1532,7 +1567,7 @@
           <SpaceNeighbors spaceNft={spaceNft} />
         </div>
       {:else if showSpaceInfoView}
-        <SpaceInfo spaceMetadata={spaceMetadata} />
+        <SpaceInfo bind:spaceMetadata={spaceMetadata} />
       {/if}
     {/if}
     <div style="position: absolute; height: 100%; width: 100%;">

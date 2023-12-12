@@ -823,6 +823,24 @@ let oneMB : Nat = 1048576; // 1 MB
 private let maxFileSize : Nat = 2 * oneMB;
 private let maxTotalSize : Nat = 25 * oneMB;
 private let maxFiles : Nat = 15;
+// Premium account limits
+private let maxTotalSizePremiumAccount : Nat = 500 * oneMB;
+private let maxFilesPremiumAccount : Nat = 1500;
+
+// TODO: manual premium account list (internal)
+private let premiumAccounts = ["c7qyu-j653i-mi4yt-7p2yd-6tqtp-cwg3m-beuxk-ohpw5-xyyl5-rljr7-xae"];
+private func isPremiumAccount(user: Principal) : Bool {
+  if (Principal.isAnonymous(user))
+  {
+    return false;
+  };
+  let userText = Principal.toText(user);
+  let findResult = Array.find<Text>(premiumAccounts, func acc = acc == userText);
+  switch (findResult) {
+    case (null) { return false; };
+    case (?foundPremiumAccount) { return true; };
+  };
+};
 
 // A simple file storage database which stores a unique file ID in the form of a 128 bit (16 byte) UUID as 
 //  defined by RFC 4122
@@ -881,7 +899,7 @@ private func getUserFiles(user: FileTypes.FileUserId) : Buffer.Buffer<FileTypes.
           switch (retrievedFileInfo) {
             case(null) {};
             case(?checkedFileInfo) {
-                userFileInfo.add(checkedFileInfo);
+              userFileInfo.add(checkedFileInfo);
             }
         };
       };      
@@ -992,14 +1010,22 @@ public shared(msg) func uploadUserFile(fileName : Text, content : FileTypes.File
   };
 
   // Retrieve the total amount of data stored by the user
+  var maxTotalSizeAllowed = maxTotalSize;
+  if (isPremiumAccount(user)) {
+    maxTotalSizeAllowed := maxTotalSizePremiumAccount;
+  };
   let userTotalSize = getUserFilesTotalSize(user);
-  if (userTotalSize + fileSize > maxTotalSize) {
+  if (userTotalSize + fileSize > maxTotalSizeAllowed) {
     return #Err(#Other("Error: Total size limit reached."));
   };
 
   // Retrieve all the file ids used by the current user
+  var maxFilesAllowed = maxFiles;
+  if (isPremiumAccount(user)) {
+    maxFilesAllowed := maxFilesPremiumAccount;
+  };
   let userFilesIds = getUserFileIds(user);
-  if (userFilesIds.size() >= maxFiles) {
+  if (userFilesIds.size() >= maxFilesAllowed) {
     return #Err(#Other("Error: File limit reached."));
   };
 

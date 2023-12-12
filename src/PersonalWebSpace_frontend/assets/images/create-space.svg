@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 199.82 188.4">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #007bc2;
+      }
+
+      .cls-2 {
+        fill: #f05457;
+      }
+
+      .cls-3 {
+        fill: #fff3e9;
+      }
+
+      .cls-4 {
+        fill: #1c2034;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <rect class="cls-1" width="199.82" height="188.4"/>
+    <path class="cls-3" d="m50.65,183.8v-57.06h13.51v57.06h-13.51Zm-8.27,0v-57.06h-13.51v57.06h13.51Zm-21.79,0v-57.06H7.08v57.06h13.51Z"/>
+    <path class="cls-3" d="m115.67,120.14V5.84h13.51v114.3h-13.51Zm-8.27,0V5.84h-13.51v114.3h13.51Zm-21.79,0V5.84h-13.51v114.3h13.51Z"/>
+    <path class="cls-3" d="m180.74,183.8V5.85h13.51v177.94h-13.51Zm-8.27,0V5.85h-13.51v177.94h13.51Zm-21.79,0V5.85h-13.51v177.94h13.51Z"/>
+    <polygon class="cls-2" points="64.15 126.73 64.15 183.8 7.09 183.8 64.15 126.73"/>
+    <path class="cls-3" d="m7.09,49.42h57.06v13.51H7.09v-13.51Zm0-8.27h57.06v-13.51H7.09v13.51Zm0-21.79h57.06V5.84H7.09v13.51Z"/>
+    <polygon class="cls-2" points="42.37 41.14 7.09 41.14 7.09 5.85 42.37 41.14"/>
+    <path class="cls-3" d="m7.09,106.24h57.06v13.51H7.09v-13.51Zm0-8.27h57.06v-13.51H7.09v13.51Zm0-21.79h57.06v-13.51H7.09v13.51Z"/>
+    <path class="cls-3" d="m72.11,126.73h28.53v28.53h-11.67c-9.31,0-16.86-7.55-16.86-16.86v-11.67h0Z"/>
+    <path class="cls-3" d="m100.63,155.25h28.53v28.53h-11.67c-9.31,0-16.86-7.55-16.86-16.86v-11.67h0Z"/>
+    <polyline class="cls-2" points="100.64 126.73 129.18 126.73 129.18 155.27"/>
+    <polyline class="cls-4" points="72.12 155.26 100.65 155.26 100.65 183.79"/>
+  </g>
+</svg>

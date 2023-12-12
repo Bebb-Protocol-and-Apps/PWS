@@ -8,14 +8,6 @@
   export let loading;
   export let toggleModal;
 
-  onMount(async () => {
-    const connected = await window.ic?.infinityWallet?.isConnected();
-    if (connected) {
-      console.log("bitfinity connection detected");
-      store.bitfinityConnect();
-    }
-  });
-
   async function connect() {
     loading = "bitfinity";
     await store.bitfinityConnect();
