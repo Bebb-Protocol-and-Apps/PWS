@@ -3,6 +3,11 @@ type UserRecord =
    file_ids: vec text;
    totalSize: nat;
  };
+type User = 
+ variant {
+   address: AccountIdentifier;
+   "principal": principal;
+ };
 type UpdateMetadataValuesInput = 
  record {
    id: TokenId;
@@ -18,7 +23,35 @@ type TxReceipt =
    Err: ApiError;
    Ok: nat;
  };
+type TransferResponse = 
+ variant {
+   err:
+    variant {
+      CannotNotify: AccountIdentifier;
+      InsufficientBalance;
+      InvalidToken: TokenIdentifier;
+      Other: text;
+      Rejected;
+      Unauthorized: AccountIdentifier;
+    };
+   ok: Balance;
+ };
+type TransferRequest = 
+ record {
+   amount: Balance;
+   from: User;
+   memo: Memo;
+   notify: bool;
+   subaccount: opt SubAccount;
+   to: User;
+   token: TokenIdentifier;
+ };
+type TokenIndex = nat32;
+type TokenIdentifier__1 = text;
+type TokenIdentifier = text;
 type TokenId = nat64;
+type Time = int;
+type SubAccount = vec nat8;
 type StreamingStrategy = variant {
                            Callback:
                             record {
@@ -43,6 +76,35 @@ type SignUpFormInput =
    emailAddress: text;
    pageSubmittedFrom: text;
  };
+type Result_4 = 
+ variant {
+   err: CommonError;
+   ok: AccountIdentifier__1;
+ };
+type Result_3 = 
+ variant {
+   err: CommonError;
+   ok: ExtMetadata;
+ };
+type Result_2 = 
+ variant {
+   err: CommonError;
+   ok: Balance__1;
+ };
+type Result_1 = 
+ variant {
+   err: CommonError;
+   ok: vec TokenIndex;
+ };
+type Result = 
+ variant {
+   err: CommonError;
+   ok: vec record {
+             TokenIndex;
+             opt EntrepotTypesListing;
+             opt vec nat8;
+           };
+ };
 type Response = 
  record {
    body: blob;
@@ -60,11 +122,14 @@ type Request =
  };
 type PersonalWebSpace = 
  service {
+   balance: (BalanceRequest) -> (BalanceResponse) query;
    balanceOfDip721: (principal) -> (nat64) query;
+   bearer: (TokenIdentifier__1) -> (Result_4) query;
    check_user_has_nft: () -> (bool) query;
    createSpace: (text) -> (NftResult);
    deleteEmailSubscriber: (text) -> (bool);
    deleteFile: (text) -> (FileResult);
+   extensions: () -> (vec Extension) query;
    getCallerSpaces: () -> (vec Nft) query;
    getEmailSubscribers: () -> (vec record {
                                      text;
@@ -85,14 +150,20 @@ type PersonalWebSpace =
    listUserFileIdsAndNames: () -> (FileResult) query;
    listUserFileNames: () -> (FileResult) query;
    logoDip721: () -> (LogoResult) query;
+   metadata: (TokenIdentifier__1) -> (Result_3) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
+   mintNFT: (ExtMintRequest) -> ();
    nameDip721: () -> (text) query;
    ownerOfDip721: (TokenId) -> (OwnerResult) query;
    safeTransferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    submitSignUpForm: (SignUpFormInput) -> (text);
+   supply: (TokenIdentifier__1) -> (Result_2) query;
    supportedInterfacesDip721: () -> (vec InterfaceId) query;
    symbolDip721: () -> (text) query;
+   tokens: (AccountIdentifier__1) -> (Result_1) query;
+   tokens_ext: (AccountIdentifier__1) -> (Result) query;
    totalSupplyDip721: () -> (nat64) query;
+   transfer: (TransferRequest) -> (TransferResponse);
    transferFromDip721: (principal, principal, TokenId) -> (TxReceipt);
    updateSpaceEntityId: (TokenId, text) -> (NftResult);
    updateUserSpace: (UpdateMetadataValuesInput) -> (NftResult);
@@ -159,6 +230,7 @@ type MetadataKeyVal =
    val: MetadataVal;
  };
 type MetadataDesc = vec MetadataPart;
+type Memo = blob;
 type LogoResult = 
  record {
    data: text;
@@ -213,6 +285,7 @@ type FileIdAndName =
    file_name: text;
  };
 type File = blob;
+type Extension = text;
 type ExtendedMetadataResult = 
  variant {
    Err: ApiError;
@@ -220,6 +293,29 @@ type ExtendedMetadataResult =
          metadata_desc: MetadataDesc;
          token_id: TokenId;
        };
+ };
+type ExtMintRequest = 
+ record {
+   metadata: opt blob;
+   to: User;
+ };
+type ExtMetadata = 
+ variant {
+   fungible:
+    record {
+      decimals: nat8;
+      metadata: opt blob;
+      name: text;
+      symbol: text;
+    };
+   nonfungible: record {metadata: opt blob;};
+ };
+type EntrepotTypesListing = 
+ record {
+   locked: opt Time;
+   price: nat64;
+   seller: principal;
+   subaccount: opt SubAccount;
  };
 type EmailSubscriber = 
  record {
@@ -234,6 +330,28 @@ type Dip721NonFungibleToken =
    name: text;
    symbol: text;
  };
+type CommonError__1 = 
+ variant {
+   InvalidToken: TokenIdentifier;
+   Other: text;
+ };
+type CommonError = 
+ variant {
+   InvalidToken: TokenIdentifier;
+   Other: text;
+ };
+type Balance__1 = nat;
+type BalanceResponse = 
+ variant {
+   err: CommonError__1;
+   ok: Balance;
+ };
+type BalanceRequest = 
+ record {
+   token: TokenIdentifier;
+   user: User;
+ };
+type Balance = nat;
 type AssocList = 
  opt record {
        record {
@@ -249,4 +367,6 @@ type ApiError =
    Unauthorized;
    ZeroAddress;
  };
+type AccountIdentifier__1 = text;
+type AccountIdentifier = text;
 service : (principal, Dip721NonFungibleToken) -> PersonalWebSpace

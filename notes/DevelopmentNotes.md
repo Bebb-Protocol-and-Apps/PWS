@@ -102,4 +102,22 @@ Space Neighbors local testing with dummy entities:
   };
   spaceNeighborsResponse = [dummyTestEntity1, dummyTestEntity2, dummyTestEntity3, dummyTestEntity4]; */
 ```
+
+NFT related calls:
+dfx canister --network ic call PersonalWebSpace_backend metadata "(\"yxqhi-2ikor-uwiaa-aaaaa-caat4-yaqca-aaaaa-a\")"
+
+dfx canister --network ic call PersonalWebSpace_backend tokens "(\"cda4n-7jjpo-s4eus-yjvy7-o6qjc-vrueo-xd2hh-lh5v2-k7fpf-hwu5o-yqe\")"
+
+dfx canister --network ic call PersonalWebSpace_backend balance "(\"cda4n-7jjpo-s4eus-yjvy7-o6qjc-vrueo-xd2hh-lh5v2-k7fpf-hwu5o-yqe\")"
+
+dfx canister --network ic call PersonalWebSpace_backend http_request "(
+  record {
+    body = vec { };
+    headers =  vec { };
+    method = \"\";
+    url = \"tokenid=yxqhi-2ikor-uwiaa-aaaaa-caat4-yaqca-aaaaa-a\";
+  }
+)"
+
+dfx canister --network ic call PersonalWebSpace_backend createSpace "(\"<html>  <head>     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.3/dist/aframe-extras.min.js"></script>    <script src="https://mannymeadows.github.io/Noosa/aframe-sun-sky.min.js"></script>  </head>  <body>    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="" device-orientation-permission-ui="" raycaster="direction: 0.9544506796854287 -0.10164039183312146 -0.2805229594810959; origin: -4.846717797159805 5.074580504821491 2.3289351396596443; useWorldCoordinates: true">       <a-assets>        <a-asset-item id="island-glb" src="tropical_island_modified.glb"></a-asset-item>       <a-asset-item id="sunbed-glb" src="at_a_beach_modified.glb"></a-asset-item>  </a-assets>      <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 4.6 0"></a-entity>       <a-light type="directional" intensity="0.9" position="-1 -2 2" light=""></a-light>      <a-light type="directional" intensity="1.0" position="2 1 -1" light=""></a-light>      <a-entity environment="preset: arches" position="7 -7 -9" ></a-entity>       <a-ocean color="#92E2E2" width="350" depth="250" density="150" speed="2" opacity="0.5"></a-ocean>  <a-entity gltf-model="#island-glb" scale="1 1 1" position="0 3 -5" id="Island" animation-mixer></a-entity>      <div class="a-loader-title" style="display: none;"></div> <div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div><div class="a-loader-title" style="display: none;"></div></a-scene>  </body> </html>\")"
         

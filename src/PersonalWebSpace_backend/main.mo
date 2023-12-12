@@ -15,6 +15,7 @@ import Random "mo:base/Random";
 import RBTree "mo:base/RBTree";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
+import Result "mo:base/Result";
 
 import FileTypes "./types/FileStorageTypes";
 import Utils "./Utils";
@@ -22,6 +23,9 @@ import Utils "./Utils";
 import Types "./Types";
 import HTTP "./Http";
 
+import ExtCore "./EXT/Core";
+import ExtCommon "./EXT/Common";
+import ExtNonFungible "./EXT/NonFungible";
 import Stoic "./EXT/Stoic";
 
 import Protocol "./Protocol";
@@ -1240,6 +1244,169 @@ public shared(msg) func deleteFile(fileId: Text) : async FileTypes.FileResult {
       return true;
     };
     return false;
+  };
+
+// EXT standard: https://github.com/Toniq-Labs/extendable-token#:~:text=EXT%20Standard%20allows%20for%20the,(e.g.%20similar%20to%20transferAndCall%20).
+  type AccountIdentifier = ExtCore.AccountIdentifier;
+  type Balance = ExtCore.Balance;
+  type TokenIdentifier = ExtCore.TokenIdentifier;
+  type Extension = ExtCore.Extension;
+  type CommonError = ExtCore.CommonError;
+  type BalanceRequest = ExtCore.BalanceRequest;
+  type BalanceResponse = ExtCore.BalanceResponse;
+  type TransferRequest = ExtCore.TransferRequest;
+  type TransferResponse = ExtCore.TransferResponse;
+  type ExtMetadata = ExtCommon.Metadata;
+  type ExtMintRequest  = ExtNonFungible.MintRequest;
+
+  public shared(msg) func transfer(request: TransferRequest) : async TransferResponse {
+    let from : Principal = switch(request.from) {
+      case (#address address) {
+        return #err(#Other "request.from needs to be Principal");
+      };
+      case (#principal principal) { principal };
+    };
+    let to: Principal = switch(request.to) {
+      case (#address address) {
+        return #err(#Other "request.to needs to be Principal");
+      };
+      case (#principal principal) { principal };
+    };
+    let token_id: Types.TokenId = textToNat64(request.token);
+    let transferReceipt : Types.TxReceipt = transferFrom(from, to, token_id, msg.caller);
+    let userBalance = List.size(
+      List.filter(nfts, func(token: Types.Nft) : Bool { token.owner == from })
+    );
+    return #ok(userBalance);
+  };
+
+  private let EXTENSIONS : [Extension] = ["@ext/common", "@ext/nonfungible"];
+  public query func extensions() : async [Extension] {
+    EXTENSIONS;
+  };
+
+  public query func balance(request : BalanceRequest) : async BalanceResponse {
+    let userPrincipal : Principal = switch(request.user) {
+      case (#address address) {
+        return #err(#Other "request.user needs to be Principal");
+      };
+      case (#principal principal) { principal };
+    };
+    let userBalance = List.size(
+      List.filter(nfts, func(token: Types.Nft) : Bool { token.owner == userPrincipal })
+    );
+    return #ok(userBalance);
+    //return #Ok(Nat64.toNat(userBalance)); // convert Nat64 to Nat
+    /* let aid = ExtCore.User.toAID(request.user);
+    switch (_balances.get(aid)) {
+      case (?balance) {
+        return #ok(balance);
+      };
+      case (_) {
+        return #ok(0);
+      };
+    } */
+  };
+
+  private stable let _supply : Balance = Nat16.toNat(maxLimit);
+  public query func supply(token : TokenIdentifier) : async Result.Result<Balance, CommonError> {
+    #ok(_supply);
+  };
+
+  public query func metadata(token : TokenIdentifier) : async Result.Result<ExtMetadata, CommonError> {
+    let tokenIdExt : Nat32 = ExtCore.TokenIdentifier.getIndex(token);
+    switch (List.get(nfts, Nat32.toNat(tokenIdExt))) {
+      case (?nft) {
+        let md : ExtMetadata = #nonfungible({
+          metadata = ?nft.metadata[0].data;
+        });
+				return #ok(md);
+      };
+      case (_) {
+        return #err(#InvalidToken(token));
+      };
+    };
+  };
+
+  // Ext nonfungible
+
+  public shared query func bearer (token : TokenIdentifier) : async Result.Result<AccountIdentifier, CommonError> {
+      if (not ExtCore.TokenIdentifier.isPrincipal(token, Principal.fromActor(Self))) {
+        return #err(#InvalidToken(token));
+      };
+      let tokenIdExt : Nat32 = ExtCore.TokenIdentifier.getIndex(token);
+      switch (List.get(nfts, Nat32.toNat(tokenIdExt))) {
+        case (?nft) {
+          let ownerAID = ExtCore.User.toAID(#principal(nft.owner));
+          return #ok(ownerAID);
+        };
+        case (_) {
+          return #err(#InvalidToken(token));
+        };
+      };
+  };
+
+  public shared({ caller }) func mintNFT (request : ExtMintRequest) : async () {
+      let recipient = ExtCore.User.toAID(request.to);
+  };
+
+  // Stoic Wallet integration
+
+  func getTokensForStoic(caller  : Principal, accountId : AccountIdentifier) : Result.Result<[ExtCore.TokenIndex], CommonError> {
+    /* let userPrincipal : Principal = switch(accountId) {
+      case (#address address) {
+        return #err(#Other "accountId needs to be Principal");
+      };
+      case (#principal principal) { principal };
+    }; */
+    let items = List.filter(nfts, func(token: Types.Nft) : Bool { ExtCore.User.toAID(#principal(token.owner)) == accountId });
+    let tokenIds = List.map(items, func (item : Types.Nft) : ExtCore.TokenIndex { Nat32.fromNat(Nat64.toNat(item.id)) });
+    return #ok(List.toArray(tokenIds));
+    /* var tokens : [Ext.TokenIndex] = [];
+    var i : Nat32 = 0;
+    for (token in Iter.fromArray(state._Tokens.read(null))) {
+        switch (token) {
+            case (?t) {
+                if (Ext.AccountIdentifier.equal(accountId, t.owner)) {
+                    tokens := Array.append(tokens, [i]);
+                };
+            };
+            case _ ();
+        };
+        i += 1;
+    };
+    #ok(tokens); */
+  };
+
+  public query ({ caller }) func tokens (accountId : AccountIdentifier) : async Result.Result<[ExtCore.TokenIndex], CommonError> {
+    getTokensForStoic(caller, accountId);
+  };
+
+  public type EntrepotTypesListing = {
+    // 6 extra digits
+    // javascript   : 1_637_174_793_714
+    // motoko       : 1_637_174_793_714_948_574
+    locked      : ?Time.Time;
+    price       : Nat64;  // ICPe8
+    seller      : Principal;
+    subaccount  : ?ExtCore.SubAccount;
+  };
+  
+  public query ({ caller }) func tokens_ext(accountId : AccountIdentifier) : async Result.Result<[(ExtCore.TokenIndex, ?EntrepotTypesListing, ?[Nat8])], CommonError> {
+    let items = List.filter(nfts, func(token: Types.Nft) : Bool { ExtCore.User.toAID(#principal(token.owner)) == accountId });
+    let tokenIds = List.map(items, func (item : Types.Nft) : ExtCore.TokenIndex { Nat32.fromNat(Nat64.toNat(item.id)) });
+
+    let tokens = Buffer.Buffer<(ExtCore.TokenIndex, ?EntrepotTypesListing, ?[Nat8])>(0);
+    //var i : Nat32 = 0;
+    for (tokenId in Iter.fromList(tokenIds)) {
+      tokens.add((
+        tokenId,
+        null,
+        null,
+      ));
+      //i += 1;
+    };
+    #ok(tokens.toArray());
   };
 
 // Upgrade Hooks
