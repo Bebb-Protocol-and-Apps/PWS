@@ -10,10 +10,10 @@
     export let toggleModal;
 
     async function connect() {
-        loading = "stoic";
+        /* loading = "stoic";
         await store.stoicConnect();
         loading = "";
-        toggleModal();
+        toggleModal(); */
     }
 </script>
 

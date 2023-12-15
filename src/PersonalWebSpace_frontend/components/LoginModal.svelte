@@ -13,7 +13,7 @@
 <Modal title={"login with …"} {toggleModal}>
   <div class="flex gap-3 flex-col flex-1 justify-center items-center">
     <NfidButton bind:loading {toggleModal} />
-    <StoicButton bind:loading {toggleModal} />
+    <!-- <StoicButton bind:loading {toggleModal} /> -->
     <BitfinityButton bind:loading {toggleModal} />
     <PlugButton bind:loading {toggleModal} />
   </div>
