@@ -24,6 +24,17 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : IDL.Text,
     'Err' : BridgeIdErrors,
   });
+  const EntityPreviewSupportedTypes = IDL.Variant({
+    'Glb' : IDL.Null,
+    'Jpg' : IDL.Null,
+    'Png' : IDL.Null,
+    'Gltf' : IDL.Null,
+    'Other' : IDL.Text,
+  });
+  const EntityPreview = IDL.Record({
+    'previewData' : IDL.Vec(IDL.Nat8),
+    'previewType' : EntityPreviewSupportedTypes,
+  });
   const EntitySettings = IDL.Record({});
   const EntityTypeResourceTypes = IDL.Variant({
     'Web' : IDL.Null,
@@ -35,6 +46,7 @@ export const idlFactory = ({ IDL }) => {
     'Resource' : EntityTypeResourceTypes,
   });
   const EntityInitiationObject = IDL.Record({
+    'previews' : IDL.Opt(IDL.Vec(EntityPreview)),
     'name' : IDL.Opt(IDL.Text),
     'description' : IDL.Opt(IDL.Text),
     'keywords' : IDL.Opt(IDL.Vec(IDL.Text)),
@@ -86,17 +98,6 @@ export const idlFactory = ({ IDL }) => {
     'linkStatus' : BridgeLinkStatus,
   });
   const EntityAttachedBridges = IDL.Vec(EntityAttachedBridge);
-  const EntityPreviewSupportedTypes = IDL.Variant({
-    'Glb' : IDL.Null,
-    'Jpg' : IDL.Null,
-    'Png' : IDL.Null,
-    'Gltf' : IDL.Null,
-    'Other' : IDL.Text,
-  });
-  const EntityPreview = IDL.Record({
-    'previewData' : IDL.Vec(IDL.Nat8),
-    'previewType' : EntityPreviewSupportedTypes,
-  });
   const Entity = IDL.Record({
     'id' : IDL.Text,
     'creator' : IDL.Principal,
@@ -126,6 +127,14 @@ export const idlFactory = ({ IDL }) => {
   const EntityAttachedBridgesResult = IDL.Variant({
     'Ok' : EntityAttachedBridges,
     'Err' : EntityAttachedBridgesErrors,
+  });
+  const EntityFilterCriterion = IDL.Record({
+    'criterionKey' : IDL.Text,
+    'criterionValue' : IDL.Text,
+  });
+  const EntitiesResult = IDL.Variant({
+    'Ok' : IDL.Vec(Entity),
+    'Err' : EntityErrors,
   });
   const BridgeUpdateObject = IDL.Record({
     'id' : IDL.Text,
@@ -157,6 +166,11 @@ export const idlFactory = ({ IDL }) => {
     'get_to_bridge_ids_by_entity_id' : IDL.Func(
         [IDL.Text],
         [EntityAttachedBridgesResult],
+        ['query'],
+      ),
+    'match_entities' : IDL.Func(
+        [IDL.Vec(EntityFilterCriterion)],
+        [EntitiesResult],
         ['query'],
       ),
     'update_bridge' : IDL.Func([BridgeUpdateObject], [BridgeIdResult], []),

@@ -49,6 +49,8 @@ export interface BridgeUpdateObject {
   'keywords' : [] | [Array<string>],
   'settings' : [] | [BridgeSettings],
 }
+export type EntitiesResult = { 'Ok' : Array<Entity> } |
+  { 'Err' : EntityErrors };
 export interface Entity {
   'id' : string,
   'creator' : Principal,
@@ -79,6 +81,10 @@ export type EntityAttachedBridgesResult = { 'Ok' : EntityAttachedBridges } |
 export type EntityErrors = { 'Error' : null } |
   { 'EntityNotFound' : null } |
   { 'Unauthorized' : string };
+export interface EntityFilterCriterion {
+  'criterionKey' : string,
+  'criterionValue' : string,
+}
 export type EntityIdErrors = { 'Error' : null } |
   { 'PreviewTooLarge' : bigint } |
   { 'EntityNotFound' : null } |
@@ -87,6 +93,7 @@ export type EntityIdErrors = { 'Error' : null } |
 export type EntityIdResult = { 'Ok' : string } |
   { 'Err' : EntityIdErrors };
 export interface EntityInitiationObject {
+  'previews' : [] | [Array<EntityPreview>],
   'name' : [] | [string],
   'description' : [] | [string],
   'keywords' : [] | [Array<string>],
@@ -134,6 +141,10 @@ export interface _SERVICE {
   'get_to_bridge_ids_by_entity_id' : ActorMethod<
     [string],
     EntityAttachedBridgesResult
+  >,
+  'match_entities' : ActorMethod<
+    [Array<EntityFilterCriterion>],
+    EntitiesResult
   >,
   'update_bridge' : ActorMethod<[BridgeUpdateObject], BridgeIdResult>,
   'update_entity' : ActorMethod<[EntityUpdateObject], EntityIdResult>,

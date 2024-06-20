@@ -71,7 +71,7 @@ export const getStringForSpaceWithEnvironment = (envToPreview) => {
       <script src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-entity camera="active: true" look-controls wasd-controls="acceleration:65; fly:true" position="0 1.6 0"></a-entity>
         
         <a-light type="directional" intensity="0.9" position="-1 -2  2"></a-light>
@@ -89,7 +89,7 @@ export const getStringForSpaceFromModel = (modelUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
@@ -115,7 +115,7 @@ export const getStringForSpaceFromUserUploadedModel = () => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene id="aSceneForModelPreview" cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene id="aSceneForModelPreview" cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
@@ -139,7 +139,7 @@ export const getStringForSpaceFromVideoFile = (videoUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
@@ -166,7 +166,7 @@ export const getStringForSpaceFrom360VideoFile = (videoUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <video id="360videoToPreview" autoplay loop="true" src="${videoUrl}"></video>
         </a-assets>
@@ -188,7 +188,7 @@ export const getStringForSpaceFromImageFile = (imageUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
           <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
@@ -215,7 +215,7 @@ export const getStringForSpaceFrom360ImageFile = (imageUrl) => {
       <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     </head>
     <body>
-      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;">
+      <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" screenshot="width: 1920; height: 1080;">
         <a-assets>
           <img crossorigin="anonymous" id="skyTexture" src="${imageUrl}">
         </a-assets>
