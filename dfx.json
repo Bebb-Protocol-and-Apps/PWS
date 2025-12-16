@@ -19,9 +19,6 @@
       }
     },
     "PersonalWebSpace_frontend": {
-      "dependencies": [
-        "PersonalWebSpace_backend"
-      ],
       "frontend": {
         "entrypoint": "dist/index.html"
       },

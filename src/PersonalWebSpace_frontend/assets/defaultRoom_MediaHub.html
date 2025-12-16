@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.3/dist/aframe-extras.min.js"></script>
+    <script src="https://mannymeadows.github.io/Noosa/aframe-sun-sky.min.js"></script>
+  </head>
+  <body>
+
+    <a-scene cursor="rayOrigin: mouse" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/;" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="" device-orientation-permission-ui="">
+      <a-assets>
+        <!-- Images -->
+        <img id="image1" src="./gracie/Gracie Avatar.png">
+        <img id="image2" src="./gracie/anticorruptionInfograph1.png">
+        <img id="image3" src="./gracie/Welcome to GIPAC.png">
+        <img id="image4" src="./gracie/RoadToAntiCorruption.png">
+        <img id="image5" src="./gracie/GracieFlashcardBackground.png">
+        <img id="image6" src="./gracie/GracieCongrats.png">
+        
+        <!-- Video -->
+        <video id="video1" autoplay loop crossorigin="anonymous" src="./gracie/HelloGracie.mp4"></video>
+        <video id="video2" loop crossorigin="anonymous" src="./gracie/UN_s_Anti-Corruption_Playbook.mp4"></video>
+
+        <a-asset-item id="goldentrophy-glb" src="./gracie/golden_trophy.glb"></a-asset-item>
+      </a-assets>
+
+      <a-entity environment="preset: forest" position="0 -0.2 -0"></a-entity>
+
+      <!-- Camera with WASD controls -->
+      <a-entity camera="active: true" look-controls wasd-controls position="0 1.6 30"></a-entity>
+
+      <!-- Lighting -->
+      <a-light type="ambient" intensity="0.5"></a-light>
+      <a-light type="directional" intensity="0.8" position="2 4 2"></a-light>
+
+      <!-- Sky -->
+      <a-sky color="#87CEEB"></a-sky>
+
+      <!-- GIF Video - Auto Loop -->
+      <a-video src="#video1" width="2" height="3" position="3.5 2.5 24" rotation="0 -25 0"></a-video>
+      <a-text value="Hello from Gracie!" align="center" position="3.5 0.8 24" rotation="0 -25 0" color="#000"></a-text>
+
+      <!-- Image 3 - Front Left (Welcome) -->
+      <a-image src="#image3" width="8" height="7" position="-4 2 23" rotation="0 25 0"></a-image>
+
+      <!-- Podium / Stand in center -->
+      <a-cylinder position="0 0.5 18" radius="0.5" height="1" color="#8B4513"></a-cylinder>
+      <a-text value="Enjoy your learning journey\nAnd become a champion for change!" align="center" position="0 1.2 18.25" color="#ffffff" width="4"></a-text>
+      <a-entity gltf-model="./gracie/golden_trophy.glb" position="0 1.2 18" rotation="0 0 0" scale="0.25 0.25 0.25" id="GoldenTrophy" animation-mixer></a-entity>
+      <a-plane position="0 0 18" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" shadow></a-plane>
+
+      <!-- Road to Anti-Corruption Champ -->
+      <a-plane position="0 0.01 6" rotation="-90 0 0" width="2" height="20" color="#555555"></a-plane>
+      <a-plane position="0 0.02 6" rotation="-90 0 0" width="0.1" height="20" color="#FFFF00"></a-plane>
+
+      <!-- Image 4 - Road Start -->
+      <a-image src="#image4" width="3" height="3" position="-2 2 16" rotation="0 0 0"></a-image>
+
+      <!-- Image 2 - Anti-Corruption Info -->
+      <a-image src="#image2" width="3" height="2" position="-3 2 12" rotation="0 70 0"></a-image>
+      <a-text value="Anti-Corruption Overview" align="center" position="-2.8 0.8 12" rotation="0 70 0" color="#000"></a-text>
+
+      <!-- Video Screen - Anti-Corruption Playbook (Click to Play) -->
+      <a-video src="#video2" width="4" height="2.25" position="3 2 10" rotation="0 -70 0" video-play-on-click></a-video>
+      <a-text value="Click Video to Play" align="center" position="2.8 0.8 10" rotation="0 -70 0" color="#000"></a-text>
+
+      <!-- Flashcard 1 - Left Side -->
+      <a-entity position="-1.5 1.5 7" rotation="0 20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: According to the UNODC Module, what is the term for the sector of society that includes individual citizens, CSOs, and the media, as distinguished from the public and private sectors?" align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Civil society." align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- Flashcard 2 - Right Side -->
+      <a-entity position="1.5 1.5 6" rotation="0 -20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: The principle of good governance that ensures decisions are taken and enforced in accordance with established laws and regulations is known as the _____." align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Rule of law" align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- Flashcard 3 - Left Side -->
+      <a-entity position="-1.5 1.5 5" rotation="0 20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: What concept refers to the process of developing the capacity to produce wanted changes in society, which is crucial for citizen participation in anti-corruption?" align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Social empowerment." align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- Flashcard 4 - Right Side -->
+      <a-entity position="1.5 1.5 4" rotation="0 -20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: What non-governmental organization launched the Advocacy and Legal Advice Centre (ALAC) to help victims and witnesses of corruption pursue complaints?" align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Transparency International." align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- Flashcard 5 - Left Side -->
+      <a-entity position="-1.5 1.5 3" rotation="0 20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: What is the term for the use of social media platforms by citizens to provide information on corruption, which is then investigated by authorities or journalists?" align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Citizen journalism." align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- Flashcard 6 - Right Side -->
+      <a-entity position="1.5 1.5 2" rotation="0 -20 0">
+        <a-plane width="1.8" height="1.2" src="#image5" opacity="0.9" position="0 0 0">
+          <a-text value="Q: What principle of good governance refers to the opportunity for active involvement by all sectors of society in the decision-making process?" align="center" position="0 0.3 0.01" color="#000000" width="1.6"></a-text>
+          <a-text value="A: Participation." align="center" position="0 -0.2 0.01" color="#2E7D32" width="1.5"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- IFrame Display 3 - Quiz -->
+      <a-entity expandable-iframe="url:https://grace-l3c.caffeine.xyz/; text:Quiz Time!;" position="-2.5 1 -1.5" rotation="0 40 0"></a-entity>
+
+      <!-- Plaza - Arrival Point -->
+      <!-- Plaza Ground -->
+      <a-circle position="0 0.01 -8" rotation="-90 0 0" radius="4" color="#8B6914"></a-circle>
+      <a-circle position="0 0.02 -8" rotation="-90 0 0" radius="3.5" color="#996515"></a-circle>
+      <a-circle position="0 0.03 -8" rotation="-90 0 0" radius="2.5" color="#8B6914"></a-circle>
+      
+      <!-- Plaza Pillars -->
+      <a-cylinder position="-4 1.5 -7" radius="0.2" height="3" color="#FFFFFF"></a-cylinder>
+      <a-cylinder position="4 1.5 -7" radius="0.2" height="3" color="#FFFFFF"></a-cylinder>
+      <a-cylinder position="0 1.5 -12" radius="0.2" height="3" color="#FFFFFF"></a-cylinder>
+      
+      <!-- Arrival Banner -->
+      <a-image src="#image6" position="0 3.5 -8" rotation="0 0 0" width="6" height="3"></a-image>
+      
+      <!-- IFrame Display 1 - Youth Engagement -->
+      <a-entity expandable-iframe="url:https://grace.unodc.org/grace/en/youth-empowerment/policy-guide-for-national-anti-corruption-authorities-on-meaningful-youth-engagement-in-anti-corruption-work.html; text:Youth Engagement;" position="12.5 1 -13" rotation="0 0 0"></a-entity>
+
+      <!-- IFrame Display 2 - Rule of Law -->
+      <a-entity expandable-iframe="url:https://grace.unodc.org/grace/en/secondary/acting-for-the-rule-of-law.html; text:Rule of Law;" position="7.5 1 -13" rotation="0 0 0"></a-entity>
+
+      <!-- IFrame Display 4 - Youth Led Talks -->
+      <a-entity expandable-iframe="url:https://grace.unodc.org/grace/en/youth-empowerment/youthled-talks.html; text:Youth Led Talks;" position="2.5 1 -13" rotation="0 0 0"></a-entity>
+
+      <!-- Image 1 - End of Road -->
+      <a-image src="#image1" width="2" height="2" position="-1.5 2 -12" rotation="0 0 0"></a-image>
+      <a-text value="See you soon, Champ!" align="center" position="-1.5 0.8 -12" rotation="0 0 0" color="#000"></a-text>
+
+      <!-- Clickable Link Entity -->
+      <a-entity position="-3.5 2 -12" rotation="0 00 0">
+        <a-box color="#4285F4" width="1.5" height="1" depth="0.1" link="href: https://notebooklm.google.com/notebook/20abf2c8-4890-49d3-8d8e-987d92f5ac55; title: NotebookLM; target: _blank"></a-box>
+        <a-text value="Click to Open\nNotebookLM" align="center" position="0 0 0.06" color="#ffffff" width="2"></a-text>
+      </a-entity>
+
+    </a-scene>
+
+  </body>
+</html>

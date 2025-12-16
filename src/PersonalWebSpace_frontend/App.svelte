@@ -10,6 +10,7 @@
   import DefaultRoom0 from "./pages/DefaultRoom0.svelte";
   import DefaultRoom1 from "./pages/DefaultRoom1.svelte";
   import DefaultRoom2 from "./pages/DefaultRoom2.svelte";
+  import DefaultRoom3 from "./pages/DefaultRoom3.svelte";
   import Spaces from "./pages/Spaces.svelte";
   import NotFound from "./pages/NotFound.svelte";
   import ObjTest from "./pages/ObjTest.svelte";
@@ -29,6 +30,7 @@
     "/defaultspace/0": DefaultRoom0,
     "/defaultspace/1": DefaultRoom1,
     "/defaultspace/2": DefaultRoom2,
+    "/defaultspace/3": DefaultRoom3,
     "/spaces": Spaces, //e.g. URL: https://vdfyi-uaaaa-aaaai-acptq-cai.ic0.app/#/spaces
     "/objtest": ObjTest,
     "/objaframe": ObjAframe,

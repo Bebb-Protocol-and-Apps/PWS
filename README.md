@@ -102,7 +102,7 @@ Ensure that all changes needed for Mainnet deployment have been made (e.g. defin
 
 Production Canisters:
 ```bash
-dfx deploy --network ic --argument "(
+dfx deploy --network development --argument "(
   principal\"$(dfx identity get-principal)\",
   record {
     logo = record {
@@ -115,7 +115,7 @@ dfx deploy --network ic --argument "(
   }
 )" PersonalWebSpace_backend
 
-dfx deploy --network ic
+dfx deploy --network development PersonalWebSpace_frontend
 ```
 
 In case there are authentication issues, you could try this command
